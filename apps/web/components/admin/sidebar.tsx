@@ -9,6 +9,7 @@ const NAV = [
   { href: '/admin/elections', label: 'Election' },
   { href: '/admin/candidates', label: 'Candidates' },
   { href: '/admin/students', label: 'Students' },
+  { href: '/admin/results', label: 'Results' },
 ];
 
 export function Sidebar() {
