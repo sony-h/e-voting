@@ -36,15 +36,33 @@ export class RedisService implements OnModuleDestroy {
   }
 
   async get(key: string): Promise<string | null> {
-    return this.client.get(key);
+    try {
+      return await this.client.get(key);
+    } catch (error) {
+      throw new Error(
+        `CACHE_ERROR: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
   }
 
   async setex(key: string, ttlSeconds: number, value: string): Promise<void> {
-    await this.client.setex(key, ttlSeconds, value);
+    try {
+      await this.client.setex(key, ttlSeconds, value);
+    } catch (error) {
+      throw new Error(
+        `CACHE_ERROR: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
   }
 
   async del(key: string): Promise<void> {
-    await this.client.del(key);
+    try {
+      await this.client.del(key);
+    } catch (error) {
+      throw new Error(
+        `CACHE_ERROR: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
   }
 
   async onModuleDestroy(): Promise<void> {

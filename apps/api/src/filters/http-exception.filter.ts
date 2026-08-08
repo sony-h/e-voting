@@ -63,9 +63,10 @@ export class HttpExceptionFilter implements ExceptionFilter {
 
     if (
       exception instanceof Error &&
-      (exception.message.includes('ECONNREFUSED') ||
+      (exception.message.includes('CACHE_ERROR') ||
+        exception.message.includes('ECONNREFUSED') ||
         exception.message.includes('ioredis') ||
-        exception.message.includes('Redis'))
+        exception.message.includes('MaxRetriesPerRequest'))
     ) {
       this.logger.error('Cache unavailable', exception.message);
       response.status(HttpStatus.SERVICE_UNAVAILABLE).json({

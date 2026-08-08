@@ -83,6 +83,24 @@ Seed bersifat idempotent — aman dijalankan berulang (upsert, bukan duplikasi).
 
 ## Troubleshooting
 
+### Login gagal dengan error 500
+Biasanya penyebabnya Docker Desktop berhenti/restart saat API sedang berjalan sehingga koneksi database/cache mati.
+
+```bash
+# 1. Cek status infrastruktur (satu URL):
+curl http://localhost:3001/api/v1/health
+#    {"database":"up","cache":"up"}  <- sehat
+#    {"database":"down",...}         <- Docker/Postgres bermasalah
+
+# 2. Pastikan Docker Desktop berjalan, lalu:
+pnpm db:up
+
+# 3. Restart API (Ctrl+C lalu jalankan ulang):
+pnpm dev
+```
+
+Sejak perbaikan terakhir, kegagalan infrastruktur mengembalikan error 503 yang jelas (`DATABASE_UNAVAILABLE` / `CACHE_UNAVAILABLE`) beserta log error di terminal API, bukan lagi 500 misterius.
+
 ### "Tidak ada tabel di database"
 Anda membuka port 5432 (native PostgreSQL). Gunakan **port 5433** — lihat bagian "Dua Instans PostgreSQL".
 
