@@ -191,7 +191,7 @@ export default function AdminStudentsPage() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold">Students</h1>
+          <h1 className="font-heading text-2xl font-bold">Students</h1>
           <p className="text-sm text-muted-foreground">Kelola data siswa dan token voting.</p>
         </div>
         <div className="flex flex-wrap items-end gap-4">
@@ -247,7 +247,14 @@ export default function AdminStudentsPage() {
                   <TableCell>{student.major ?? '—'}</TableCell>
                   <TableCell className="font-mono text-xs">{student.token?.token ?? '—'}</TableCell>
                   <TableCell>
-                    <Badge variant={student.has_voted ? 'default' : 'secondary'}>
+                    <Badge
+                      variant={student.has_voted ? 'outline' : 'secondary'}
+                      className={
+                        student.has_voted
+                          ? 'border-success/40 bg-success/10 text-success'
+                          : undefined
+                      }
+                    >
                       {student.has_voted ? 'Sudah' : 'Belum'}
                     </Badge>
                   </TableCell>

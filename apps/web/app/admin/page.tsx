@@ -1,10 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { listElections } from '@/services/elections';
 import { getDashboardClasses, getDashboardMajors, getDashboardSummary } from '@/services/dashboard';
 import { ElectionSelect } from '@/components/admin/election-select';
+import { PageHeader } from '@/components/ui/page-header';
+import { StatCard } from '@/components/ui/stat-card';
+import { CountdownPill } from '@/components/ui/countdown-pill';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -17,31 +20,8 @@ const STATUS_VARIANT: Record<string, 'default' | 'secondary' | 'outline' | 'dest
 };
 
 const STATUS_CLASS: Record<string, string> = {
-  ACTIVE: 'border-green-600/30 bg-green-600/10 text-green-700 dark:text-green-400',
+  ACTIVE: 'border-success/40 bg-success/10 text-success',
 };
-
-function useCountdown(endAt: string | Date | null, active: boolean) {
-  const [remaining, setRemaining] = useState<number>(0);
-
-  useEffect(() => {
-    if (!active || !endAt) return;
-    const interval = setInterval(() => {
-      const diff = new Date(endAt).getTime() - Date.now();
-      setRemaining(Math.max(0, diff));
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [endAt, active]);
-
-  return remaining;
-}
-
-function formatRemaining(ms: number) {
-  const totalSeconds = Math.floor(ms / 1000);
-  const h = Math.floor(totalSeconds / 3600);
-  const m = Math.floor((totalSeconds % 3600) / 60);
-  const s = totalSeconds % 60;
-  return `${h}j ${m}m ${s}d`;
-}
 
 export default function AdminDashboardPage() {
   const [electionId, setElectionId] = useState('');
@@ -69,17 +49,14 @@ export default function AdminDashboardPage() {
   });
 
   const isActive = selectedElection?.status === 'ACTIVE';
-  const remaining = useCountdown(selectedElection?.end_at ?? null, isActive);
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold">Dashboard</h1>
-          <p className="text-sm text-muted-foreground">Monitoring partisipasi voting.</p>
-        </div>
-        <ElectionSelect value={effectiveElectionId} onChange={setElectionId} />
-      </div>
+      <PageHeader
+        title="Dashboard"
+        description="Monitoring partisipasi voting."
+        action={<ElectionSelect value={effectiveElectionId} onChange={setElectionId} />}
+      />
 
       {!effectiveElectionId ? (
         <div className="rounded-xl border border-dashed p-12 text-center text-sm text-muted-foreground">
@@ -88,51 +65,32 @@ export default function AdminDashboardPage() {
       ) : (
         <>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="rounded-xl border p-6">
-              <p className="text-sm text-muted-foreground">Total Siswa</p>
-              {summaryLoading ? (
-                <Skeleton className="mt-2 h-8 w-16" />
-              ) : (
-                <p className="mt-2 text-3xl font-bold">{summary?.total_students ?? 0}</p>
-              )}
-            </div>
-            <div className="rounded-xl border p-6">
-              <p className="text-sm text-muted-foreground">Sudah Voting</p>
-              {summaryLoading ? (
-                <Skeleton className="mt-2 h-8 w-16" />
-              ) : (
-                <p className="mt-2 text-3xl font-bold text-green-600">
-                  {summary?.already_voted ?? 0}
-                </p>
-              )}
-            </div>
-            <div className="rounded-xl border p-6">
-              <p className="text-sm text-muted-foreground">Belum Voting</p>
-              {summaryLoading ? (
-                <Skeleton className="mt-2 h-8 w-16" />
-              ) : (
-                <p className="mt-2 text-3xl font-bold text-orange-600">{summary?.not_voted ?? 0}</p>
-              )}
-            </div>
-            <div className="rounded-xl border p-6">
-              <p className="text-sm text-muted-foreground">Partisipasi</p>
-              {summaryLoading ? (
-                <Skeleton className="mt-2 h-8 w-16" />
-              ) : (
-                <p className="mt-2 text-3xl font-bold">{summary?.participation_rate ?? 0}%</p>
-              )}
-            </div>
+            <StatCard
+              label="Total Siswa"
+              value={summaryLoading ? '...' : (summary?.total_students ?? 0)}
+            />
+            <StatCard
+              label="Sudah Voting"
+              value={summaryLoading ? '...' : (summary?.already_voted ?? 0)}
+              accent="green"
+            />
+            <StatCard
+              label="Belum Voting"
+              value={summaryLoading ? '...' : (summary?.not_voted ?? 0)}
+              accent="orange"
+            />
+            <StatCard
+              label="Partisipasi"
+              value={summaryLoading ? '...' : `${summary?.participation_rate ?? 0}%`}
+              accent="blue"
+            />
           </div>
 
-          <div className="rounded-xl border p-6">
-            <div className="flex items-center justify-between">
-              <h2 className="font-semibold">Partisipasi Voting</h2>
+          <div className="rounded-xl border bg-card p-6 shadow-sm">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <h2 className="font-heading font-semibold">Partisipasi Voting</h2>
               <div className="flex items-center gap-3">
-                {isActive && remaining > 0 && (
-                  <span className="text-sm text-muted-foreground">
-                    Sisa waktu: <span className="font-mono">{formatRemaining(remaining)}</span>
-                  </span>
-                )}
+                {isActive && <CountdownPill endAt={selectedElection?.end_at ?? null} />}
                 <Badge
                   variant={STATUS_VARIANT[selectedElection?.status ?? 'DRAFT'] ?? 'secondary'}
                   className={STATUS_CLASS[selectedElection?.status ?? '']}
@@ -148,8 +106,8 @@ export default function AdminDashboardPage() {
           </div>
 
           <div className="grid gap-6 lg:grid-cols-2">
-            <div className="rounded-xl border p-6">
-              <h2 className="font-semibold">Progress per Kelas</h2>
+            <div className="rounded-xl border bg-card p-6 shadow-sm">
+              <h2 className="font-heading font-semibold">Progress per Kelas</h2>
               <div className="mt-4 space-y-4">
                 {!classes || classes.length === 0 ? (
                   <p className="text-sm text-muted-foreground">Belum ada data kelas.</p>
@@ -158,7 +116,7 @@ export default function AdminDashboardPage() {
                     <div key={c.name}>
                       <div className="flex items-center justify-between text-sm">
                         <span className="font-medium">{c.name}</span>
-                        <span className="text-muted-foreground">
+                        <span className="font-mono text-xs text-muted-foreground">
                           {c.voted}/{c.total} · {c.participation_rate}%
                         </span>
                       </div>
@@ -169,8 +127,8 @@ export default function AdminDashboardPage() {
               </div>
             </div>
 
-            <div className="rounded-xl border p-6">
-              <h2 className="font-semibold">Progress per Jurusan</h2>
+            <div className="rounded-xl border bg-card p-6 shadow-sm">
+              <h2 className="font-heading font-semibold">Progress per Jurusan</h2>
               <div className="mt-4 space-y-4">
                 {!majors || majors.length === 0 ? (
                   <p className="text-sm text-muted-foreground">Belum ada data jurusan.</p>
@@ -179,7 +137,7 @@ export default function AdminDashboardPage() {
                     <div key={m.name}>
                       <div className="flex items-center justify-between text-sm">
                         <span className="font-medium">{m.name}</span>
-                        <span className="text-muted-foreground">
+                        <span className="font-mono text-xs text-muted-foreground">
                           {m.voted}/{m.total} · {m.participation_rate}%
                         </span>
                       </div>
@@ -192,6 +150,8 @@ export default function AdminDashboardPage() {
           </div>
         </>
       )}
+
+      {summaryLoading && <Skeleton className="h-32 w-full" />}
     </div>
   );
 }
