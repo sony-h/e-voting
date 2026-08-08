@@ -31,3 +31,8 @@
 | Phase 4 | One Student One Vote | Done | has_voted + token is_used + session destroy |
 | Phase 4 | Success Page | Done | Tidak menampilkan kandidat dipilih |
 | Phase 4 | Election status via PATCH dikunci | Done | Status hanya via start/close |
+| Phase 5 | Dashboard Summary | Done | Total siswa, voting, partisipasi |
+| Phase 5 | Progress per Kelas & Jurusan | Done | Grouping + persentase |
+| Phase 5 | Result Page | Done | Ranking, bar chart, hanya saat Closed |
+| Phase 5 | Export PDF & Excel | Done | pdfkit + xlsx, verified |
+| Phase 5 | Countdown Election | Done | Sisa waktu saat Active |

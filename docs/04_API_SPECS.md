@@ -459,6 +459,8 @@ Response
 * Participation Rate
 * Election Status
 
+Query param `electionId` wajib. Hanya untuk admin.
+
 ---
 
 GET
@@ -469,6 +471,8 @@ GET
 
 Progress voting per kelas.
 
+Query param `electionId` wajib. Hanya untuk admin.
+
 ---
 
 GET
@@ -478,6 +482,8 @@ GET
 ```
 
 Progress voting per jurusan.
+
+Query param `electionId` wajib. Hanya untuk admin.
 
 ---
 
@@ -490,6 +496,10 @@ GET
 ```
 
 Hanya tersedia apabila Election Closed.
+
+Query param `electionId` wajib. Hanya untuk admin.
+
+Apabila Election belum Closed: error code `ELECTION_NOT_CLOSED`.
 
 Response
 
@@ -598,6 +608,7 @@ System
 * INTERNAL_SERVER_ERROR
 * VALIDATION_ERROR
 * RATE_LIMITED
+* ELECTION_NOT_CLOSED
 
 ---
 
