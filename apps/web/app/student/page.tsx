@@ -8,7 +8,9 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import type { Candidate } from '@e-voting/types';
 import { API_BASE_URL, ApiError } from '@/lib/api';
 import { getVotingCandidates, getVotingStatus, submitVote } from '@/services/voting';
+import { listElections } from '@/services/elections';
 import { studentLogout } from '@/services/auth';
+import { CountdownPill } from '@/components/ui/countdown-pill';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -39,9 +41,9 @@ function photoUrl(candidate: Candidate) {
 
 function CheckIcon() {
   return (
-    <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
+    <div className="mx-auto flex h-16 w-16 animate-[check-pop_0.4s_ease-out] items-center justify-center rounded-full bg-success/15">
       <svg
-        className="h-8 w-8 text-green-600"
+        className="h-8 w-8 text-success"
         fill="none"
         viewBox="0 0 24 24"
         stroke="currentColor"
@@ -66,6 +68,9 @@ export default function StudentPortalPage() {
   });
 
   const statusError = !statusLoading && !status;
+
+  const { data: elections } = useQuery({ queryKey: ['elections'], queryFn: listElections });
+  const activeElection = elections?.find((e) => e.status === 'ACTIVE');
 
   const { data: candidates, isLoading: candidatesLoading } = useQuery({
     queryKey: ['voting-candidates'],
@@ -101,11 +106,11 @@ export default function StudentPortalPage() {
       <main className="flex min-h-screen items-center justify-center px-6">
         <div className="w-full max-w-md text-center">
           <CheckIcon />
-          <h1 className="mt-6 text-2xl font-bold">Terima kasih!</h1>
+          <h1 className="mt-6 font-heading text-3xl font-bold">Terima kasih!</h1>
           <p className="mt-2 text-muted-foreground">Hak pilih Anda telah digunakan.</p>
           <Link
             href="/"
-            className="mt-8 inline-flex h-11 items-center justify-center rounded-lg bg-blue-600 px-6 font-medium text-white transition-colors hover:bg-blue-700"
+            className="mt-8 inline-flex h-11 w-full items-center justify-center rounded-xl bg-primary px-6 font-semibold text-primary-foreground shadow-sm transition-all duration-200 hover:bg-primary/90 hover:shadow-md"
           >
             Kembali ke Beranda
           </Link>
@@ -126,7 +131,7 @@ export default function StudentPortalPage() {
     return (
       <main className="flex min-h-screen flex-col items-center justify-center px-6">
         <div className="w-full max-w-md text-center">
-          <h1 className="text-2xl font-bold">Pemilihan belum dimulai</h1>
+          <h1 className="font-heading text-3xl font-bold">Pemilihan belum dimulai</h1>
           <p className="mt-2 text-muted-foreground">
             Pemilihan akan segera dibuka. Nantikan informasi berikutnya.
           </p>
@@ -141,16 +146,22 @@ export default function StudentPortalPage() {
   return (
     <main className="min-h-screen px-4 py-6">
       <div className="mx-auto max-w-5xl">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h1 className="text-2xl font-bold">Pilih Pemimpinmu</h1>
+            <h1 className="font-heading text-2xl font-bold">Pilih Pemimpinmu</h1>
             <p className="text-sm text-muted-foreground">
               Pilih satu kandidat. Suara Anda rahasia.
             </p>
           </div>
-          <button onClick={handleLogout} className="text-sm text-blue-600 underline">
-            Keluar
-          </button>
+          <div className="flex items-center gap-4">
+            <CountdownPill endAt={activeElection?.end_at ?? null} />
+            <button
+              onClick={handleLogout}
+              className="text-sm text-primary underline underline-offset-4"
+            >
+              Keluar
+            </button>
+          </div>
         </div>
 
         {candidatesLoading ? (
@@ -160,11 +171,11 @@ export default function StudentPortalPage() {
             Belum ada kandidat.
           </div>
         ) : (
-          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {candidates.map((candidate) => (
               <div
                 key={candidate.id}
-                className="flex flex-col overflow-hidden rounded-2xl border bg-card"
+                className="group flex flex-col overflow-hidden rounded-2xl border bg-card shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
               >
                 <div className="relative">
                   {candidate.photo_url ? (
@@ -180,29 +191,31 @@ export default function StudentPortalPage() {
                       No foto
                     </div>
                   )}
-                  <span className="absolute left-3 top-3 rounded-full bg-blue-600 px-3 py-1 text-xs font-semibold text-white">
-                    Nomor {candidate.candidate_number}
+                  <span className="absolute left-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-primary font-mono text-sm font-bold text-primary-foreground shadow-sm">
+                    {candidate.candidate_number}
                   </span>
                 </div>
                 <div className="flex flex-1 flex-col p-4">
-                  <h2 className="text-lg font-bold">{candidate.chairman_name}</h2>
+                  <h2 className="font-heading text-lg font-semibold">{candidate.chairman_name}</h2>
                   <p className="text-sm text-muted-foreground">
-                    {candidate.vice_chairman_name ?? '—'}
+                    {candidate.vice_chairman_name ? `& ${candidate.vice_chairman_name}` : '—'}
                   </p>
                   <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">
                     {candidate.vision}
                   </p>
-                  <div className="mt-4 flex gap-2">
-                    <Button
-                      variant="outline"
-                      className="flex-1"
-                      onClick={() => setDetailCandidate(candidate)}
-                    >
-                      Detail
-                    </Button>
-                    <Button className="flex-1" onClick={() => setConfirmCandidate(candidate)}>
-                      Pilih
-                    </Button>
+                  <div className="mt-4 border-t border-dashed pt-4">
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        className="flex-1"
+                        onClick={() => setDetailCandidate(candidate)}
+                      >
+                        Detail
+                      </Button>
+                      <Button className="flex-1" onClick={() => setConfirmCandidate(candidate)}>
+                        Pilih
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -217,8 +230,10 @@ export default function StudentPortalPage() {
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>
-              {detailCandidate ? `Nomor ${detailCandidate.candidate_number}` : ''}
+            <DialogTitle className="font-heading text-xl">
+              {detailCandidate
+                ? `${detailCandidate.chairman_name} — Nomor ${detailCandidate.candidate_number}`
+                : ''}
             </DialogTitle>
             <DialogDescription>
               {detailCandidate
@@ -242,11 +257,11 @@ export default function StudentPortalPage() {
                 </div>
               )}
               <div>
-                <h3 className="font-semibold">Visi</h3>
+                <h3 className="font-heading font-semibold">Visi</h3>
                 <p className="mt-1 text-sm text-muted-foreground">{detailCandidate.vision}</p>
               </div>
               <div>
-                <h3 className="font-semibold">Misi</h3>
+                <h3 className="font-heading font-semibold">Misi</h3>
                 <p className="mt-1 text-sm text-muted-foreground">{detailCandidate.mission}</p>
               </div>
             </div>
@@ -273,13 +288,26 @@ export default function StudentPortalPage() {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Apakah Anda yakin memilih kandidat ini?</AlertDialogTitle>
+            <AlertDialogTitle className="font-heading text-xl">
+              Apakah Anda yakin memilih kandidat ini?
+            </AlertDialogTitle>
             <AlertDialogDescription>
               {confirmCandidate
                 ? `Anda akan memilih "${confirmCandidate.chairman_name}" (Nomor ${confirmCandidate.candidate_number}). Pilihan tidak dapat diubah setelah dikirim.`
                 : ''}
             </AlertDialogDescription>
           </AlertDialogHeader>
+          <div className="rounded-xl border border-dashed bg-muted/40 p-4 text-center">
+            <p className="font-mono text-2xl font-bold text-primary">
+              {confirmCandidate?.candidate_number}
+            </p>
+            <p className="mt-1 font-heading font-semibold">{confirmCandidate?.chairman_name}</p>
+            {confirmCandidate?.vice_chairman_name && (
+              <p className="text-sm text-muted-foreground">
+                & {confirmCandidate.vice_chairman_name}
+              </p>
+            )}
+          </div>
           <AlertDialogFooter>
             <AlertDialogCancel>Kembali</AlertDialogCancel>
             <AlertDialogAction
