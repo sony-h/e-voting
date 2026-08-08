@@ -36,3 +36,7 @@
 | Phase 5 | Result Page | Done | Ranking, bar chart, hanya saat Closed |
 | Phase 5 | Export PDF & Excel | Done | pdfkit + xlsx, verified |
 | Phase 5 | Countdown Election | Done | Sisa waktu saat Active |
+| UI | Civic Ballot identity | Done | Blue primary token, serif display |
+| UI | Landing hero + student flow | Done | Ballot stamp, ballot cards |
+| UI | Dark mode (default light) | Done | next-themes + toggle admin |
+| UI | Admin polish | Done | Sidebar, dashboard, results, tables |

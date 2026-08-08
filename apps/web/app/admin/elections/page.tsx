@@ -66,7 +66,7 @@ const STATUS_VARIANT: Record<
 const STATUS_CLASS: Record<Election['status'], string> = {
   DRAFT: '',
   SCHEDULED: '',
-  ACTIVE: 'border-green-600/30 bg-green-600/10 text-green-700 dark:text-green-400',
+  ACTIVE: 'border-success/40 bg-success/10 text-success',
   CLOSED: '',
 };
 
