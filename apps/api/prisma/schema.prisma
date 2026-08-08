@@ -1,0 +1,120 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ElectionStatus {
+  DRAFT
+  SCHEDULED
+  ACTIVE
+  CLOSED
+}
+
+model Election {
+  id            String         @id @default(uuid())
+  title         String
+  description   String?
+  academic_year String
+  status        ElectionStatus @default(DRAFT)
+  start_at      DateTime?
+  end_at        DateTime?
+  created_at    DateTime       @default(now())
+  updated_at    DateTime       @updatedAt
+
+  candidates Candidate[]
+  students   Student[]
+  tokens     VotingToken[]
+  votes      Vote[]
+
+  @@index([status])
+}
+
+model Student {
+  id         String    @id @default(uuid())
+  election_id String
+  nis        String
+  nisn       String?
+  full_name  String
+  class_name String
+  major      String?
+  grade      String?
+  has_voted  Boolean   @default(false)
+  voted_at   DateTime?
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+
+  election Election     @relation(fields: [election_id], references: [id])
+  token    VotingToken?
+
+  @@unique([nis])
+  @@unique([nisn])
+  @@index([class_name])
+  @@index([major])
+}
+
+model Candidate {
+  id                  String   @id @default(uuid())
+  election_id         String
+  candidate_number    Int
+  chairman_name       String
+  vice_chairman_name  String?
+  photo_url           String?
+  vision              String
+  mission             String
+  created_at          DateTime @default(now())
+  updated_at          DateTime @updatedAt
+
+  election Election @relation(fields: [election_id], references: [id])
+  votes    Vote[]
+
+  @@unique([election_id, candidate_number])
+}
+
+model VotingToken {
+  id          String    @id @default(uuid())
+  election_id String
+  student_id  String    @unique
+  token       String    @unique
+  is_used     Boolean   @default(false)
+  expires_at  DateTime?
+  created_at  DateTime  @default(now())
+
+  election Election @relation(fields: [election_id], references: [id])
+  student  Student  @relation(fields: [student_id], references: [id])
+}
+
+model Vote {
+  id           String   @id @default(uuid())
+  election_id  String
+  candidate_id String
+  created_at   DateTime @default(now())
+
+  election  Election  @relation(fields: [election_id], references: [id])
+  candidate Candidate @relation(fields: [candidate_id], references: [id])
+
+  @@index([candidate_id])
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  actor_type String
+  actor_id   String?
+  action     String
+  entity     String?
+  ip_address String?
+  user_agent String?
+  created_at DateTime @default(now())
+}
+
+model Settings {
+  id                    Int      @id @default(1)
+  school_name           String?
+  school_logo           String?
+  principal_name        String?
+  current_academic_year String?
+  updated_at            DateTime @updatedAt
+}
