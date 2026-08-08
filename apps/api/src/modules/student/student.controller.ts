@@ -7,8 +7,13 @@ import {
   Patch,
   Post,
   Query,
+  Res,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
+import { Response } from 'express';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
 import { RolesGuard } from '../../guards/roles.guard';
 import { Roles } from '../../decorators/roles.decorator';
@@ -55,5 +60,29 @@ export class StudentController {
   @Post('student-elections/:id/token/reset')
   resetToken(@Param('id') id: string) {
     return this.studentService.resetToken(id);
+  }
+
+  @Post('students/import')
+  @UseInterceptors(FileInterceptor('file'))
+  importStudents(
+    @Query('electionId') electionId: string,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    return this.studentService.importStudents(electionId, file.buffer);
+  }
+
+  @Post('students/export')
+  async exportStudents(
+    @Query('electionId') electionId: string,
+    @Res() res: Response,
+  ) {
+    const { buffer, filename } =
+      await this.studentService.exportStudents(electionId);
+    res.setHeader(
+      'Content-Type',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    );
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.send(buffer);
   }
 }
