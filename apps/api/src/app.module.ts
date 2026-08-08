@@ -8,6 +8,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { ElectionModule } from './modules/election/election.module';
 import { StudentModule } from './modules/student/student.module';
 import { CandidateModule } from './modules/candidate/candidate.module';
+import { VotingModule } from './modules/voting/voting.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { CandidateModule } from './modules/candidate/candidate.module';
     ElectionModule,
     StudentModule,
     CandidateModule,
+    VotingModule,
   ],
   controllers: [AppController],
   providers: [AppService],
