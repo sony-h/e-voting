@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsOptional, IsString, IsUUID } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class CreateStudentDto {
   @IsString()
@@ -25,7 +25,7 @@ export class CreateStudentDto {
   @IsOptional()
   grade?: string;
 
-  @IsUUID()
+  @IsString()
   @IsNotEmpty()
   election_id!: string;
 }

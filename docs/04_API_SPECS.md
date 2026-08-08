@@ -210,6 +210,8 @@ GET
 
 Daftar kandidat.
 
+Query param opsional `electionId` untuk memfilter kandidat per Election.
+
 ---
 
 GET
@@ -271,6 +273,8 @@ GET
 ```
 
 Daftar siswa.
+
+Query param opsional `electionId` untuk memfilter siswa per Election.
 
 ---
 
@@ -344,6 +348,8 @@ GET
 
 Daftar partisipasi siswa pada Election.
 
+Catatan: pada implementasi, `:id` pada endpoint di bawah merujuk pada student id (tidak ada tabel StudentElection terpisah; status partisipasi disimpan pada Student.has_voted dan VotingToken.is_used).
+
 ---
 
 PATCH
@@ -365,6 +371,8 @@ POST
 ```
 
 Generate Token baru.
+
+Format token: `XXXX-XXXX` (huruf kapital dan angka, tanpa karakter ambigu seperti O/0/I/1/L).
 
 ---
 

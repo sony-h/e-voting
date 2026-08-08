@@ -51,7 +51,10 @@ export class StudentService {
   async remove(id: string) {
     const student = await this.ensureExists(id);
     await this.ensureEditable(student.election_id);
-    return this.prisma.student.delete({ where: { id } });
+    return this.prisma.$transaction([
+      this.prisma.votingToken.deleteMany({ where: { student_id: id } }),
+      this.prisma.student.delete({ where: { id } }),
+    ]);
   }
 
   async resetVote(id: string) {

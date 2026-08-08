@@ -30,17 +30,16 @@ export class HttpExceptionFilter implements ExceptionFilter {
 
     if (exception instanceof Prisma.PrismaClientKnownRequestError) {
       const target = (exception.meta?.target ?? []) as string[];
-      const field = Array.isArray(target) ? target[0] : '';
-      const code =
-        field === 'nis'
-          ? 'DUPLICATE_NIS'
-          : field === 'nisn'
-            ? 'DUPLICATE_NISN'
-            : field === 'candidate_number'
-              ? 'DUPLICATE_CANDIDATE_NUMBER'
-              : field === 'token'
-                ? 'DUPLICATE_TOKEN'
-                : 'DUPLICATE_RECORD';
+      const fields = Array.isArray(target) ? target : [];
+      const code = fields.includes('nis')
+        ? 'DUPLICATE_NIS'
+        : fields.includes('nisn')
+          ? 'DUPLICATE_NISN'
+          : fields.includes('candidate_number')
+            ? 'DUPLICATE_CANDIDATE_NUMBER'
+            : fields.includes('token')
+              ? 'DUPLICATE_TOKEN'
+              : 'DUPLICATE_RECORD';
       response.status(HttpStatus.CONFLICT).json({
         success: false,
         message: 'Duplicate record violates unique constraint',

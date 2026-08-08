@@ -18,3 +18,10 @@
 | Phase 2 | Landing page | Done | Info election + CTA siswa, tanpa admin |
 | Phase 2 | Admin panel | Done | /admin hidden, dashboard + election management |
 | Phase 2 | Admin table + seed | Done | docs/03_DATABASE.md diperbarui |
+| Phase 3 | Student CRUD | Done | Token auto-generate |
+| Phase 3 | Import Excel | Done | SheetJS, summary imported/failed |
+| Phase 3 | Export Excel | Done | Download xlsx |
+| Phase 3 | Candidate CRUD | Done | Foto, nomor urut, visi misi |
+| Phase 3 | Upload Photo | Done | /uploads/candidate-photo, max 2MB |
+| Phase 3 | Token Generator | Done | Format XXXX-XXXX |
+| Phase 3 | Reset Token / Reset Voting | Done | Hanya sebelum election Active |
