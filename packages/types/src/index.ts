@@ -44,6 +44,7 @@ export interface Candidate {
   show_on_landing: boolean;
   created_at: Date;
   updated_at: Date;
+  images?: CandidateImage[];
 }
 
 export interface CandidateImage {

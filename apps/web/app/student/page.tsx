@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import type { Candidate } from '@e-voting/types';
+import type { Candidate, CandidateImage } from '@e-voting/types';
 import { API_BASE_URL, ApiError } from '@/lib/api';
 import { getVotingCandidates, getVotingStatus, submitVote } from '@/services/voting';
 import { listElections } from '@/services/elections';
@@ -37,6 +37,69 @@ const UPLOADS_BASE = API_BASE_URL.replace('/api/v1', '');
 
 function photoUrl(candidate: Candidate) {
   return `${UPLOADS_BASE}${candidate.photo_url}`;
+}
+
+function GalleryCarousel({ images }: { images: CandidateImage[] }) {
+  const [index, setIndex] = useState(0);
+
+  if (images.length === 0) return null;
+  const current = images[index % images.length]!;
+  const go = (dir: number) => setIndex((i) => (i + dir + images.length) % images.length);
+
+  return (
+    <div>
+      <h3 className="font-heading font-semibold">Program &amp; Kegiatan</h3>
+      <div className="relative mt-2 overflow-hidden rounded-lg">
+        <Image
+          src={`${UPLOADS_BASE}${current.url}`}
+          alt={current.caption ?? 'Gambar program'}
+          width={640}
+          height={400}
+          className="h-44 w-full object-cover"
+        />
+        {current.caption && (
+          <p className="absolute bottom-0 left-0 right-0 bg-black/50 px-3 py-1.5 text-xs font-medium text-white">
+            {current.caption}
+          </p>
+        )}
+        {images.length > 1 && (
+          <>
+            <button
+              type="button"
+              aria-label="Sebelumnya"
+              onClick={() => go(-1)}
+              className="absolute left-2 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full bg-black/40 text-white transition-colors hover:bg-black/60"
+            >
+              ‹
+            </button>
+            <button
+              type="button"
+              aria-label="Berikutnya"
+              onClick={() => go(1)}
+              className="absolute right-2 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full bg-black/40 text-white transition-colors hover:bg-black/60"
+            >
+              ›
+            </button>
+          </>
+        )}
+      </div>
+      {images.length > 1 && (
+        <div className="mt-2 flex gap-1.5">
+          {images.map((image, i) => (
+            <button
+              key={image.id}
+              type="button"
+              aria-label={`Gambar ${i + 1}`}
+              onClick={() => setIndex(i)}
+              className={`h-1.5 flex-1 rounded-full transition-colors ${
+                i === index ? 'bg-primary' : 'bg-muted'
+              }`}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
 }
 
 function CheckIcon() {
@@ -255,6 +318,9 @@ export default function StudentPortalPage() {
                 <div className="flex h-44 w-full items-center justify-center rounded-lg bg-muted text-sm text-muted-foreground">
                   No foto
                 </div>
+              )}
+              {detailCandidate.images && detailCandidate.images.length > 0 && (
+                <GalleryCarousel images={detailCandidate.images} />
               )}
               <div>
                 <h3 className="font-heading font-semibold">Visi</h3>
