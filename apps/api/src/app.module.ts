@@ -10,6 +10,7 @@ import { StudentModule } from './modules/student/student.module';
 import { CandidateModule } from './modules/candidate/candidate.module';
 import { VotingModule } from './modules/voting/voting.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
+import { ReportModule } from './modules/report/report.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { DashboardModule } from './modules/dashboard/dashboard.module';
     CandidateModule,
     VotingModule,
     DashboardModule,
+    ReportModule,
   ],
   controllers: [AppController],
   providers: [AppService],
