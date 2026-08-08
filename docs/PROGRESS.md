@@ -40,3 +40,7 @@
 | UI | Landing hero + student flow | Done | Ballot stamp, ballot cards |
 | UI | Dark mode (default light) | Done | next-themes + toggle admin |
 | UI | Admin polish | Done | Sidebar, dashboard, results, tables |
+| Seed | Rich demo data | Done | 30 siswa, 3 kandidat, admin, election |
+| Gallery | CandidateImage + upload | Done | Multi-upload, delete, carousel siswa |
+| Landing | 3D immersive (motion) | Done | Floating ballot, tilt cards, scroll reveal |
+| Landing | Public candidates | Done | GET /public/candidates, show_on_landing |
