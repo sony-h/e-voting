@@ -5,6 +5,7 @@ import { AppService } from './app.service';
 import { PrismaModule } from './prisma/prisma.module';
 import { RedisModule } from './redis/redis.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { ElectionModule } from './modules/election/election.module';
 
 @Module({
   imports: [
@@ -12,6 +13,7 @@ import { AuthModule } from './modules/auth/auth.module';
     PrismaModule,
     RedisModule,
     AuthModule,
+    ElectionModule,
   ],
   controllers: [AppController],
   providers: [AppService],
