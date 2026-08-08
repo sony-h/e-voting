@@ -5,3 +5,4 @@ dist
 coverage
 pnpm-lock.yaml
 docs
+next-env.d.ts
