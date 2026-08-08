@@ -306,6 +306,27 @@ Tidak menampilkan data suara/hasil.
 
 ---
 
+GET
+
+```text
+/health
+```
+
+Cek status infrastruktur (database dan cache).
+
+Public: tidak memerlukan autentikasi.
+
+Response
+
+```json
+{
+  "database": "up",
+  "cache": "up"
+}
+```
+
+---
+
 # 5. Student
 
 GET
@@ -650,6 +671,8 @@ System
 * VALIDATION_ERROR
 * RATE_LIMITED
 * ELECTION_NOT_CLOSED
+* DATABASE_UNAVAILABLE
+* CACHE_UNAVAILABLE
 
 ---
 

@@ -11,6 +11,7 @@ import { CandidateModule } from './modules/candidate/candidate.module';
 import { VotingModule } from './modules/voting/voting.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { ReportModule } from './modules/report/report.module';
+import { HealthModule } from './modules/health/health.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { ReportModule } from './modules/report/report.module';
     VotingModule,
     DashboardModule,
     ReportModule,
+    HealthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
