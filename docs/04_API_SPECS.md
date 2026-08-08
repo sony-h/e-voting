@@ -103,10 +103,12 @@ Body
 
 ```json
 {
-  "nis": "231045",
+  "identifier": "231045",
   "token": "ABCD-1234"
 }
 ```
+
+Catatan: field `identifier` menerima NIS atau NISN.
 
 Response
 
@@ -142,6 +144,8 @@ GET
 
 Daftar seluruh Election.
 
+Public: tidak memerlukan autentikasi (digunakan landing page).
+
 ---
 
 GET
@@ -151,6 +155,8 @@ GET
 ```
 
 Detail Election.
+
+Public: tidak memerlukan autentikasi.
 
 ---
 
