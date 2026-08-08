@@ -101,6 +101,8 @@ pnpm dev
 
 Sejak perbaikan terakhir, kegagalan infrastruktur mengembalikan error 503 yang jelas (`DATABASE_UNAVAILABLE` / `CACHE_UNAVAILABLE`) beserta log error di terminal API, bukan lagi 500 misterius.
 
+API juga bersifat **self-healing**: jika Docker/Postgres belum hidup saat API dijalankan, API tetap menyala (lazy connect) dan otomatis pulih begitu database tersedia — tanpa perlu restart. Cek `GET /api/v1/health` kapan saja untuk memastikan statusnya.
+
 ### "Tidak ada tabel di database"
 Anda membuka port 5432 (native PostgreSQL). Gunakan **port 5433** — lihat bagian "Dua Instans PostgreSQL".
 
