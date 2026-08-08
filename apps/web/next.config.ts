@@ -1,5 +1,20 @@
 import type { NextConfig } from 'next';
 
-const nextConfig: NextConfig = {/* config options here */};
+const API_HOST = process.env.NEXT_PUBLIC_API_URL
+  ? new URL(process.env.NEXT_PUBLIC_API_URL).hostname
+  : 'localhost';
+
+const nextConfig: NextConfig = {
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'http',
+        hostname: API_HOST,
+        port: '3001',
+        pathname: '/uploads/**',
+      },
+    ],
+  },
+};
 
 export default nextConfig;
