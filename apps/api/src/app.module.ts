@@ -6,6 +6,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { RedisModule } from './redis/redis.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { ElectionModule } from './modules/election/election.module';
+import { StudentModule } from './modules/student/student.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { ElectionModule } from './modules/election/election.module';
     RedisModule,
     AuthModule,
     ElectionModule,
+    StudentModule,
   ],
   controllers: [AppController],
   providers: [AppService],
