@@ -39,6 +39,21 @@ Inspirasi:
 
 ---
 
+# 2b. Visual Identity — Civic Ballot
+
+Sistem menggunakan identitas visual "Civic Ballot": nuansa pemungutan suara yang bersih dan resmi.
+
+Keputusan desain:
+
+* Warna Primary (Biru) didefinisikan sebagai token tema (`--primary`), bukan kelas hardcoded. Semua tombol/link/state aktif menggunakan token.
+* Typography display menggunakan serif (Source Serif 4) untuk headline dan nama kandidat; body menggunakan Geist Sans; angka/token/countdown menggunakan Geist Mono.
+* Kandidat ditampilkan sebagai "ballot card": nomor urut dalam plakat biru, garis putus-putus sebagai pemisah, aksi utama "Pilih".
+* Status election ditampilkan sebagai stempel ("Sedang Berlangsung", "Segera", "Selesai").
+* Dark mode didukung dengan default Light.
+* Landing page tidak pernah menampilkan atau menautkan portal admin.
+
+---
+
 # 3. Color Palette
 
 Primary
