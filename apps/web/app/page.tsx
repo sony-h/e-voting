@@ -1,79 +1,412 @@
+'use client';
+
+import { useRef } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
+import { useQuery } from '@tanstack/react-query';
+import {
+  motion,
+  useMotionValue,
+  useReducedMotion,
+  useScroll,
+  useSpring,
+  useTransform,
+} from 'motion/react';
+import type { CandidateWithImages } from '@/services/candidates';
 import { listElections } from '@/services/elections';
+import { listPublicCandidates } from '@/services/candidates';
 import { formatPeriod } from '@/lib/format';
 import { BallotStamp, type BallotStatus } from '@/components/ui/ballot-stamp';
+import { API_BASE_URL } from '@/lib/api';
 
-export const dynamic = 'force-dynamic';
+const UPLOADS_BASE = API_BASE_URL.replace('/api/v1', '');
 
-export default async function HomePage() {
-  const elections = await listElections().catch(() => []);
-  const election = elections.find((e) => e.status === 'ACTIVE') ?? elections[0];
-  const status: BallotStatus = (election?.status as BallotStatus) ?? 'DRAFT';
+function fadeUp(delay = 0) {
+  return {
+    initial: { opacity: 0, y: 24 },
+    whileInView: { opacity: 1, y: 0 },
+    viewport: { once: true, margin: '-80px' },
+    transition: { duration: 0.6, delay, ease: [0.21, 0.47, 0.32, 0.98] as const },
+  };
+}
+
+function FloatingBallot() {
+  const reduced = useReducedMotion();
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+  const rotateX = useSpring(useTransform(mouseY, [-0.5, 0.5], [14, -14]), {
+    stiffness: 150,
+    damping: 20,
+  });
+  const rotateY = useSpring(useTransform(mouseX, [-0.5, 0.5], [-14, 14]), {
+    stiffness: 150,
+    damping: 20,
+  });
+
+  function onMouseMove(e: React.MouseEvent<HTMLDivElement>) {
+    const rect = e.currentTarget.getBoundingClientRect();
+    mouseX.set((e.clientX - rect.left) / rect.width - 0.5);
+    mouseY.set((e.clientY - rect.top) / rect.height - 0.5);
+  }
 
   return (
-    <main className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-6">
+    <motion.div
+      className="relative mx-auto h-40 w-40 [perspective:700px]"
+      onMouseMove={onMouseMove}
+      onMouseLeave={() => {
+        mouseX.set(0);
+        mouseY.set(0);
+      }}
+      initial={{ opacity: 0, scale: 0.6 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{ duration: 0.8, delay: 0.3, ease: [0.21, 0.47, 0.32, 0.98] }}
+    >
+      <motion.div
+        style={reduced ? undefined : { rotateX, rotateY, transformStyle: 'preserve-3d' }}
+        className="absolute inset-0"
+      >
+        <div className="absolute inset-0 rounded-[2rem] border-2 border-dashed border-primary/30" />
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div
+            className="flex h-24 w-24 items-center justify-center rounded-3xl bg-primary shadow-lg"
+            style={{ transform: 'translateZ(40px)' }}
+          >
+            <svg
+              className="h-12 w-12 text-primary-foreground"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              strokeWidth={2.5}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+        </div>
+        <div
+          className="absolute -right-2 top-6 h-8 w-8 rounded-full bg-success/20"
+          style={{ transform: 'translateZ(70px)' }}
+        />
+        <div
+          className="absolute -left-3 bottom-8 h-12 w-12 rounded-full bg-primary/10"
+          style={{ transform: 'translateZ(55px)' }}
+        />
+      </motion.div>
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background: 'radial-gradient(ellipse 80% 50% at 50% -10%, var(--hero-tint), transparent)',
-        }}
+        className="absolute inset-x-8 -bottom-6 h-6 rounded-full bg-primary/15 blur-xl"
+        style={{ transform: 'rotateX(75deg)' }}
       />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-[0.35] dark:opacity-[0.15]"
-        style={{
-          backgroundImage: 'radial-gradient(circle at 1px 1px, var(--border) 1px, transparent 0)',
-          backgroundSize: '24px 24px',
-        }}
-      />
+    </motion.div>
+  );
+}
 
-      <div className="relative w-full max-w-2xl text-center">
-        <p className="font-mono text-xs uppercase tracking-[0.3em] text-muted-foreground">
-          Pemilihan Ketua OSIS{election ? ` · ${election.academic_year}` : ''}
-        </p>
+function TiltCard({ children }: { children: React.ReactNode }) {
+  const reduced = useReducedMotion();
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+  const rotateX = useSpring(useTransform(mouseY, [-0.5, 0.5], [8, -8]), {
+    stiffness: 200,
+    damping: 25,
+  });
+  const rotateY = useSpring(useTransform(mouseX, [-0.5, 0.5], [-8, 8]), {
+    stiffness: 200,
+    damping: 25,
+  });
 
-        <h1 className="mt-4 font-heading text-4xl font-bold leading-tight sm:text-5xl">
-          Pilih Pemimpin OSIS-mu
-        </h1>
+  return (
+    <motion.div
+      className="h-full [perspective:900px]"
+      onMouseMove={(e) => {
+        const rect = e.currentTarget.getBoundingClientRect();
+        mouseX.set((e.clientX - rect.left) / rect.width - 0.5);
+        mouseY.set((e.clientY - rect.top) / rect.height - 0.5);
+      }}
+      onMouseLeave={() => {
+        mouseX.set(0);
+        mouseY.set(0);
+      }}
+    >
+      <motion.div
+        style={reduced ? undefined : { rotateX, rotateY, transformStyle: 'preserve-3d' }}
+        className="flex h-full flex-col overflow-hidden rounded-2xl border bg-card shadow-sm transition-shadow duration-200 hover:shadow-xl"
+      >
+        {children}
+      </motion.div>
+    </motion.div>
+  );
+}
 
-        {election ? (
-          <>
-            <div className="mt-6 flex justify-center">
-              <BallotStamp status={status} />
+function CandidateCard({ candidate, index }: { candidate: CandidateWithImages; index: number }) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const images = candidate.images ?? [];
+
+  function scrollStrip(dir: 1 | -1) {
+    scrollRef.current?.scrollBy({ left: dir * 240, behavior: 'smooth' });
+  }
+
+  return (
+    <motion.div {...fadeUp(index * 0.12)} className="h-full">
+      <TiltCard>
+        <div className="relative">
+          {candidate.photo_url ? (
+            <Image
+              src={`${UPLOADS_BASE}${candidate.photo_url}`}
+              alt={candidate.chairman_name}
+              width={640}
+              height={400}
+              className="h-44 w-full object-cover"
+            />
+          ) : (
+            <div className="flex h-44 w-full items-center justify-center bg-muted text-sm text-muted-foreground">
+              No foto
             </div>
-            <h2 className="mt-6 font-heading text-xl font-semibold text-muted-foreground">
-              {election.title}
-            </h2>
-            <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
-              {election.description ??
-                'Satu siswa, satu suara. Pilihanmu menentukan masa depan OSIS.'}
-            </p>
-            <p className="mt-4 font-mono text-sm text-muted-foreground">{formatPeriod(election)}</p>
-          </>
-        ) : (
-          <>
-            <div className="mt-6 flex justify-center">
-              <BallotStamp status="DRAFT" />
-            </div>
-            <p className="mx-auto mt-6 max-w-md text-sm text-muted-foreground">
-              Belum ada pemilihan yang dijadwalkan. Nantikan informasi dari panitia.
-            </p>
-          </>
-        )}
+          )}
+          <span
+            className="absolute left-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-primary font-mono text-sm font-bold text-primary-foreground shadow-sm"
+            style={{ transform: 'translateZ(30px)' }}
+          >
+            {candidate.candidate_number}
+          </span>
+        </div>
 
-        <div className="mx-auto mt-10 max-w-md border-t pt-8">
+        <div className="flex flex-1 flex-col p-4" style={{ transform: 'translateZ(20px)' }}>
+          <h3 className="font-heading text-lg font-semibold">{candidate.chairman_name}</h3>
           <p className="text-sm text-muted-foreground">
-            Gunakan NIS/NISN dan Token Voting dari panitia untuk memilih pemimpinmu.
+            {candidate.vice_chairman_name ? `& ${candidate.vice_chairman_name}` : '—'}
           </p>
+          <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">{candidate.vision}</p>
+
+          {images.length > 0 && (
+            <div className="mt-4">
+              <div className="flex items-center justify-between">
+                <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                  Program
+                </p>
+                {images.length > 1 && (
+                  <div className="flex gap-1">
+                    <button
+                      type="button"
+                      aria-label="Geser kiri"
+                      onClick={() => scrollStrip(-1)}
+                      className="flex h-6 w-6 items-center justify-center rounded-full bg-muted text-xs transition-colors hover:bg-primary hover:text-primary-foreground"
+                    >
+                      ‹
+                    </button>
+                    <button
+                      type="button"
+                      aria-label="Geser kanan"
+                      onClick={() => scrollStrip(1)}
+                      className="flex h-6 w-6 items-center justify-center rounded-full bg-muted text-xs transition-colors hover:bg-primary hover:text-primary-foreground"
+                    >
+                      ›
+                    </button>
+                  </div>
+                )}
+              </div>
+              <div
+                ref={scrollRef}
+                className="mt-2 flex snap-x snap-mandatory gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+              >
+                {images.map((image) => (
+                  <Image
+                    key={image.id}
+                    src={`${UPLOADS_BASE}${image.url}`}
+                    alt={image.caption ?? 'Gambar program'}
+                    width={200}
+                    height={140}
+                    className="h-20 w-32 shrink-0 snap-start rounded-lg object-cover"
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="mt-4 border-t border-dashed pt-4">
+            <Link
+              href="/student/login"
+              className="inline-flex h-10 w-full items-center justify-center rounded-lg bg-primary text-sm font-semibold text-primary-foreground shadow-sm transition-all duration-200 hover:bg-primary/90 hover:shadow-md"
+            >
+              Pilih Nomor {candidate.candidate_number}
+            </Link>
+          </div>
+        </div>
+      </TiltCard>
+    </motion.div>
+  );
+}
+
+export default function HomePage() {
+  const reduced = useReducedMotion();
+  const { scrollYProgress } = useScroll();
+  const bgY = useTransform(scrollYProgress, [0, 1], [0, 120]);
+
+  const { data: elections } = useQuery({
+    queryKey: ['elections'],
+    queryFn: listElections,
+    retry: false,
+  });
+  const election = elections?.find((e) => e.status === 'ACTIVE') ?? elections?.[0];
+  const status: BallotStatus = (election?.status as BallotStatus) ?? 'DRAFT';
+
+  const { data: candidates } = useQuery({
+    queryKey: ['public-candidates', election?.id],
+    queryFn: () => listPublicCandidates(election!.id),
+    enabled: !!election?.id,
+    retry: false,
+  });
+
+  const heroAnim = reduced
+    ? {}
+    : {
+        initial: { opacity: 0, y: 30 },
+        animate: { opacity: 1, y: 0 },
+        transition: { duration: 0.7, ease: [0.21, 0.47, 0.32, 0.98] as const },
+      };
+
+  return (
+    <main className="relative min-h-screen overflow-hidden">
+      <motion.div aria-hidden style={{ y: bgY }} className="pointer-events-none absolute inset-0">
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              'radial-gradient(ellipse 80% 50% at 50% -10%, var(--hero-tint), transparent)',
+          }}
+        />
+        <div
+          className="absolute inset-0 opacity-[0.35] dark:opacity-[0.15]"
+          style={{
+            backgroundImage: 'radial-gradient(circle at 1px 1px, var(--border) 1px, transparent 0)',
+            backgroundSize: '24px 24px',
+          }}
+        />
+      </motion.div>
+
+      <section className="relative flex min-h-screen flex-col items-center justify-center px-6 pb-16 pt-24">
+        <motion.p
+          {...heroAnim}
+          className="font-mono text-xs uppercase tracking-[0.3em] text-muted-foreground"
+        >
+          Pemilihan Ketua OSIS{election ? ` · ${election.academic_year}` : ''}
+        </motion.p>
+
+        <motion.h1
+          {...heroAnim}
+          className="mt-4 text-center font-heading text-4xl font-bold leading-tight sm:text-6xl"
+        >
+          Pilih Pemimpin OSIS-mu
+        </motion.h1>
+
+        <motion.div {...heroAnim} className="mt-10 w-full max-w-sm">
+          <FloatingBallot />
+        </motion.div>
+
+        <motion.div {...heroAnim} className="mt-12 text-center">
+          <div className="flex justify-center">
+            <BallotStamp status={status} />
+          </div>
+          {election && (
+            <>
+              <h2 className="mt-4 font-heading text-xl font-semibold text-muted-foreground">
+                {election.title}
+              </h2>
+              <p className="mx-auto mt-1 max-w-md text-sm text-muted-foreground">
+                {election.description ??
+                  'Satu siswa, satu suara. Pilihanmu menentukan masa depan OSIS.'}
+              </p>
+              <p className="mt-3 font-mono text-sm text-muted-foreground">
+                {formatPeriod(election)}
+              </p>
+            </>
+          )}
           <Link
             href="/student/login"
-            className="mt-5 inline-flex h-12 w-full items-center justify-center rounded-xl bg-primary px-6 font-semibold text-primary-foreground shadow-sm transition-all duration-200 hover:bg-primary/90 hover:shadow-md"
+            className="mt-8 inline-flex h-12 w-full max-w-sm items-center justify-center rounded-xl bg-primary px-6 font-semibold text-primary-foreground shadow-sm transition-all duration-200 hover:bg-primary/90 hover:shadow-md"
           >
             Siap Memilih — Klik di Sini
           </Link>
+        </motion.div>
+      </section>
+
+      {election && (
+        <section className="relative mx-auto max-w-6xl px-6 py-20">
+          <motion.div {...fadeUp()} className="text-center">
+            <p className="font-mono text-xs uppercase tracking-[0.3em] text-muted-foreground">
+              Kenali Kandidatmu
+            </p>
+            <h2 className="mt-2 font-heading text-3xl font-bold sm:text-4xl">
+              Tiga Pilihan untuk Masa Depan OSIS
+            </h2>
+            <p className="mx-auto mt-3 max-w-xl text-sm text-muted-foreground">
+              Pelajari visi, misi, dan program setiap kandidat sebelum menentukan pilihanmu.
+            </p>
+          </motion.div>
+
+          {candidates && candidates.length > 0 && (
+            <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {candidates.map((candidate, index) => (
+                <CandidateCard key={candidate.id} candidate={candidate} index={index} />
+              ))}
+            </div>
+          )}
+        </section>
+      )}
+
+      <section className="relative mx-auto max-w-5xl px-6 py-20">
+        <motion.div {...fadeUp()} className="text-center">
+          <p className="font-mono text-xs uppercase tracking-[0.3em] text-muted-foreground">
+            Cara Memilih
+          </p>
+          <h2 className="mt-2 font-heading text-3xl font-bold sm:text-4xl">Hanya Tiga Langkah</h2>
+        </motion.div>
+
+        <div className="mt-12 grid gap-6 sm:grid-cols-3">
+          {[
+            {
+              step: '01',
+              title: 'Masuk',
+              desc: 'Login dengan NIS/NISN dan Token Voting dari panitia.',
+            },
+            {
+              step: '02',
+              title: 'Pilih',
+              desc: 'Pelajari kandidat, lalu pilih satu yang paling kamu percaya.',
+            },
+            {
+              step: '03',
+              title: 'Selesai',
+              desc: 'Suaramu tersimpan rahasia. Satu siswa, satu suara.',
+            },
+          ].map((item, index) => (
+            <motion.div
+              key={item.step}
+              {...fadeUp(index * 0.12)}
+              className="rounded-2xl border bg-card p-6 text-center shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-md"
+            >
+              <p className="font-mono text-sm text-primary">/{item.step}</p>
+              <h3 className="mt-3 font-heading text-xl font-semibold">{item.title}</h3>
+              <p className="mt-2 text-sm text-muted-foreground">{item.desc}</p>
+            </motion.div>
+          ))}
         </div>
-      </div>
+      </section>
+
+      <section className="relative px-6 py-24 text-center">
+        <motion.div {...fadeUp()}>
+          <h2 className="font-heading text-3xl font-bold sm:text-4xl">
+            Suaramu Menentukan Masa Depan
+          </h2>
+          <p className="mx-auto mt-3 max-w-md text-sm text-muted-foreground">
+            Gunakan hak pilihmu dengan bijak.
+          </p>
+          <Link
+            href="/student/login"
+            className="mt-8 inline-flex h-12 items-center justify-center rounded-xl bg-primary px-10 font-semibold text-primary-foreground shadow-sm transition-all duration-200 hover:bg-primary/90 hover:shadow-md"
+          >
+            Siap Memilih — Klik di Sini
+          </Link>
+        </motion.div>
+      </section>
     </main>
   );
 }
