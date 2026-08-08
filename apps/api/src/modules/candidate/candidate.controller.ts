@@ -108,9 +108,4 @@ export class CandidateController {
   ) {
     return this.candidateService.addImages(id, files);
   }
-
-  @Delete('candidate-images/:imageId')
-  removeImage(@Param('imageId') imageId: string) {
-    return this.candidateService.removeImage(imageId);
-  }
 }
