@@ -9,6 +9,7 @@ import { ElectionModule } from './modules/election/election.module';
 import { StudentModule } from './modules/student/student.module';
 import { CandidateModule } from './modules/candidate/candidate.module';
 import { VotingModule } from './modules/voting/voting.module';
+import { DashboardModule } from './modules/dashboard/dashboard.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { VotingModule } from './modules/voting/voting.module';
     StudentModule,
     CandidateModule,
     VotingModule,
+    DashboardModule,
   ],
   controllers: [AppController],
   providers: [AppService],
