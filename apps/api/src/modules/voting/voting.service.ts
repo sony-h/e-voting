@@ -23,6 +23,7 @@ export class VotingService {
     await this.ensureElectionActive(session.electionId);
     return this.prisma.candidate.findMany({
       where: { election_id: session.electionId },
+      include: { images: { orderBy: { sort_order: 'asc' } } },
       orderBy: { candidate_number: 'asc' },
     });
   }

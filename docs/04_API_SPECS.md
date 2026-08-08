@@ -266,6 +266,46 @@ Upload foto kandidat.
 
 ---
 
+POST
+
+```text
+/candidates/:id/images
+```
+
+Upload galeri gambar kandidat (multipart, field `files`, maksimal 5 file, maksimal 2MB per file, format jpeg/png/webp).
+
+---
+
+DELETE
+
+```text
+/candidate-images/:id
+```
+
+Hapus gambar galeri.
+
+Error: `CANDIDATE_IMAGE_NOT_FOUND`.
+
+---
+
+# 4b. Public
+
+GET
+
+```text
+/public/candidates?electionId=
+```
+
+Daftar kandidat untuk halaman landing publik.
+
+Public: tidak memerlukan autentikasi.
+
+Hanya menampilkan kandidat dengan `show_on_landing = true`.
+
+Tidak menampilkan data suara/hasil.
+
+---
+
 # 5. Student
 
 GET
@@ -600,6 +640,7 @@ Candidate
 
 * CANDIDATE_NOT_FOUND
 * DUPLICATE_CANDIDATE_NUMBER
+* CANDIDATE_IMAGE_NOT_FOUND
 
 ---
 

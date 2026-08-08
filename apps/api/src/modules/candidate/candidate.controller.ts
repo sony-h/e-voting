@@ -8,10 +8,11 @@ import {
   Post,
   Query,
   UploadedFile,
+  UploadedFiles,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname, join } from 'path';
 import { randomUUID } from 'crypto';
@@ -80,5 +81,36 @@ export class CandidateController {
       id,
       `/uploads/candidate-photo/${file.filename}`,
     );
+  }
+
+  @Post(':id/images')
+  @UseInterceptors(
+    FilesInterceptor('files', 5, {
+      storage: diskStorage({
+        destination: join(process.cwd(), 'uploads', 'candidate-image'),
+        filename: (_req, file, cb) =>
+          cb(
+            null,
+            `${Date.now()}-${randomUUID()}${extname(file.originalname)}`,
+          ),
+      }),
+      limits: { fileSize: 2 * 1024 * 1024 },
+      fileFilter: (_req, file, cb) =>
+        cb(
+          null,
+          ['image/jpeg', 'image/png', 'image/webp'].includes(file.mimetype),
+        ),
+    }),
+  )
+  uploadImages(
+    @Param('id') id: string,
+    @UploadedFiles() files: Express.Multer.File[],
+  ) {
+    return this.candidateService.addImages(id, files);
+  }
+
+  @Delete('candidate-images/:imageId')
+  removeImage(@Param('imageId') imageId: string) {
+    return this.candidateService.removeImage(imageId);
   }
 }
