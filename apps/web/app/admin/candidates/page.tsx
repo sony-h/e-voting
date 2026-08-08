@@ -4,15 +4,18 @@ import { useRef, useState } from 'react';
 import Image from 'next/image';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import type { Candidate, Election } from '@e-voting/types';
+import type { Candidate, CandidateImage, Election } from '@e-voting/types';
 import { API_BASE_URL } from '@/lib/api';
 import { listElections } from '@/services/elections';
 import {
   createCandidate,
   deleteCandidate,
+  deleteCandidateImage,
   listCandidates,
   updateCandidate,
+  uploadCandidateImages,
   uploadCandidatePhoto,
+  type CandidateWithImages,
 } from '@/services/candidates';
 import { ElectionSelect } from '@/components/admin/election-select';
 import { Button } from '@/components/ui/button';
@@ -54,6 +57,7 @@ interface CandidateForm {
   vice_chairman_name: string;
   vision: string;
   mission: string;
+  show_on_landing: boolean;
 }
 
 const EMPTY_FORM: CandidateForm = {
@@ -62,6 +66,7 @@ const EMPTY_FORM: CandidateForm = {
   vice_chairman_name: '',
   vision: '',
   mission: '',
+  show_on_landing: true,
 };
 
 function toForm(c: Candidate): CandidateForm {
@@ -71,6 +76,7 @@ function toForm(c: Candidate): CandidateForm {
     vice_chairman_name: c.vice_chairman_name ?? '',
     vision: c.vision,
     mission: c.mission,
+    show_on_landing: c.show_on_landing,
   };
 }
 
@@ -82,11 +88,14 @@ export default function AdminCandidatesPage() {
   const queryClient = useQueryClient();
   const [electionId, setElectionId] = useState('');
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [editing, setEditing] = useState<Candidate | null>(null);
+  const [editing, setEditing] = useState<CandidateWithImages | null>(null);
   const [form, setForm] = useState<CandidateForm>(EMPTY_FORM);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [galleryFiles, setGalleryFiles] = useState<File[]>([]);
+  const [galleryToDelete, setGalleryToDelete] = useState<CandidateImage[]>([]);
   const [deleteTarget, setDeleteTarget] = useState<Candidate | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const galleryRef = useRef<HTMLInputElement>(null);
 
   const { data: elections } = useQuery({ queryKey: ['elections'], queryFn: listElections });
   const effectiveElectionId = electionId || elections?.[0]?.id || '';
@@ -110,14 +119,21 @@ export default function AdminCandidatesPage() {
         vice_chairman_name: form.vice_chairman_name || undefined,
         vision: form.vision,
         mission: form.mission,
+        show_on_landing: form.show_on_landing,
       };
-      let saved: Candidate;
+      let saved: CandidateWithImages;
       if (editing) {
         saved = await updateCandidate(editing.id, payload);
         if (photoFile) saved = await uploadCandidatePhoto(editing.id, photoFile);
       } else {
         saved = await createCandidate(payload);
         if (photoFile) saved = await uploadCandidatePhoto(saved.id, photoFile);
+      }
+      if (galleryFiles.length > 0) {
+        await uploadCandidateImages(saved.id, galleryFiles);
+      }
+      for (const image of galleryToDelete) {
+        await deleteCandidateImage(image.id);
       }
       return saved;
     },
@@ -128,7 +144,10 @@ export default function AdminCandidatesPage() {
       setEditing(null);
       setForm(EMPTY_FORM);
       setPhotoFile(null);
+      setGalleryFiles([]);
+      setGalleryToDelete([]);
       if (fileRef.current) fileRef.current.value = '';
+      if (galleryRef.current) galleryRef.current.value = '';
     },
     onError: () => toast.error('Gagal menyimpan kandidat.'),
   });
@@ -147,19 +166,27 @@ export default function AdminCandidatesPage() {
     setEditing(null);
     setForm(EMPTY_FORM);
     setPhotoFile(null);
+    setGalleryFiles([]);
+    setGalleryToDelete([]);
     if (fileRef.current) fileRef.current.value = '';
+    if (galleryRef.current) galleryRef.current.value = '';
     setDialogOpen(true);
   }
 
-  function openEdit(candidate: Candidate) {
+  function openEdit(candidate: CandidateWithImages) {
     setEditing(candidate);
     setForm(toForm(candidate));
     setPhotoFile(null);
+    setGalleryFiles([]);
+    setGalleryToDelete([]);
     if (fileRef.current) fileRef.current.value = '';
+    if (galleryRef.current) galleryRef.current.value = '';
     setDialogOpen(true);
   }
 
   const editable = !!selectedElection && isEditable(selectedElection.status);
+  const existingImages =
+    editing?.images.filter((img) => !galleryToDelete.some((d) => d.id === img.id)) ?? [];
 
   return (
     <div className="space-y-6">
@@ -313,6 +340,65 @@ export default function AdminCandidatesPage() {
                 onChange={(e) => setForm({ ...form, mission: e.target.value })}
                 required
               />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="show_on_landing">Tampilkan di Landing Page</Label>
+              <label className="flex cursor-pointer items-center gap-2 text-sm">
+                <input
+                  id="show_on_landing"
+                  type="checkbox"
+                  checked={form.show_on_landing}
+                  onChange={(e) => setForm({ ...form, show_on_landing: e.target.checked })}
+                  className="h-4 w-4 rounded border-input accent-primary"
+                />
+                Kandidat ini muncul di halaman landing publik
+              </label>
+            </div>
+            <div className="space-y-2 border-t pt-4">
+              <Label>Galeri Program</Label>
+              <Input
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                multiple
+                ref={galleryRef}
+                onChange={(e) => setGalleryFiles(Array.from(e.target.files ?? []).slice(0, 5))}
+              />
+              {(existingImages.length > 0 || galleryFiles.length > 0) && (
+                <div className="grid grid-cols-3 gap-2">
+                  {existingImages.map((image) => (
+                    <div key={image.id} className="group relative">
+                      <Image
+                        src={`${API_BASE_URL.replace('/api/v1', '')}${image.url}`}
+                        alt={image.caption ?? 'Gambar program'}
+                        width={120}
+                        height={120}
+                        className="h-20 w-full rounded-lg object-cover"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setGalleryToDelete([...galleryToDelete, image])}
+                        className="absolute right-1 top-1 rounded-full bg-destructive px-1.5 py-0.5 text-[10px] font-semibold text-white"
+                      >
+                        Hapus
+                      </button>
+                    </div>
+                  ))}
+                  {galleryFiles.map((file, index) => (
+                    <div key={index} className="relative">
+                      <Image
+                        src={URL.createObjectURL(file)}
+                        alt="Gambar baru"
+                        width={120}
+                        height={120}
+                        className="h-20 w-full rounded-lg object-cover"
+                      />
+                      <span className="absolute right-1 top-1 rounded-full bg-primary px-1.5 py-0.5 text-[10px] font-semibold text-white">
+                        Baru
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
           <DialogFooter>
