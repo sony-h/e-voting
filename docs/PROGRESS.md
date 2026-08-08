@@ -25,3 +25,9 @@
 | Phase 3 | Upload Photo | Done | /uploads/candidate-photo, max 2MB |
 | Phase 3 | Token Generator | Done | Format XXXX-XXXX |
 | Phase 3 | Reset Token / Reset Voting | Done | Hanya sebelum election Active |
+| Phase 4 | Candidate List & Detail | Done | Portal siswa, hanya saat election Active |
+| Phase 4 | Vote Confirmation & Submission | Done | Dialog konfirmasi, submit anonim |
+| Phase 4 | Anonymous Vote + Transaction | Done | Vote tanpa identitas, rollback otomatis |
+| Phase 4 | One Student One Vote | Done | has_voted + token is_used + session destroy |
+| Phase 4 | Success Page | Done | Tidak menampilkan kandidat dipilih |
+| Phase 4 | Election status via PATCH dikunci | Done | Status hanya via start/close |

@@ -178,6 +178,8 @@ PATCH
 
 Mengubah Election.
 
+Field `status` tidak dapat diubah melalui endpoint ini; perubahan status hanya melalui `/start` dan `/close` (state machine satu arah).
+
 ---
 
 POST
@@ -411,7 +413,10 @@ Backend akan:
 * Validasi hak pilih
 * Menyimpan Vote
 * Menandai StudentElection.has_voted
+* Menandai VotingToken.is_used
 * Menghapus Session Redis
+
+Catatan: Session Redis dihapus setelah commit transaksi database (Redis tidak dapat bergabung dalam transaksi Postgres).
 
 Response
 

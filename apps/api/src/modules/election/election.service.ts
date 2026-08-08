@@ -29,7 +29,9 @@ export class ElectionService {
 
   async update(id: string, dto: UpdateElectionDto) {
     await this.ensureExists(id);
-    return this.prisma.election.update({ where: { id }, data: dto });
+    const data: UpdateElectionDto = { ...dto };
+    delete data.status;
+    return this.prisma.election.update({ where: { id }, data });
   }
 
   async start(id: string) {
