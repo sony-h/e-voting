@@ -65,13 +65,28 @@ model Candidate {
   photo_url           String?
   vision              String
   mission             String
+  show_on_landing     Boolean  @default(true)
   created_at          DateTime @default(now())
   updated_at          DateTime @updatedAt
 
-  election Election @relation(fields: [election_id], references: [id])
+  election Election         @relation(fields: [election_id], references: [id])
   votes    Vote[]
+  images   CandidateImage[]
 
   @@unique([election_id, candidate_number])
+}
+
+model CandidateImage {
+  id           String   @id @default(uuid())
+  candidate_id String
+  url          String
+  caption      String?
+  sort_order   Int      @default(0)
+  created_at   DateTime @default(now())
+
+  candidate Candidate @relation(fields: [candidate_id], references: [id])
+
+  @@index([candidate_id])
 }
 
 model VotingToken {

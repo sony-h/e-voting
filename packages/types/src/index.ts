@@ -41,8 +41,18 @@ export interface Candidate {
   photo_url: string | null;
   vision: string;
   mission: string;
+  show_on_landing: boolean;
   created_at: Date;
   updated_at: Date;
+}
+
+export interface CandidateImage {
+  id: string;
+  candidate_id: string;
+  url: string;
+  caption: string | null;
+  sort_order: number;
+  created_at: Date;
 }
 
 export interface VotingToken {

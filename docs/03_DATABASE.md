@@ -170,8 +170,30 @@ Field:
 * photo_url
 * vision
 * mission
+* show_on_landing
 * created_at
 * updated_at
+
+Catatan:
+
+* `show_on_landing` (Boolean, default true): menentukan apakah kandidat ditampilkan pada halaman landing publik.
+
+---
+
+## CandidateImage
+
+Menyimpan galeri gambar kandidat (foto program, foto kegiatan, dan lain-lain).
+
+Field:
+
+* id
+* candidate_id
+* url
+* caption
+* sort_order
+* created_at
+
+Relasi: banyak CandidateImage untuk satu Candidate.
 
 ---
 
@@ -309,6 +331,16 @@ Candidate
 ↓
 
 Many Vote
+
+---
+
+Candidate
+
+1
+
+↓
+
+Many CandidateImage
 
 ---
 
