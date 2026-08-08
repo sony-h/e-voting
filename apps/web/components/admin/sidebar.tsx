@@ -7,6 +7,8 @@ import { useAuth } from '@/hooks/use-auth';
 const NAV = [
   { href: '/admin', label: 'Dashboard' },
   { href: '/admin/elections', label: 'Election' },
+  { href: '/admin/candidates', label: 'Candidates' },
+  { href: '/admin/students', label: 'Students' },
 ];
 
 export function Sidebar() {
