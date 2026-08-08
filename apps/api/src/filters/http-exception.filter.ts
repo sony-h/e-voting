@@ -1,0 +1,50 @@
+import {
+  ArgumentsHost,
+  Catch,
+  ExceptionFilter,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
+import { Response } from 'express';
+import { Prisma } from '@prisma/client';
+
+@Catch()
+export class HttpExceptionFilter implements ExceptionFilter {
+  catch(exception: unknown, host: ArgumentsHost): void {
+    const ctx = host.switchToHttp();
+    const response = ctx.getResponse<Response>();
+
+    if (exception instanceof HttpException) {
+      const body = exception.getResponse();
+      const errorCode =
+        typeof body === 'object' && body !== null && 'errorCode' in body
+          ? String((body as { errorCode: string }).errorCode)
+          : exception.name;
+      response.status(exception.getStatus()).json({
+        success: false,
+        message: exception.message,
+        errorCode,
+      });
+      return;
+    }
+
+    if (exception instanceof Prisma.PrismaClientKnownRequestError) {
+      const code =
+        exception.code === 'P2002'
+          ? 'DUPLICATE_RECORD'
+          : 'INTERNAL_SERVER_ERROR';
+      response.status(HttpStatus.CONFLICT).json({
+        success: false,
+        message: 'Duplicate record violates unique constraint',
+        errorCode: code,
+      });
+      return;
+    }
+
+    response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+      success: false,
+      message: 'Internal server error',
+      errorCode: 'INTERNAL_SERVER_ERROR',
+    });
+  }
+}
