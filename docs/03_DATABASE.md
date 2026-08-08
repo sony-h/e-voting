@@ -102,6 +102,8 @@ Audit Log berdiri sendiri.
 
 Settings berdiri sendiri.
 
+Admin berdiri sendiri.
+
 ---
 
 # 5. Tables
@@ -238,6 +240,23 @@ Field:
 * principal_name
 * current_academic_year
 * updated_at
+
+---
+
+## Admin
+
+Menyimpan akun administrator.
+
+Field:
+
+* id
+* username
+* password_hash
+* full_name
+* created_at
+* updated_at
+
+Constraint: username harus unik.
 
 ---
 
@@ -435,6 +454,12 @@ Candidate harus berasal dari Election yang sama.
 VotingToken
 
 Token tidak boleh digunakan dua kali.
+
+---
+
+Admin
+
+Username wajib unik.
 
 ---
 

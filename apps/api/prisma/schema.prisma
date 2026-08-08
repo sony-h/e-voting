@@ -118,3 +118,12 @@ model Settings {
   current_academic_year String?
   updated_at            DateTime @updatedAt
 }
+
+model Admin {
+  id            String   @id @default(uuid())
+  username      String   @unique
+  password_hash String
+  full_name     String?
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+}
