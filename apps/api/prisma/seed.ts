@@ -55,6 +55,27 @@ async function main() {
       });
       console.log(`Dev student ${nis} ready`);
     }
+
+    for (let i = 1; i <= 2; i++) {
+      await prisma.candidate.upsert({
+        where: {
+          election_id_candidate_number: {
+            election_id: devElection.id,
+            candidate_number: i,
+          },
+        },
+        update: {},
+        create: {
+          election_id: devElection.id,
+          candidate_number: i,
+          chairman_name: `Kandidat ${i}`,
+          vice_chairman_name: `Wakil ${i}`,
+          vision: 'Visi kandidat ' + i,
+          mission: 'Misi kandidat ' + i,
+        },
+      });
+      console.log(`Dev candidate ${i} ready`);
+    }
   }
 }
 

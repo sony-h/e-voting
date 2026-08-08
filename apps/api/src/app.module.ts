@@ -7,6 +7,7 @@ import { RedisModule } from './redis/redis.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { ElectionModule } from './modules/election/election.module';
 import { StudentModule } from './modules/student/student.module';
+import { CandidateModule } from './modules/candidate/candidate.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { StudentModule } from './modules/student/student.module';
     AuthModule,
     ElectionModule,
     StudentModule,
+    CandidateModule,
   ],
   controllers: [AppController],
   providers: [AppService],
