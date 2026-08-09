@@ -6,6 +6,7 @@ const API_HOST = process.env.NEXT_PUBLIC_API_URL
 
 const nextConfig: NextConfig = {
   images: {
+    dangerouslyAllowLocalIP: true,
     remotePatterns: [
       {
         protocol: 'http',
