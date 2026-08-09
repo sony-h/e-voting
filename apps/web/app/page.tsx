@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
@@ -136,102 +136,122 @@ function TiltCard({ children }: { children: React.ReactNode }) {
   );
 }
 
-function CandidateCard({ candidate, index }: { candidate: CandidateWithImages; index: number }) {
-  const scrollRef = useRef<HTMLDivElement>(null);
+function CandidateCard({ candidate }: { candidate: CandidateWithImages }) {
   const images = candidate.images ?? [];
+  const shown = images.slice(0, 3);
+  const hiddenCount = images.length - shown.length;
 
-  function scrollStrip(dir: 1 | -1) {
-    scrollRef.current?.scrollBy({ left: dir * 240, behavior: 'smooth' });
+  return (
+    <TiltCard>
+      <div className="relative">
+        {candidate.photo_url ? (
+          <Image
+            src={`${UPLOADS_BASE}${candidate.photo_url}`}
+            alt={candidate.chairman_name}
+            width={640}
+            height={400}
+            className="h-40 w-full object-cover"
+          />
+        ) : (
+          <div className="flex h-40 w-full items-center justify-center bg-muted text-sm text-muted-foreground">
+            No foto
+          </div>
+        )}
+        <span
+          className="absolute left-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-primary font-mono text-sm font-bold text-primary-foreground shadow-sm"
+          style={{ transform: 'translateZ(30px)' }}
+        >
+          {candidate.candidate_number}
+        </span>
+      </div>
+
+      <div className="flex flex-1 flex-col p-4" style={{ transform: 'translateZ(20px)' }}>
+        <h3 className="font-heading text-lg font-semibold">{candidate.chairman_name}</h3>
+        <p className="text-sm text-muted-foreground">
+          {candidate.vice_chairman_name ? `& ${candidate.vice_chairman_name}` : '—'}
+        </p>
+        <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">{candidate.vision}</p>
+
+        {images.length > 0 && (
+          <div className="mt-4">
+            <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+              Program
+            </p>
+            <div className="mt-2 flex gap-2">
+              {shown.map((image) => (
+                <Image
+                  key={image.id}
+                  src={`${UPLOADS_BASE}${image.url}`}
+                  alt={image.caption ?? 'Gambar program'}
+                  width={200}
+                  height={140}
+                  className="h-16 w-24 rounded-lg object-cover"
+                />
+              ))}
+              {hiddenCount > 0 && (
+                <div className="flex h-16 w-24 items-center justify-center rounded-lg border border-dashed text-xs font-semibold text-muted-foreground">
+                  +{hiddenCount}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    </TiltCard>
+  );
+}
+
+function CandidateCarousel({ candidates }: { candidates: CandidateWithImages[] }) {
+  const trackRef = useRef<HTMLDivElement>(null);
+  const [active, setActive] = useState(0);
+
+  function onScroll() {
+    const el = trackRef.current;
+    if (!el) return;
+    const index = Math.round(el.scrollLeft / el.clientWidth);
+    setActive(Math.min(index, candidates.length - 1));
+  }
+
+  function goTo(index: number) {
+    const el = trackRef.current;
+    if (!el) return;
+    el.scrollTo({ left: index * el.clientWidth, behavior: 'smooth' });
   }
 
   return (
-    <motion.div {...fadeUp(index * 0.12)} className="h-full">
-      <TiltCard>
-        <div className="relative">
-          {candidate.photo_url ? (
-            <Image
-              src={`${UPLOADS_BASE}${candidate.photo_url}`}
-              alt={candidate.chairman_name}
-              width={640}
-              height={400}
-              className="h-44 w-full object-cover"
-            />
-          ) : (
-            <div className="flex h-44 w-full items-center justify-center bg-muted text-sm text-muted-foreground">
-              No foto
-            </div>
-          )}
-          <span
-            className="absolute left-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-primary font-mono text-sm font-bold text-primary-foreground shadow-sm"
-            style={{ transform: 'translateZ(30px)' }}
+    <div className="mt-12">
+      <div
+        ref={trackRef}
+        onScroll={onScroll}
+        className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:grid sm:grid-cols-2 sm:snap-none sm:overflow-visible sm:pb-0 lg:grid-cols-3"
+      >
+        {candidates.map((candidate) => (
+          <motion.div
+            key={candidate.id}
+            {...fadeUp(0.1)}
+            className="w-[85%] shrink-0 snap-start sm:w-auto"
           >
-            {candidate.candidate_number}
-          </span>
+            <CandidateCard candidate={candidate} />
+          </motion.div>
+        ))}
+      </div>
+
+      {candidates.length > 1 && (
+        <div className="mt-4 flex justify-center gap-2 sm:hidden">
+          {candidates.map((candidate, index) => (
+            <button
+              key={candidate.id}
+              type="button"
+              aria-label={`Kandidat ${index + 1}`}
+              onClick={() => goTo(index)}
+              className={`h-2 rounded-full transition-all duration-200 ${
+                index === active ? 'w-6 bg-primary' : 'w-2 bg-muted-foreground/30'
+              }`}
+            />
+          ))}
         </div>
-
-        <div className="flex flex-1 flex-col p-4" style={{ transform: 'translateZ(20px)' }}>
-          <h3 className="font-heading text-lg font-semibold">{candidate.chairman_name}</h3>
-          <p className="text-sm text-muted-foreground">
-            {candidate.vice_chairman_name ? `& ${candidate.vice_chairman_name}` : '—'}
-          </p>
-          <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">{candidate.vision}</p>
-
-          {images.length > 0 && (
-            <div className="mt-4">
-              <div className="flex items-center justify-between">
-                <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-                  Program
-                </p>
-                {images.length > 1 && (
-                  <div className="flex gap-1">
-                    <button
-                      type="button"
-                      aria-label="Geser kiri"
-                      onClick={() => scrollStrip(-1)}
-                      className="flex h-6 w-6 items-center justify-center rounded-full bg-muted text-xs transition-colors hover:bg-primary hover:text-primary-foreground"
-                    >
-                      ‹
-                    </button>
-                    <button
-                      type="button"
-                      aria-label="Geser kanan"
-                      onClick={() => scrollStrip(1)}
-                      className="flex h-6 w-6 items-center justify-center rounded-full bg-muted text-xs transition-colors hover:bg-primary hover:text-primary-foreground"
-                    >
-                      ›
-                    </button>
-                  </div>
-                )}
-              </div>
-              <div
-                ref={scrollRef}
-                className="mt-2 flex snap-x snap-mandatory gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-              >
-                {images.map((image) => (
-                  <Image
-                    key={image.id}
-                    src={`${UPLOADS_BASE}${image.url}`}
-                    alt={image.caption ?? 'Gambar program'}
-                    width={200}
-                    height={140}
-                    className="h-20 w-32 shrink-0 snap-start rounded-lg object-cover"
-                  />
-                ))}
-              </div>
-            </div>
-          )}
-
-          <div className="mt-4 border-t border-dashed pt-4">
-            <Link
-              href="/student/login"
-              className="inline-flex h-10 w-full items-center justify-center rounded-lg bg-primary text-sm font-semibold text-primary-foreground shadow-sm transition-all duration-200 hover:bg-primary/90 hover:shadow-md"
-            >
-              Pilih Nomor {candidate.candidate_number}
-            </Link>
-          </div>
-        </div>
-      </TiltCard>
-    </motion.div>
+      )}
+    </div>
   );
 }
 
@@ -342,13 +362,7 @@ export default function HomePage() {
             </p>
           </motion.div>
 
-          {candidates && candidates.length > 0 && (
-            <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {candidates.map((candidate, index) => (
-                <CandidateCard key={candidate.id} candidate={candidate} index={index} />
-              ))}
-            </div>
-          )}
+          {candidates && candidates.length > 0 && <CandidateCarousel candidates={candidates} />}
         </section>
       )}
 
