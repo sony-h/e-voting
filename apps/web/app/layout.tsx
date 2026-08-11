@@ -3,23 +3,25 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThemeProvider } from 'next-themes';
 import { AuthProvider } from '@/hooks/use-auth';
-import { Geist, Geist_Mono, Source_Serif_4 } from 'next/font/google';
+import localFont from 'next/font/local';
 import './globals.css';
 
-const geistSans = Geist({
+const geistSans = localFont({
+  src: './fonts/Geist-Variable.woff2',
   variable: '--font-sans',
-  subsets: ['latin'],
+  display: 'swap',
 });
 
-const geistMono = Geist_Mono({
+const geistMono = localFont({
+  src: './fonts/GeistMono-Variable.woff2',
   variable: '--font-geist-mono',
-  subsets: ['latin'],
+  display: 'swap',
 });
 
-const sourceSerif4 = Source_Serif_4({
+const sourceSerif4 = localFont({
+  src: './fonts/SourceSerif4-Variable.woff2',
   variable: '--font-heading',
-  subsets: ['latin'],
-  weight: ['400', '600', '700'],
+  display: 'swap',
 });
 
 const queryClient = new QueryClient();

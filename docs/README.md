@@ -103,6 +103,9 @@ Sejak perbaikan terakhir, kegagalan infrastruktur mengembalikan error 503 yang j
 
 API juga bersifat **self-healing**: jika Docker/Postgres belum hidup saat API dijalankan, API tetap menyala (lazy connect) dan otomatis pulih begitu database tersedia — tanpa perlu restart. Cek `GET /api/v1/health` kapan saja untuk memastikan statusnya.
 
+### Font (di-self-host)
+Font Geist, Geist Mono, dan Source Serif 4 disimpan lokal di `apps/web/app/fonts/` dan dimuat via `next/font/local`. Tidak ada dependensi jaringan ke Google Fonts saat dev/build — aman untuk jaringan sekolah/LAN.
+
 ### "Tidak ada tabel di database"
 Anda membuka port 5432 (native PostgreSQL). Gunakan **port 5433** — lihat bagian "Dua Instans PostgreSQL".
 
