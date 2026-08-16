@@ -106,6 +106,17 @@ API juga bersifat **self-healing**: jika Docker/Postgres belum hidup saat API di
 ### Font (di-self-host)
 Font Geist, Geist Mono, dan Source Serif 4 disimpan lokal di `apps/web/app/fonts/` dan dimuat via `next/font/local`. Tidak ada dependensi jaringan ke Google Fonts saat dev/build — aman untuk jaringan sekolah/LAN.
 
+### Route 404 setelah build/dev bergantian
+Campuran artefak build produksi dan cache dev di `.next` dapat membuat beberapa route 404 (mis. `/admin/login`, `/candidate/:id`) padahal kode benar.
+
+```powershell
+# 1. Stop server dev (Ctrl+C), lalu:
+Remove-Item apps/web/.next -Recurse -Force
+
+# 2. Jalankan ulang:
+pnpm dev
+```
+
 ### "Tidak ada tabel di database"
 Anda membuka port 5432 (native PostgreSQL). Gunakan **port 5433** — lihat bagian "Dua Instans PostgreSQL".
 
