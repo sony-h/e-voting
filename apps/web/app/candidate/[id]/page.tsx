@@ -5,11 +5,13 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
+import { motion, useReducedMotion, useScroll, useSpring, useTransform } from 'motion/react';
 import type { CandidateImage } from '@e-voting/types';
 import { listElections } from '@/services/elections';
 import { listPublicCandidates } from '@/services/candidates';
 import { uploadUrl } from '@/lib/images';
 import { formatPeriod } from '@/lib/format';
+import { fadeUp, EASE } from '@/lib/animations';
 import { BallotStamp, type BallotStatus } from '@/components/ui/ballot-stamp';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -23,17 +25,29 @@ function GalleryCarousel({ images }: { images: CandidateImage[] }) {
   return (
     <div>
       <div className="relative overflow-hidden rounded-2xl">
-        <Image
-          src={uploadUrl(current.url) ?? ''}
-          alt={current.caption ?? 'Gambar program'}
-          width={1024}
-          height={640}
-          className="h-64 w-full object-cover sm:h-80"
-        />
+        <motion.div
+          key={current.id}
+          initial={{ opacity: 0, x: 24 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.35, ease: EASE }}
+        >
+          <Image
+            src={uploadUrl(current.url) ?? ''}
+            alt={current.caption ?? 'Gambar program'}
+            width={1024}
+            height={640}
+            className="h-64 w-full object-cover sm:h-80"
+          />
+        </motion.div>
         {current.caption && (
-          <p className="absolute bottom-0 left-0 right-0 bg-black/50 px-4 py-2 text-sm font-medium text-white">
+          <motion.p
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.15 }}
+            className="absolute bottom-0 left-0 right-0 bg-black/50 px-4 py-2 text-sm font-medium text-white"
+          >
             {current.caption}
-          </p>
+          </motion.p>
         )}
         {images.length > 1 && (
           <>
@@ -79,6 +93,12 @@ export default function CandidateDetailPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const candidateId = params.id;
+  const reduced = useReducedMotion();
+  const { scrollYProgress } = useScroll();
+  const parallaxY = useSpring(useTransform(scrollYProgress, [0, 1], [0, 60]), {
+    stiffness: 120,
+    damping: 30,
+  });
 
   const { data: elections } = useQuery({
     queryKey: ['elections'],
@@ -132,35 +152,50 @@ export default function CandidateDetailPage() {
   const photo = uploadUrl(candidate.photo_url);
   const images = candidate.images ?? [];
 
+  const heroAnim = reduced
+    ? {}
+    : {
+        initial: { opacity: 0, y: 24, scale: 0.98 },
+        animate: { opacity: 1, y: 0, scale: 1 },
+        transition: { duration: 0.7, ease: EASE },
+      };
+
   return (
     <main className="min-h-screen">
       <div className="relative">
-        <div
+        <motion.div
           aria-hidden
+          style={{ y: reduced ? 0 : parallaxY }}
           className="pointer-events-none absolute inset-0"
-          style={{
-            background:
-              'radial-gradient(ellipse 80% 50% at 50% -10%, var(--hero-tint), transparent)',
-          }}
-        />
+        >
+          <div
+            className="absolute inset-0"
+            style={{
+              background:
+                'radial-gradient(ellipse 80% 50% at 50% -10%, var(--hero-tint), transparent)',
+            }}
+          />
+        </motion.div>
         <div className="relative mx-auto max-w-3xl px-6 py-10">
-          <Link
-            href="/"
-            className="inline-flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-primary"
-          >
-            ← Kembali
-          </Link>
+          <motion.div {...fadeUp()}>
+            <Link
+              href="/"
+              className="inline-flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-primary"
+            >
+              ← Kembali
+            </Link>
+          </motion.div>
 
-          <div className="mt-6 text-center">
+          <motion.div {...fadeUp(0.05)} className="mt-6 text-center">
             <p className="font-mono text-xs uppercase tracking-[0.3em] text-muted-foreground">
               {election.title} · {election.academic_year}
             </p>
             <div className="mt-4 flex justify-center">
               <BallotStamp status={status} />
             </div>
-          </div>
+          </motion.div>
 
-          <div className="relative mt-8">
+          <motion.div {...heroAnim} className="relative mt-8">
             {photo ? (
               <Image
                 src={photo}
@@ -175,41 +210,51 @@ export default function CandidateDetailPage() {
                 No foto
               </div>
             )}
-            <span className="absolute left-4 top-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary font-mono text-lg font-bold text-primary-foreground shadow-sm">
+            <motion.span
+              initial={reduced ? false : { scale: 0.5, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ type: 'spring', stiffness: 260, damping: 18, delay: 0.25 }}
+              className="absolute left-4 top-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary font-mono text-lg font-bold text-primary-foreground shadow-sm"
+            >
               {candidate.candidate_number}
-            </span>
-          </div>
+            </motion.span>
+          </motion.div>
 
           <div className="mt-6 text-center">
-            <h1 className="font-heading text-3xl font-bold sm:text-4xl">
+            <motion.h1 {...fadeUp(0.1)} className="font-heading text-3xl font-bold sm:text-4xl">
               {candidate.chairman_name}
-            </h1>
+            </motion.h1>
             {candidate.vice_chairman_name && (
-              <p className="mt-2 text-lg text-muted-foreground">& {candidate.vice_chairman_name}</p>
+              <motion.p {...fadeUp(0.18)} className="mt-2 text-lg text-muted-foreground">
+                & {candidate.vice_chairman_name}
+              </motion.p>
             )}
           </div>
 
           {images.length > 0 && (
-            <div className="mt-10">
+            <motion.div {...fadeUp(0.15)} className="mt-10">
               <h2 className="font-heading text-xl font-semibold">Program &amp; Kegiatan</h2>
               <div className="mt-3">
                 <GalleryCarousel images={images} />
               </div>
-            </div>
+            </motion.div>
           )}
 
           <div className="mt-10 space-y-8">
-            <section>
+            <motion.section {...fadeUp()}>
               <h2 className="font-heading text-xl font-semibold">Visi</h2>
               <p className="mt-3 whitespace-pre-line text-muted-foreground">{candidate.vision}</p>
-            </section>
-            <section>
+            </motion.section>
+            <motion.section {...fadeUp(0.1)}>
               <h2 className="font-heading text-xl font-semibold">Misi</h2>
               <p className="mt-3 whitespace-pre-line text-muted-foreground">{candidate.mission}</p>
-            </section>
+            </motion.section>
           </div>
 
-          <div className="mt-12 rounded-2xl border bg-card p-8 text-center shadow-sm">
+          <motion.div
+            {...fadeUp()}
+            className="mt-12 rounded-2xl border bg-card p-8 text-center shadow-sm"
+          >
             <h2 className="font-heading text-2xl font-bold">Sudah menentukan pilihanmu?</h2>
             <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
               Gunakan NIS/NISN dan Token Voting dari panitia untuk memilih pemimpinmu.
@@ -220,9 +265,9 @@ export default function CandidateDetailPage() {
             >
               Siap Memilih — Klik di Sini
             </Link>
-          </div>
+          </motion.div>
 
-          <div className="mt-8 flex items-center justify-between gap-4">
+          <motion.div {...fadeUp()} className="mt-8 flex items-center justify-between gap-4">
             {prev ? (
               <button
                 type="button"
@@ -251,11 +296,14 @@ export default function CandidateDetailPage() {
             ) : (
               <span />
             )}
-          </div>
+          </motion.div>
 
-          <p className="mt-6 text-center font-mono text-xs text-muted-foreground">
+          <motion.p
+            {...fadeUp(0.05)}
+            className="mt-6 text-center font-mono text-xs text-muted-foreground"
+          >
             {formatPeriod(election)}
-          </p>
+          </motion.p>
         </div>
       </div>
     </main>

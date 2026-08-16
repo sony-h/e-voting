@@ -17,16 +17,8 @@ import { listElections } from '@/services/elections';
 import { listPublicCandidates } from '@/services/candidates';
 import { formatPeriod } from '@/lib/format';
 import { uploadUrl } from '@/lib/images';
+import { fadeUp } from '@/lib/animations';
 import { BallotStamp, type BallotStatus } from '@/components/ui/ballot-stamp';
-
-function fadeUp(delay = 0) {
-  return {
-    initial: { opacity: 0, y: 24 },
-    whileInView: { opacity: 1, y: 0 },
-    viewport: { once: true, margin: '-80px' },
-    transition: { duration: 0.6, delay, ease: [0.21, 0.47, 0.32, 0.98] as const },
-  };
-}
 
 function FloatingBallot() {
   const reduced = useReducedMotion();
@@ -141,7 +133,7 @@ function CandidateCard({ candidate }: { candidate: CandidateWithImages }) {
 
   return (
     <TiltCard>
-      <Link href={`/candidate/${candidate.id}`} className="flex h-full flex-col">
+      <Link href={`/candidate/${candidate.id}`} className="group flex h-full flex-col">
         <div className="relative">
           {candidate.photo_url ? (
             <Image
@@ -195,6 +187,21 @@ function CandidateCard({ candidate }: { candidate: CandidateWithImages }) {
               </div>
             </div>
           )}
+
+          <div className="mt-4 border-t border-dashed pt-4">
+            <span className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-lg border text-sm font-semibold transition-all duration-200 group-hover:border-primary group-hover:bg-primary group-hover:text-primary-foreground">
+              Lihat Detail
+              <svg
+                className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5-5 5M6 12h12" />
+              </svg>
+            </span>
+          </div>
         </div>
       </Link>
     </TiltCard>
