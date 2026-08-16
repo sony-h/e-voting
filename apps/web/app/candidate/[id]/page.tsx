@@ -34,9 +34,9 @@ function GalleryCarousel({ images }: { images: CandidateImage[] }) {
           <Image
             src={uploadUrl(current.url) ?? ''}
             alt={current.caption ?? 'Gambar program'}
-            width={1024}
-            height={640}
-            className="h-64 w-full object-cover sm:h-80"
+            width={1280}
+            height={720}
+            className="aspect-video w-full object-cover"
           />
         </motion.div>
         {current.caption && (
@@ -200,13 +200,13 @@ export default function CandidateDetailPage() {
               <Image
                 src={photo}
                 alt={candidate.chairman_name}
-                width={1024}
-                height={640}
+                width={1200}
+                height={900}
                 priority
-                className="h-80 w-full rounded-2xl object-cover shadow-sm sm:h-96"
+                className="aspect-[4/3] w-full rounded-2xl object-cover shadow-sm"
               />
             ) : (
-              <div className="flex h-80 w-full items-center justify-center rounded-2xl bg-muted text-sm text-muted-foreground sm:h-96">
+              <div className="flex aspect-[4/3] w-full items-center justify-center rounded-2xl bg-muted text-sm text-muted-foreground">
                 No foto
               </div>
             )}

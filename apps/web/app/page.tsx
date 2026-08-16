@@ -139,12 +139,12 @@ function CandidateCard({ candidate }: { candidate: CandidateWithImages }) {
             <Image
               src={uploadUrl(candidate.photo_url) ?? ''}
               alt={candidate.chairman_name}
-              width={640}
-              height={400}
-              className="h-52 w-full object-cover"
+              width={1200}
+              height={900}
+              className="aspect-[4/3] w-full object-cover"
             />
           ) : (
-            <div className="flex h-52 w-full items-center justify-center bg-muted text-sm text-muted-foreground">
+            <div className="flex aspect-[4/3] w-full items-center justify-center bg-muted text-sm text-muted-foreground">
               No foto
             </div>
           )}
@@ -174,13 +174,13 @@ function CandidateCard({ candidate }: { candidate: CandidateWithImages }) {
                     key={image.id}
                     src={uploadUrl(image.url) ?? ''}
                     alt={image.caption ?? 'Gambar program'}
-                    width={200}
-                    height={140}
-                    className="h-20 w-28 rounded-lg object-cover"
+                    width={1280}
+                    height={720}
+                    className="aspect-video w-28 rounded-lg object-cover"
                   />
                 ))}
                 {hiddenCount > 0 && (
-                  <div className="flex h-20 w-28 items-center justify-center rounded-lg border border-dashed text-xs font-semibold text-muted-foreground">
+                  <div className="flex aspect-video w-28 items-center justify-center rounded-lg border border-dashed text-xs font-semibold text-muted-foreground">
                     +{hiddenCount}
                   </div>
                 )}

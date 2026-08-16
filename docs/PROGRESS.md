@@ -52,3 +52,5 @@
 | Detail | Page animations | Done | Entrance, reveals, carousel transition, parallax |
 | UI | Standalone admin login | Done | Route group (panel), login full-screen |
 | UI | Screen-fit dialogs | Done | max-h dvh + internal scroll, candidate sm:max-w-lg |
+| Foto | Rasio standar | Done | Portrait 4:3 (1200x900), program 16:9 (1280x720) |
+| Foto | Validasi upload | Done | Min 800px (IMAGE_TOO_SMALL), maks 10MB |

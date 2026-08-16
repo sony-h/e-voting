@@ -65,7 +65,7 @@ export class CandidateController {
             `${Date.now()}-${randomUUID()}${extname(file.originalname)}`,
           ),
       }),
-      limits: { fileSize: 2 * 1024 * 1024 },
+      limits: { fileSize: 10 * 1024 * 1024 },
       fileFilter: (_req, file, cb) =>
         cb(
           null,
@@ -80,6 +80,7 @@ export class CandidateController {
     return this.candidateService.updatePhoto(
       id,
       `/uploads/candidate-photo/${file.filename}`,
+      join(process.cwd(), 'uploads', 'candidate-photo', file.filename),
     );
   }
 
@@ -94,7 +95,7 @@ export class CandidateController {
             `${Date.now()}-${randomUUID()}${extname(file.originalname)}`,
           ),
       }),
-      limits: { fileSize: 2 * 1024 * 1024 },
+      limits: { fileSize: 10 * 1024 * 1024 },
       fileFilter: (_req, file, cb) =>
         cb(
           null,

@@ -110,24 +110,25 @@ async function generateImage(opts: {
   sublabel?: string;
   bg: string;
   fg: string;
-  size: number;
+  width: number;
+  height: number;
 }): Promise<string> {
-  const { dir, name, label, sublabel, bg, fg, size } = opts;
+  const { dir, name, label, sublabel, bg, fg, width, height } = opts;
   const svg = `
-    <svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+    <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
       <defs>
         <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
           <stop offset="0%" stop-color="${bg}"/>
           <stop offset="100%" stop-color="${bg}" stop-opacity="0.6"/>
         </linearGradient>
       </defs>
-      <rect width="${size}" height="${size}" fill="url(#g)"/>
-      <circle cx="${size * 0.8}" cy="${size * 0.2}" r="${size * 0.25}" fill="${fg}" opacity="0.12"/>
-      <circle cx="${size * 0.15}" cy="${size * 0.85}" r="${size * 0.3}" fill="${fg}" opacity="0.1"/>
-      <text x="50%" y="46%" text-anchor="middle" font-family="sans-serif" font-size="${size * 0.16}" font-weight="bold" fill="${fg}">${label}</text>
+      <rect width="${width}" height="${height}" fill="url(#g)"/>
+      <circle cx="${width * 0.8}" cy="${height * 0.2}" r="${height * 0.25}" fill="${fg}" opacity="0.12"/>
+      <circle cx="${width * 0.15}" cy="${height * 0.85}" r="${height * 0.3}" fill="${fg}" opacity="0.1"/>
+      <text x="50%" y="46%" text-anchor="middle" font-family="sans-serif" font-size="${height * 0.16}" font-weight="bold" fill="${fg}">${label}</text>
       ${
         sublabel
-          ? `<text x="50%" y="60%" text-anchor="middle" font-family="monospace" font-size="${size * 0.06}" fill="${fg}" opacity="0.85">${sublabel}</text>`
+          ? `<text x="50%" y="60%" text-anchor="middle" font-family="monospace" font-size="${height * 0.06}" fill="${fg}" opacity="0.85">${sublabel}</text>`
           : ''
       }
     </svg>
@@ -243,7 +244,8 @@ async function main() {
         sublabel: seed.chairman.toUpperCase(),
         bg: seed.colors.bg,
         fg: seed.colors.fg,
-        size: 640,
+        width: 1200,
+        height: 900,
       });
 
       const candidate = await prisma.candidate.upsert({
@@ -285,7 +287,8 @@ async function main() {
           sublabel: `${seed.chairman.toUpperCase()} · PROGRAM ${g + 1}`,
           bg: seed.colors.bg,
           fg: seed.colors.fg,
-          size: 640,
+          width: 1280,
+          height: 720,
         });
         await prisma.candidateImage.create({
           data: {

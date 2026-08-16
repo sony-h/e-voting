@@ -1,7 +1,12 @@
 import { Test } from '@nestjs/testing';
 import { BadRequestException } from '@nestjs/common';
+import sharp from 'sharp';
 import { CandidateService } from './candidate.service';
 import { PrismaService } from '../../prisma/prisma.service';
+
+jest.mock('sharp');
+
+const sharpMock = sharp as jest.MockedFunction<typeof sharp>;
 
 describe('CandidateService', () => {
   let service: CandidateService;
@@ -32,6 +37,10 @@ describe('CandidateService', () => {
     }).compile();
     service = moduleRef.get(CandidateService);
     jest.clearAllMocks();
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   it('creates a candidate with the given dto', async () => {
@@ -74,6 +83,10 @@ describe('CandidateService', () => {
     );
     prismaMock.candidateImage.create.mockResolvedValue({ id: 'img1' });
 
+    sharpMock.mockReturnValue({
+      metadata: jest.fn().mockResolvedValue({ width: 1280, height: 720 }),
+    } as unknown as ReturnType<typeof sharp>);
+
     await service.addImages('c1', [
       { filename: 'a.png' } as Express.Multer.File,
       { filename: 'b.png' } as Express.Multer.File,
@@ -93,6 +106,29 @@ describe('CandidateService', () => {
         sort_order: 3,
       },
     });
+  });
+
+  it('rejects gallery images narrower than 800px', async () => {
+    prismaMock.candidate.findUnique.mockResolvedValue({
+      id: 'c1',
+      election_id: 'e1',
+    });
+    prismaMock.election.findUnique.mockResolvedValue({
+      id: 'e1',
+      status: 'DRAFT',
+    });
+
+    sharpMock.mockReturnValue({
+      metadata: jest.fn().mockResolvedValue({ width: 400, height: 300 }),
+    } as unknown as ReturnType<typeof sharp>);
+
+    await expect(
+      service.addImages('c1', [
+        { filename: 'small.png' } as Express.Multer.File,
+      ]),
+    ).rejects.toThrow(BadRequestException);
+
+    expect(prismaMock.candidateImage.create).not.toHaveBeenCalled();
   });
 
   it('removes a gallery image', async () => {

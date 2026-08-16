@@ -304,6 +304,9 @@ export default function AdminCandidatesPage() {
                   ref={fileRef}
                   onChange={(e) => setPhotoFile(e.target.files?.[0] ?? null)}
                 />
+                <p className="text-xs text-muted-foreground">
+                  Maks 10MB · lebar minimal 800px · rasio disarankan 4:3
+                </p>
               </div>
             </div>
             <div className="space-y-2">
@@ -363,6 +366,10 @@ export default function AdminCandidatesPage() {
                 ref={galleryRef}
                 onChange={(e) => setGalleryFiles(Array.from(e.target.files ?? []).slice(0, 5))}
               />
+              <p className="text-xs text-muted-foreground">
+                Format jpeg/png/webp · maks 10MB per file · lebar minimal 800px · rasio disarankan
+                16:9
+              </p>
               {(existingImages.length > 0 || galleryFiles.length > 0) && (
                 <div className="grid grid-cols-3 gap-2">
                   {existingImages.map((image) => (

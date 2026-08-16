@@ -53,9 +53,9 @@ function GalleryCarousel({ images }: { images: CandidateImage[] }) {
         <Image
           src={`${UPLOADS_BASE}${current.url}`}
           alt={current.caption ?? 'Gambar program'}
-          width={640}
-          height={400}
-          className="h-44 w-full object-cover"
+          width={1280}
+          height={720}
+          className="aspect-video w-full object-cover"
         />
         {current.caption && (
           <p className="absolute bottom-0 left-0 right-0 bg-black/50 px-3 py-1.5 text-xs font-medium text-white">
@@ -245,12 +245,12 @@ export default function StudentPortalPage() {
                     <Image
                       src={photoUrl(candidate)}
                       alt={candidate.chairman_name}
-                      width={320}
-                      height={200}
-                      className="h-40 w-full object-cover"
+                      width={1200}
+                      height={900}
+                      className="aspect-[4/3] w-full object-cover"
                     />
                   ) : (
-                    <div className="flex h-40 w-full items-center justify-center bg-muted text-sm text-muted-foreground">
+                    <div className="flex aspect-[4/3] w-full items-center justify-center bg-muted text-sm text-muted-foreground">
                       No foto
                     </div>
                   )}
@@ -310,12 +310,12 @@ export default function StudentPortalPage() {
                 <Image
                   src={photoUrl(detailCandidate)}
                   alt={detailCandidate.chairman_name}
-                  width={320}
-                  height={200}
-                  className="h-44 w-full rounded-lg object-cover"
+                  width={1200}
+                  height={900}
+                  className="aspect-[4/3] w-full rounded-lg object-cover"
                 />
               ) : (
-                <div className="flex h-44 w-full items-center justify-center rounded-lg bg-muted text-sm text-muted-foreground">
+                <div className="flex aspect-[4/3] w-full items-center justify-center rounded-lg bg-muted text-sm text-muted-foreground">
                   No foto
                 </div>
               )}

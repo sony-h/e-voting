@@ -264,6 +264,8 @@ POST
 
 Upload foto kandidat.
 
+Aturan file: format jpeg/png/webp, maksimal 10MB per file, lebar minimal 800px (error `IMAGE_TOO_SMALL`).
+
 ---
 
 POST
@@ -272,7 +274,9 @@ POST
 /candidates/:id/images
 ```
 
-Upload galeri gambar kandidat (multipart, field `files`, maksimal 5 file, maksimal 2MB per file, format jpeg/png/webp).
+Upload galeri gambar kandidat (multipart, field `files`, maksimal 5 file).
+
+Aturan file: format jpeg/png/webp, maksimal 10MB per file, lebar minimal 800px (error `IMAGE_TOO_SMALL`).
 
 ---
 
@@ -662,6 +666,7 @@ Candidate
 * CANDIDATE_NOT_FOUND
 * DUPLICATE_CANDIDATE_NUMBER
 * CANDIDATE_IMAGE_NOT_FOUND
+* IMAGE_TOO_SMALL
 
 ---
 

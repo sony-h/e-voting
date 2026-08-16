@@ -3,9 +3,14 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import sharp from 'sharp';
+import { unlink } from 'fs/promises';
+import { join } from 'path';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateCandidateDto } from './dto/create-candidate.dto';
 import { UpdateCandidateDto } from './dto/update-candidate.dto';
+
+const MIN_IMAGE_WIDTH = 800;
 
 @Injectable()
 export class CandidateService {
@@ -49,9 +54,10 @@ export class CandidateService {
     return this.prisma.candidate.delete({ where: { id } });
   }
 
-  async updatePhoto(id: string, photoUrl: string) {
+  async updatePhoto(id: string, photoUrl: string, filePath?: string) {
     const candidate = await this.ensureExists(id);
     await this.ensureEditable(candidate.election_id);
+    if (filePath) await this.assertImageSize(filePath);
     return this.prisma.candidate.update({
       where: { id },
       data: { photo_url: photoUrl },
@@ -61,6 +67,11 @@ export class CandidateService {
   async addImages(id: string, files: Express.Multer.File[]) {
     const candidate = await this.ensureExists(id);
     await this.ensureEditable(candidate.election_id);
+    for (const file of files) {
+      await this.assertImageSize(
+        join(process.cwd(), 'uploads', 'candidate-image', file.filename),
+      );
+    }
     const existing = await this.prisma.candidateImage.count({
       where: { candidate_id: id },
     });
@@ -75,6 +86,23 @@ export class CandidateService {
         }),
       ),
     );
+  }
+
+  private async assertImageSize(filePath: string) {
+    try {
+      const metadata = await sharp(filePath).metadata();
+      if (!metadata.width || metadata.width < MIN_IMAGE_WIDTH) {
+        await unlink(filePath).catch(() => undefined);
+        throw new BadRequestException({
+          errorCode: 'IMAGE_TOO_SMALL',
+          message: `Image width must be at least ${MIN_IMAGE_WIDTH}px.`,
+        });
+      }
+    } catch (error) {
+      if (error instanceof BadRequestException) throw error;
+      await unlink(filePath).catch(() => undefined);
+      throw new BadRequestException({ errorCode: 'IMAGE_TOO_SMALL' });
+    }
   }
 
   async removeImage(imageId: string) {
