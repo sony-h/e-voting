@@ -16,10 +16,8 @@ import type { CandidateWithImages } from '@/services/candidates';
 import { listElections } from '@/services/elections';
 import { listPublicCandidates } from '@/services/candidates';
 import { formatPeriod } from '@/lib/format';
+import { uploadUrl } from '@/lib/images';
 import { BallotStamp, type BallotStatus } from '@/components/ui/ballot-stamp';
-import { API_BASE_URL } from '@/lib/api';
-
-const UPLOADS_BASE = API_BASE_URL.replace('/api/v1', '');
 
 function fadeUp(delay = 0) {
   return {
@@ -143,60 +141,62 @@ function CandidateCard({ candidate }: { candidate: CandidateWithImages }) {
 
   return (
     <TiltCard>
-      <div className="relative">
-        {candidate.photo_url ? (
-          <Image
-            src={`${UPLOADS_BASE}${candidate.photo_url}`}
-            alt={candidate.chairman_name}
-            width={640}
-            height={400}
-            className="h-40 w-full object-cover"
-          />
-        ) : (
-          <div className="flex h-40 w-full items-center justify-center bg-muted text-sm text-muted-foreground">
-            No foto
-          </div>
-        )}
-        <span
-          className="absolute left-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-primary font-mono text-sm font-bold text-primary-foreground shadow-sm"
-          style={{ transform: 'translateZ(30px)' }}
-        >
-          {candidate.candidate_number}
-        </span>
-      </div>
-
-      <div className="flex flex-1 flex-col p-4" style={{ transform: 'translateZ(20px)' }}>
-        <h3 className="font-heading text-lg font-semibold">{candidate.chairman_name}</h3>
-        <p className="text-sm text-muted-foreground">
-          {candidate.vice_chairman_name ? `& ${candidate.vice_chairman_name}` : '—'}
-        </p>
-        <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">{candidate.vision}</p>
-
-        {images.length > 0 && (
-          <div className="mt-4">
-            <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-              Program
-            </p>
-            <div className="mt-2 flex gap-2">
-              {shown.map((image) => (
-                <Image
-                  key={image.id}
-                  src={`${UPLOADS_BASE}${image.url}`}
-                  alt={image.caption ?? 'Gambar program'}
-                  width={200}
-                  height={140}
-                  className="h-16 w-24 rounded-lg object-cover"
-                />
-              ))}
-              {hiddenCount > 0 && (
-                <div className="flex h-16 w-24 items-center justify-center rounded-lg border border-dashed text-xs font-semibold text-muted-foreground">
-                  +{hiddenCount}
-                </div>
-              )}
+      <Link href={`/candidate/${candidate.id}`} className="flex h-full flex-col">
+        <div className="relative">
+          {candidate.photo_url ? (
+            <Image
+              src={uploadUrl(candidate.photo_url) ?? ''}
+              alt={candidate.chairman_name}
+              width={640}
+              height={400}
+              className="h-52 w-full object-cover"
+            />
+          ) : (
+            <div className="flex h-52 w-full items-center justify-center bg-muted text-sm text-muted-foreground">
+              No foto
             </div>
-          </div>
-        )}
-      </div>
+          )}
+          <span
+            className="absolute left-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-primary font-mono text-sm font-bold text-primary-foreground shadow-sm"
+            style={{ transform: 'translateZ(30px)' }}
+          >
+            {candidate.candidate_number}
+          </span>
+        </div>
+
+        <div className="flex flex-1 flex-col p-4" style={{ transform: 'translateZ(20px)' }}>
+          <h3 className="font-heading text-lg font-semibold">{candidate.chairman_name}</h3>
+          <p className="text-sm text-muted-foreground">
+            {candidate.vice_chairman_name ? `& ${candidate.vice_chairman_name}` : '—'}
+          </p>
+          <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">{candidate.vision}</p>
+
+          {images.length > 0 && (
+            <div className="mt-4">
+              <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                Program
+              </p>
+              <div className="mt-2 flex gap-2">
+                {shown.map((image) => (
+                  <Image
+                    key={image.id}
+                    src={uploadUrl(image.url) ?? ''}
+                    alt={image.caption ?? 'Gambar program'}
+                    width={200}
+                    height={140}
+                    className="h-20 w-28 rounded-lg object-cover"
+                  />
+                ))}
+                {hiddenCount > 0 && (
+                  <div className="flex h-20 w-28 items-center justify-center rounded-lg border border-dashed text-xs font-semibold text-muted-foreground">
+                    +{hiddenCount}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      </Link>
     </TiltCard>
   );
 }
