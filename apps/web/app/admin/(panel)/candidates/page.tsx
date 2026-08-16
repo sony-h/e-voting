@@ -277,7 +277,7 @@ export default function AdminCandidatesPage() {
       )}
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>{editing ? 'Edit Kandidat' : 'Tambah Kandidat'}</DialogTitle>
             <DialogDescription>Lengkapi informasi kandidat di bawah ini.</DialogDescription>
