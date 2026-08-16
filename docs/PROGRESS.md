@@ -48,3 +48,5 @@
 | Fonts | Self-hosted fonts | Done | next/font/local, offline-safe |
 | Landing | Candidate detail page | Done | /candidate/[id], carousel, switcher, CTA |
 | Landing | Bigger card previews | Done | Portrait h-52, thumbnails h-20 |
+| Landing | Lihat Detail button | Done | Outline button, group-hover primary |
+| Detail | Page animations | Done | Entrance, reveals, carousel transition, parallax |
