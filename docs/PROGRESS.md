@@ -46,3 +46,5 @@
 | Landing | Public candidates | Done | GET /public/candidates, show_on_landing |
 | Landing | Candidate card rework | Done | Info-only, mobile snap carousel + dots |
 | Fonts | Self-hosted fonts | Done | next/font/local, offline-safe |
+| Landing | Candidate detail page | Done | /candidate/[id], carousel, switcher, CTA |
+| Landing | Bigger card previews | Done | Portrait h-52, thumbnails h-20 |
