@@ -50,3 +50,5 @@
 | Landing | Bigger card previews | Done | Portrait h-52, thumbnails h-20 |
 | Landing | Lihat Detail button | Done | Outline button, group-hover primary |
 | Detail | Page animations | Done | Entrance, reveals, carousel transition, parallax |
+| UI | Standalone admin login | Done | Route group (panel), login full-screen |
+| UI | Screen-fit dialogs | Done | max-h dvh + internal scroll, candidate sm:max-w-lg |
