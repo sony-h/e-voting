@@ -228,9 +228,11 @@ export default function StudentPortalPage() {
           <CheckIcon />
           <h1 className="mt-6 font-heading text-3xl font-bold">Terima kasih!</h1>
           <p className="mt-2 text-muted-foreground">Anda telah menggunakan hak pilih Anda.</p>
-          <p className="mt-3 text-sm text-muted-foreground">
-            Redirect ke beranda dalam {countdown} detik...
-          </p>
+          {voted && (
+            <p className="mt-3 text-sm text-muted-foreground">
+              Redirect ke beranda dalam {countdown} detik...
+            </p>
+          )}
           <Link
             href="/"
             className="mt-6 inline-flex h-11 w-full items-center justify-center rounded-xl border bg-primary/5 px-6 text-sm font-semibold text-primary transition-all duration-200 hover:bg-primary/10"
