@@ -76,10 +76,11 @@ pnpm dev
 ## Reset ke Keadaan Demo Bersih
 
 ```bash
-pnpm --filter @e-voting/api db:seed
+pnpm --filter @e-voting/api db:reset   # hapus semua suara + reset status siswa/token/election
+pnpm --filter @e-voting/api db:seed    # regenerate data demo
 ```
 
-Seed bersifat idempotent — aman dijalankan berulang (upsert, bukan duplikasi).
+`db:reset` menghapus seluruh Vote, mereset `has_voted`/`is_used`, dan mengembalikan election ke status DRAFT + hasil disembunyikan (`results_public = false`).
 
 ## Troubleshooting
 
