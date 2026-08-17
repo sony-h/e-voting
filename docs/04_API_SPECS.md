@@ -588,11 +588,13 @@ GET
 /results
 ```
 
-Hanya tersedia apabila Election Closed.
+Hanya tersedia apabila Election Closed **dan** `results_public = true`.
 
 Query param `electionId` wajib. Hanya untuk admin.
 
 Apabila Election belum Closed: error code `ELECTION_NOT_CLOSED`.
+
+Apabila hasil belum ditampilkan ke publik: error code `RESULTS_NOT_PUBLISHED` (hasil juga disembunyikan dari admin sampai dipublikasikan).
 
 Response
 

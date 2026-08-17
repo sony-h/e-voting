@@ -12,7 +12,37 @@ export class ReportService {
   constructor(private readonly prisma: PrismaService) {}
 
   async getResults(electionId: string) {
+    await this.assertResultsVisible(electionId);
+    return this.loadResults(electionId);
+  }
+
+  async getPublicResults(electionId: string) {
+    await this.assertResultsVisible(electionId);
+    return this.loadResults(electionId);
+  }
+
+  async setResultsPublic(electionId: string, visible: boolean) {
+    await this.ensureClosed(electionId);
+    return this.prisma.election.update({
+      where: { id: electionId },
+      data: { results_public: visible },
+    });
+  }
+
+  private async assertResultsVisible(electionId: string) {
     const election = await this.ensureClosed(electionId);
+    if (!election.results_public) {
+      throw new BadRequestException({ errorCode: 'RESULTS_NOT_PUBLISHED' });
+    }
+    return election;
+  }
+
+  private async loadResults(electionId: string) {
+    const election = await this.prisma.election.findUnique({
+      where: { id: electionId },
+    });
+    if (!election)
+      throw new NotFoundException({ errorCode: 'ELECTION_NOT_FOUND' });
     const candidates = await this.prisma.candidate.findMany({
       where: { election_id: electionId },
       orderBy: { candidate_number: 'asc' },
@@ -48,22 +78,6 @@ export class ReportService {
         }))
         .sort((a, b) => b.votes - a.votes),
     };
-  }
-
-  async getPublicResults(electionId: string) {
-    const election = await this.ensureClosed(electionId);
-    if (!election.results_public) {
-      throw new BadRequestException({ errorCode: 'RESULTS_NOT_PUBLISHED' });
-    }
-    return this.getResults(electionId);
-  }
-
-  async setResultsPublic(electionId: string, visible: boolean) {
-    await this.ensureClosed(electionId);
-    return this.prisma.election.update({
-      where: { id: electionId },
-      data: { results_public: visible },
-    });
   }
 
   async exportExcel(electionId: string) {

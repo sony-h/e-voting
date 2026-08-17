@@ -29,6 +29,7 @@ export default function AdminResultsPage() {
     data: results,
     isLoading,
     isError,
+    error,
   } = useQuery({
     queryKey: ['results', effectiveElectionId],
     queryFn: () => getResults(effectiveElectionId),
@@ -36,8 +37,11 @@ export default function AdminResultsPage() {
     retry: false,
   });
 
+  const errorCode = error instanceof ApiError ? error.errorCode : null;
   const notClosed =
     isError && selectedElection?.status !== 'CLOSED' && selectedElection?.status !== undefined;
+  const notPublished =
+    isError && errorCode === 'RESULTS_NOT_PUBLISHED' && selectedElection?.status === 'CLOSED';
 
   const publishMutation = useMutation({
     mutationFn: (visible: boolean) => publishResults(effectiveElectionId, visible),
@@ -100,6 +104,22 @@ export default function AdminResultsPage() {
         <div className="rounded-xl border border-dashed p-12 text-center text-sm text-muted-foreground">
           Hasil hanya tersedia setelah election ditutup.
         </div>
+      ) : notPublished ? (
+        <div className="rounded-xl border border-dashed bg-card p-12 text-center shadow-sm">
+          <p className="text-4xl">🔒</p>
+          <h2 className="mt-3 font-heading text-2xl font-bold">Hasil tersembunyi</h2>
+          <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
+            Hasil belum ditampilkan ke publik. Klik tombol di bawah untuk menampilkan hasil — baik
+            di halaman admin maupun halaman publik secara bersamaan.
+          </p>
+          <Button
+            className="mt-6"
+            onClick={() => publishMutation.mutate(true)}
+            disabled={publishMutation.isPending}
+          >
+            {publishMutation.isPending ? 'Menampilkan...' : 'Tampilkan Hasil ke Publik 🎉'}
+          </Button>
+        </div>
       ) : !results ? (
         <div className="rounded-xl border border-dashed p-12 text-center text-sm text-muted-foreground">
           Hasil tidak dapat dimuat.
@@ -117,18 +137,15 @@ export default function AdminResultsPage() {
                 </p>
               </div>
               <div className="flex flex-col items-end gap-2">
-                <span
-                  className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                    published ? 'bg-success/15 text-success' : 'bg-muted text-muted-foreground'
-                  }`}
-                >
-                  {published ? 'Ditampilkan ke publik' : 'Tersembunyi dari publik'}
+                <span className="rounded-full bg-success/15 px-3 py-1 text-xs font-semibold text-success">
+                  Ditampilkan ke publik
                 </span>
                 <Button
-                  onClick={() => publishMutation.mutate(!published)}
+                  variant="outline"
+                  onClick={() => publishMutation.mutate(false)}
                   disabled={publishMutation.isPending}
                 >
-                  {published ? 'Sembunyikan Hasil' : 'Tampilkan Hasil ke Publik'}
+                  Sembunyikan Hasil
                 </Button>
               </div>
             </div>

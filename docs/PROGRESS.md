@@ -59,3 +59,5 @@
 | Voting | Animasi halaman pilih | Done | Staggered cards, hover, press |
 | Voting | Limit waktu 5 menit | Done | Sesi Redis 300s + countdown + redirect |
 | Results | Festive + publish | Done | Confetti, podium, count-up; /results publik + toggle admin |
+| Results | Sembunyi dari admin | Done | Admin tidak lihat hasil sebelum publish |
+| Reset | db:reset + seed | Done | 0 suara, DRAFT, tersembunyi |

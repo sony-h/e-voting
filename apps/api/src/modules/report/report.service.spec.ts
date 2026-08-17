@@ -35,10 +35,20 @@ describe('ReportService', () => {
     await expect(service.getResults('nope')).rejects.toThrow(NotFoundException);
   });
 
+  it('rejects results when not published to public', async () => {
+    prismaMock.election.findUnique.mockResolvedValue({
+      id: 'e1',
+      status: 'CLOSED',
+      results_public: false,
+    });
+    await expect(service.getResults('e1')).rejects.toThrow(BadRequestException);
+  });
+
   it('returns ranking sorted by votes desc', async () => {
     prismaMock.election.findUnique.mockResolvedValue({
       id: 'e1',
       status: 'CLOSED',
+      results_public: true,
       title: 'Pemilihan',
       academic_year: '2026/2027',
     });
@@ -73,6 +83,7 @@ describe('ReportService', () => {
     prismaMock.election.findUnique.mockResolvedValue({
       id: 'e1',
       status: 'CLOSED',
+      results_public: true,
       title: 'P',
       academic_year: '2026/2027',
     });
