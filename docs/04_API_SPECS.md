@@ -148,6 +148,8 @@ GET
 
 Daftar seluruh Election.
 
+Field `order` (Int, default 1) menentukan urutan tampilan di halaman landing.
+
 Public: tidak memerlukan autentikasi (digunakan landing page).
 
 ---

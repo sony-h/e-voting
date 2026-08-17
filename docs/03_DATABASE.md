@@ -123,6 +123,7 @@ Field:
 * start_at
 * end_at
 * results_public
+* order
 * created_at
 * updated_at
 
@@ -136,6 +137,7 @@ Status:
 Catatan:
 
 * `results_public` (Boolean, default false): menentukan apakah hasil election ditampilkan ke publik (halaman `/results`). Hanya dapat diubah oleh admin setelah election Closed.
+* `order` (Int, default 1): menentukan urutan tampilan di halaman landing. Default 1.
 
 ---
 

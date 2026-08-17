@@ -69,3 +69,8 @@
 | Token | Expiry 24 jam | Done | `expires_at` di token, error `TOKEN_EXPIRED` |
 | Token | Login token-first | Done | Login pakai token (unik global) + identifier; verifikasi NIS/NISN, expiry, is_used, status election |
 | Foto | Program gambar tidak ter-crop | Done | Carousel `object-contain` + bg muted |
+| Order | Election order column | Done | order field, admin form, landing + results ordering |
+| Results | Per-election results | Done | /results index + /results/[id] detail, fallback redirect |
+| Landing | Per-election candidates | Done | Candidates grouped by election, ordered vertically |
+| Copy | Generic landing copy | Done | No hardcoded "OSIS", uses election.title |
+| Vote | Auto-redirect 5s | Done | Countdown + router.push after voting |
