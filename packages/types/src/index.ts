@@ -13,6 +13,7 @@ export interface Election {
   status: ElectionStatus;
   start_at: Date | null;
   end_at: Date | null;
+  order: number;
   created_at: Date;
   updated_at: Date;
 }

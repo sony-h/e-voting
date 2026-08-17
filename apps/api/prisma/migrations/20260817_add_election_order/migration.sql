@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Election" ADD COLUMN "order" INTEGER NOT NULL DEFAULT 1;

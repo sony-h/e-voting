@@ -22,6 +22,7 @@ model Election {
   status         ElectionStatus @default(DRAFT)
   start_at       DateTime?
   end_at         DateTime?
+  order          Int            @default(1)
   results_public Boolean        @default(false)
   created_at     DateTime       @default(now())
   updated_at     DateTime       @updatedAt
