@@ -15,7 +15,6 @@ import {
 import type { CandidateWithImages } from '@/services/candidates';
 import { listElections } from '@/services/elections';
 import { listPublicCandidates } from '@/services/candidates';
-import { getPublicResults } from '@/services/results';
 import { formatPeriod } from '@/lib/format';
 import { uploadUrl } from '@/lib/images';
 import { fadeUp } from '@/lib/animations';
@@ -277,21 +276,22 @@ export default function HomePage() {
   const status: BallotStatus = (election?.status as BallotStatus) ?? 'DRAFT';
   const allElections = elections ?? [];
 
-  const { data: candidates } = useQuery({
-    queryKey: ['public-candidates', election?.id],
-    queryFn: () => listPublicCandidates(election!.id),
-    enabled: !!election?.id,
-    retry: false,
-  });
+  const sortedElections = [...allElections].sort((a, b) => (a.order ?? 1) - (b.order ?? 1));
 
-  const { data: resultsVisible, isError: resultsError } = useQuery({
-    queryKey: ['public-results-visible', election?.id],
-    queryFn: () => getPublicResults(election!.id),
-    enabled: !!election?.id && election?.status === 'CLOSED',
+  const { data: electionCandidates } = useQuery({
+    queryKey: ['public-candidates-all'],
+    queryFn: async () => {
+      const results = await Promise.all(
+        sortedElections.map((e) => listPublicCandidates(e.id).catch(() => [])),
+      );
+      return sortedElections.map((e, i) => ({
+        election: e,
+        candidates: results[i] ?? [],
+      }));
+    },
+    enabled: sortedElections.length > 0,
     retry: false,
-    refetchInterval: 5000,
   });
-  const resultsPublished = !!resultsVisible && !resultsError;
 
   const heroAnim = reduced
     ? {}
@@ -332,7 +332,7 @@ export default function HomePage() {
           {...heroAnim}
           className="mt-4 text-center font-heading text-4xl font-bold leading-tight sm:text-6xl"
         >
-          Pilih Pemimpinmu
+          Pilih Pemimpin Organisasi
         </motion.h1>
 
         <motion.div {...heroAnim} className="mt-10 w-full max-w-sm">
@@ -350,7 +350,7 @@ export default function HomePage() {
               </h2>
               <p className="mx-auto mt-1 max-w-md text-sm text-muted-foreground">
                 {election.description ??
-                  'Satu siswa, satu suara. Pilihanmu menentukan masa depan OSIS.'}
+                  'Satu siswa, satu suara. Pilihanmu menentukan masa depan organisasi.'}
               </p>
               <p className="mt-3 font-mono text-sm text-muted-foreground">
                 {formatPeriod(election)}
@@ -417,7 +417,7 @@ export default function HomePage() {
                     </Link>
                     {electionItem.status === 'CLOSED' && (
                       <Link
-                        href="/results"
+                        href={`/results/${electionItem.id}`}
                         className="inline-flex h-10 items-center justify-center rounded-lg border-2 border-success/50 bg-success/10 px-4 text-sm font-semibold text-success transition-all duration-200 hover:bg-success/20"
                       >
                         🎉 Hasil
@@ -431,22 +431,21 @@ export default function HomePage() {
         </section>
       )}
 
-      {election && (
-        <section className="relative mx-auto max-w-6xl px-6 py-20">
-          <motion.div {...fadeUp()} className="text-center">
-            <p className="font-mono text-xs uppercase tracking-[0.3em] text-muted-foreground">
-              Kenali Kandidatmu
-            </p>
-            <h2 className="mt-2 font-heading text-3xl font-bold sm:text-4xl">
-              Tiga Pilihan untuk Masa Depan OSIS
-            </h2>
-            <p className="mx-auto mt-3 max-w-xl text-sm text-muted-foreground">
-              Pelajari visi, misi, dan program setiap kandidat sebelum menentukan pilihanmu.
-            </p>
-          </motion.div>
-
-          {candidates && candidates.length > 0 && <CandidateCarousel candidates={candidates} />}
-        </section>
+      {electionCandidates?.map(({ election: e, candidates: eCandidates }) =>
+        eCandidates.length > 0 ? (
+          <section key={e.id} className="relative mx-auto max-w-6xl px-6 py-20">
+            <motion.div {...fadeUp()} className="text-center">
+              <p className="font-mono text-xs uppercase tracking-[0.3em] text-muted-foreground">
+                Kenali Kandidatmu
+              </p>
+              <h2 className="mt-2 font-heading text-3xl font-bold sm:text-4xl">{e.title}</h2>
+              <p className="mx-auto mt-3 max-w-xl text-sm text-muted-foreground">
+                Pelajari visi, misi, dan program setiap kandidat sebelum menentukan pilihanmu.
+              </p>
+            </motion.div>
+            <CandidateCarousel candidates={eCandidates} />
+          </section>
+        ) : null,
       )}
 
       <section className="relative mx-auto max-w-5xl px-6 py-20">
@@ -502,16 +501,6 @@ export default function HomePage() {
           >
             Siap Memilih — Klik di Sini
           </Link>
-          {resultsPublished && (
-            <motion.div {...fadeUp(0.1)} className="mt-6">
-              <Link
-                href="/results"
-                className="inline-flex items-center gap-2 rounded-xl border-2 border-success/50 bg-success/10 px-8 py-3 font-semibold text-success transition-all duration-200 hover:bg-success/20"
-              >
-                🎉 Lihat Hasil Pemilihan
-              </Link>
-            </motion.div>
-          )}
         </motion.div>
       </section>
     </main>
