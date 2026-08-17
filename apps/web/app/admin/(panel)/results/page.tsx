@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { listElections } from '@/services/elections';
@@ -17,9 +17,19 @@ import { Button } from '@/components/ui/button';
 import { FestiveResults, FireConfetti } from '@/components/results/festive-results';
 import { Toaster } from '@/components/ui/sonner';
 
+const REVEAL_DELAY_MS = 6000;
+
 export default function AdminResultsPage() {
   const queryClient = useQueryClient();
   const [electionId, setElectionId] = useState('');
+  const [revealing, setRevealing] = useState(false);
+  const revealTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (revealTimer.current) clearTimeout(revealTimer.current);
+    };
+  }, []);
 
   const { data: elections } = useQuery({ queryKey: ['elections'], queryFn: listElections });
   const effectiveElectionId = electionId || elections?.[0]?.id || '';
@@ -46,8 +56,18 @@ export default function AdminResultsPage() {
   const publishMutation = useMutation({
     mutationFn: (visible: boolean) => publishResults(effectiveElectionId, visible),
     onSuccess: async (_, visible) => {
-      await queryClient.invalidateQueries({ queryKey: ['results', effectiveElectionId] });
-      toast.success(visible ? 'Hasil ditampilkan ke publik.' : 'Hasil disembunyikan dari publik.');
+      if (visible) {
+        setRevealing(true);
+        toast.success('Hasil ditampilkan ke publik.');
+        revealTimer.current = setTimeout(async () => {
+          await queryClient.invalidateQueries({ queryKey: ['results', effectiveElectionId] });
+          setRevealing(false);
+        }, REVEAL_DELAY_MS);
+      } else {
+        if (revealTimer.current) clearTimeout(revealTimer.current);
+        await queryClient.invalidateQueries({ queryKey: ['results', effectiveElectionId] });
+        toast.success('Hasil disembunyikan dari publik.');
+      }
     },
     onError: () => toast.error('Gagal mengubah status publikasi.'),
   });
@@ -106,19 +126,38 @@ export default function AdminResultsPage() {
         </div>
       ) : notPublished ? (
         <div className="rounded-xl border border-dashed bg-card p-12 text-center shadow-sm">
-          <p className="text-4xl">🔒</p>
-          <h2 className="mt-3 font-heading text-2xl font-bold">Hasil tersembunyi</h2>
-          <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
-            Hasil belum ditampilkan ke publik. Klik tombol di bawah untuk menampilkan hasil — baik
-            di halaman admin maupun halaman publik secara bersamaan.
-          </p>
-          <Button
-            className="mt-6"
-            onClick={() => publishMutation.mutate(true)}
-            disabled={publishMutation.isPending}
-          >
-            {publishMutation.isPending ? 'Menampilkan...' : 'Tampilkan Hasil ke Publik 🎉'}
-          </Button>
+          {revealing ? (
+            <>
+              <p className="text-4xl animate-pulse">🎉</p>
+              <h2 className="mt-3 font-heading text-2xl font-bold">
+                Menampilkan hasil ke publik...
+              </h2>
+              <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
+                Halaman publik sedang memuat hasil. Hasil akan tampil di sini sebentar lagi.
+              </p>
+              <div className="mt-6 inline-flex items-center gap-2 text-sm text-muted-foreground">
+                <span className="h-2 w-2 animate-bounce rounded-full bg-primary" />
+                <span className="h-2 w-2 animate-bounce rounded-full bg-primary [animation-delay:150ms]" />
+                <span className="h-2 w-2 animate-bounce rounded-full bg-primary [animation-delay:300ms]" />
+              </div>
+            </>
+          ) : (
+            <>
+              <p className="text-4xl">🔒</p>
+              <h2 className="mt-3 font-heading text-2xl font-bold">Hasil tersembunyi</h2>
+              <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
+                Hasil belum ditampilkan ke publik. Klik tombol di bawah untuk menampilkan hasil —
+                baik di halaman admin maupun halaman publik secara bersamaan.
+              </p>
+              <Button
+                className="mt-6"
+                onClick={() => publishMutation.mutate(true)}
+                disabled={publishMutation.isPending}
+              >
+                {publishMutation.isPending ? 'Menampilkan...' : 'Tampilkan Hasil ke Publik 🎉'}
+              </Button>
+            </>
+          )}
         </div>
       ) : !results ? (
         <div className="rounded-xl border border-dashed p-12 text-center text-sm text-muted-foreground">
