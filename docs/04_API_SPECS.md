@@ -108,7 +108,11 @@ Body
 }
 ```
 
-Catatan: field `identifier` menerima NIS atau NISN.
+Catatan:
+* field `identifier` menerima NIS atau NISN.
+* Login berbasis token: sistem mencari token (unik global), lalu memverifikasi `identifier` cocok dengan NIS/NISN siswa pemilik token, token belum dipakai, dan belum kedaluwarsa (`expires_at`).
+* Token kedaluwarsa setelah 24 jam (`TOKEN_EXPIRY_HOURS` di `.env`). Saat kedaluwarsa, kembalikan `TOKEN_EXPIRED` dan hubungi panitia untuk token baru.
+* Satu siswa dapat memiliki token di tiap pemilihan (per-eleksi); suara dibatasi per pemilihan (`has_voted` per baris Student).
 
 Response
 
@@ -661,6 +665,7 @@ Authentication
 
 * INVALID_CREDENTIALS
 * INVALID_TOKEN
+* TOKEN_EXPIRED (token telah kedaluwarsa; buat token baru dari panel admin)
 * SESSION_EXPIRED
 * UNAUTHORIZED
 
@@ -671,7 +676,6 @@ Election
 * ELECTION_NOT_FOUND
 * ELECTION_NOT_ACTIVE
 * ELECTION_CLOSED
-* MULTIPLE_ACTIVE_ELECTION
 
 ---
 

@@ -33,7 +33,13 @@ export class StudentService {
     return this.prisma.student.create({
       data: {
         ...dto,
-        token: { create: { election_id: dto.election_id, token } },
+        token: {
+          create: {
+            election_id: dto.election_id,
+            token,
+            expires_at: this.tokenExpiry(),
+          },
+        },
       },
       include: { token: true },
     });
@@ -77,8 +83,13 @@ export class StudentService {
     const token = generateVotingToken();
     return this.prisma.votingToken.upsert({
       where: { student_id: id },
-      update: { token, is_used: false },
-      create: { student_id: id, election_id: student.election_id, token },
+      update: { token, is_used: false, expires_at: this.tokenExpiry() },
+      create: {
+        student_id: id,
+        election_id: student.election_id,
+        token,
+        expires_at: this.tokenExpiry(),
+      },
       include: { student: true },
     });
   }
@@ -106,10 +117,13 @@ export class StudentService {
           election_id: electionId,
         };
         const existing = await this.prisma.student.findUnique({
-          where: { nis },
+          where: { election_id_nis: { election_id: electionId, nis } },
         });
         if (existing) {
-          await this.prisma.student.update({ where: { nis }, data });
+          await this.prisma.student.update({
+            where: { id: existing.id },
+            data,
+          });
         } else {
           await this.prisma.student.create({
             data: {
@@ -118,6 +132,7 @@ export class StudentService {
                 create: {
                   election_id: electionId,
                   token: generateVotingToken(),
+                  expires_at: this.tokenExpiry(),
                 },
               },
             },
@@ -149,6 +164,11 @@ export class StudentService {
     }));
     const buffer = buildExcelBuffer(rows, 'Siswa');
     return { buffer, filename: `students-${Date.now()}.xlsx` };
+  }
+
+  private tokenExpiry(): Date {
+    const hours = Number(process.env.TOKEN_EXPIRY_HOURS ?? '24');
+    return new Date(Date.now() + hours * 60 * 60 * 1000);
   }
 
   private async ensureExists(id: string) {

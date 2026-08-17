@@ -51,8 +51,8 @@ model Student {
   election Election     @relation(fields: [election_id], references: [id])
   token    VotingToken?
 
-  @@unique([nis])
-  @@unique([nisn])
+  @@unique([election_id, nis])
+  @@unique([election_id, nisn])
   @@index([class_name])
   @@index([major])
 }

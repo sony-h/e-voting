@@ -50,11 +50,13 @@ function StudentLoginForm() {
         setError(
           err.errorCode === 'INVALID_TOKEN'
             ? 'Token voting tidak valid.'
-            : err.errorCode === 'ALREADY_VOTED'
-              ? 'Anda telah menggunakan hak pilih Anda.'
-              : err.errorCode === 'ELECTION_NOT_ACTIVE'
-                ? 'Pemilihan belum dimulai.'
-                : 'Login gagal. Periksa kembali data Anda.',
+            : err.errorCode === 'TOKEN_EXPIRED'
+              ? 'Token sudah kedaluwarsa. Hubungi panitia untuk token baru.'
+              : err.errorCode === 'ALREADY_VOTED'
+                ? 'Anda telah menggunakan hak pilih Anda.'
+                : err.errorCode === 'ELECTION_NOT_ACTIVE'
+                  ? 'Pemilihan belum dimulai.'
+                  : 'Login gagal. Periksa kembali data Anda.',
         );
       } else {
         setError('Terjadi kesalahan. Silakan coba lagi.');

@@ -38,7 +38,7 @@ Seluruh desain database mengikuti prinsip berikut:
 ## Election
 
 * Sistem dapat memiliki banyak Election.
-* Hanya satu Election yang boleh berstatus Active.
+* Beberapa Election boleh berstatus Active bersamaan (mis. OSIS + MPK).
 * Election berstatus Closed tidak dapat diubah kembali menjadi Active.
 * Hasil suara hanya dapat diakses ketika Election berstatus Closed.
 
@@ -46,9 +46,9 @@ Seluruh desain database mengikuti prinsip berikut:
 
 ## Student
 
-* Setiap siswa hanya terdaftar satu kali.
-* NIS harus unik.
-* NISN harus unik apabila digunakan.
+* Setiap siswa dapat terdaftar pada beberapa Election (satu baris Student per Election).
+* NIS harus unik dalam satu Election.
+* NISN harus unik dalam satu Election apabila digunakan.
 * Setiap siswa memiliki satu Token Voting aktif untuk setiap Election.
 * Status hak pilih hanya berlaku pada Election yang sedang berlangsung.
 
@@ -73,9 +73,10 @@ Seluruh desain database mengikuti prinsip berikut:
 
 ## Token
 
-* Token bersifat unik.
+* Token bersifat unik (global).
 * Token hanya berlaku untuk satu Election.
 * Token hanya dapat digunakan satu kali.
+* Token memiliki masa berlaku (`expires_at`); default 24 jam (`TOKEN_EXPIRY_HOURS`).
 * Token dapat direset sebelum Election dimulai.
 
 ---
@@ -471,8 +472,8 @@ Election
 
 Student
 
-* NIS wajib unik.
-* NISN opsional tetapi unik jika diisi.
+* NIS wajib unik per Election (satu siswa dapat mengikuti beberapa Election, NIS sama diperbolehkan di Election berbeda).
+* NISN opsional tetapi unik per Election jika diisi.
 
 ---
 

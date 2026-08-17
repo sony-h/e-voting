@@ -38,6 +38,8 @@ describe('StudentService', () => {
     });
     const data = prismaMock.student.create.mock.calls[0][0].data;
     expect(data.token.create.token).toMatch(/^[A-Z2-9]{4}-[A-Z2-9]{4}$/);
+    expect(data.token.create.expires_at).toBeInstanceOf(Date);
+    expect(data.token.create.expires_at.getTime()).toBeGreaterThan(Date.now());
   });
 
   it('rejects delete when election is active', async () => {

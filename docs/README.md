@@ -54,7 +54,7 @@ pnpm install
 # 4. Migrasi database (buat tabel)
 pnpm --filter @e-voting/api db:migrate
 
-# 5. Seed data demo (admin, 30 siswa, 3 kandidat + galeri)
+# 5. Seed data demo (2 election: OSIS + MPK, masing-masing 30 siswa + 3 kandidat + galeri)
 pnpm --filter @e-voting/api db:seed
 
 # 6. Jalankan semua app
@@ -69,7 +69,7 @@ pnpm dev
 | Admin panel | http://localhost:3000/admin/login |
 | Admin login | `admin` / `admin123` (sesuai env `ADMIN_USERNAME`/`ADMIN_PASSWORD`) |
 | Portal siswa | http://localhost:3000/student/login |
-| Siswa demo | NIS `231001` – `231030`, token lihat di halaman admin Students |
+| Siswa demo | NIS `231001` – `231030` (tiap election), token lihat di halaman admin Students |
 | API base | http://localhost:3001/api/v1 |
 | Foto upload | http://localhost:3001/uploads/... |
 

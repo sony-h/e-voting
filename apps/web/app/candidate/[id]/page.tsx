@@ -24,7 +24,7 @@ function GalleryCarousel({ images }: { images: CandidateImage[] }) {
 
   return (
     <div>
-      <div className="relative overflow-hidden rounded-2xl">
+      <div className="relative overflow-hidden rounded-2xl bg-muted/40">
         <motion.div
           key={current.id}
           initial={{ opacity: 0, x: 24 }}
@@ -36,7 +36,7 @@ function GalleryCarousel({ images }: { images: CandidateImage[] }) {
             alt={current.caption ?? 'Gambar program'}
             width={1280}
             height={720}
-            className="aspect-video w-full object-cover"
+            className="aspect-video w-full object-contain"
           />
         </motion.div>
         {current.caption && (

@@ -275,6 +275,7 @@ export default function HomePage() {
   });
   const election = elections?.find((e) => e.status === 'ACTIVE') ?? elections?.[0];
   const status: BallotStatus = (election?.status as BallotStatus) ?? 'DRAFT';
+  const allElections = elections ?? [];
 
   const { data: candidates } = useQuery({
     queryKey: ['public-candidates', election?.id],
@@ -324,14 +325,14 @@ export default function HomePage() {
           {...heroAnim}
           className="font-mono text-xs uppercase tracking-[0.3em] text-muted-foreground"
         >
-          Pemilihan Ketua OSIS{election ? ` · ${election.academic_year}` : ''}
+          Pemilihan Organisasi{election ? ` · ${election.academic_year}` : ''}
         </motion.p>
 
         <motion.h1
           {...heroAnim}
           className="mt-4 text-center font-heading text-4xl font-bold leading-tight sm:text-6xl"
         >
-          Pilih Pemimpin OSIS-mu
+          Pilih Pemimpinmu
         </motion.h1>
 
         <motion.div {...heroAnim} className="mt-10 w-full max-w-sm">
@@ -364,6 +365,71 @@ export default function HomePage() {
           </Link>
         </motion.div>
       </section>
+
+      {allElections.length > 0 && (
+        <section className="relative mx-auto max-w-5xl px-6 py-16">
+          <motion.div {...fadeUp()} className="text-center">
+            <p className="font-mono text-xs uppercase tracking-[0.3em] text-muted-foreground">
+              Pilih Pemilihan
+            </p>
+            <h2 className="mt-2 font-heading text-3xl font-bold sm:text-4xl">
+              Ikuti Pemilihan yang Tersedia
+            </h2>
+            <p className="mx-auto mt-3 max-w-xl text-sm text-muted-foreground">
+              Pilih salah satu pemilihan untuk melihat kandidat dan informasi lengkapnya.
+            </p>
+          </motion.div>
+
+          <div
+            className={`mt-12 grid gap-6 ${
+              allElections.length > 1 ? 'sm:grid-cols-2' : 'mx-auto max-w-md sm:grid-cols-1'
+            }`}
+          >
+            {allElections.map((electionItem, index) => {
+              const itemStatus = electionItem.status as BallotStatus;
+              return (
+                <motion.div
+                  key={electionItem.id}
+                  {...fadeUp(index * 0.1)}
+                  className="flex flex-col rounded-2xl border bg-card p-6 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
+                >
+                  <div className="flex items-center justify-between">
+                    <BallotStamp status={itemStatus} />
+                    <span className="font-mono text-xs text-muted-foreground">
+                      {electionItem.academic_year}
+                    </span>
+                  </div>
+                  <h3 className="mt-4 font-heading text-xl font-bold">{electionItem.title}</h3>
+                  {electionItem.description && (
+                    <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">
+                      {electionItem.description}
+                    </p>
+                  )}
+                  <p className="mt-3 font-mono text-xs text-muted-foreground">
+                    {formatPeriod(electionItem)}
+                  </p>
+                  <div className="mt-5 flex gap-2">
+                    <Link
+                      href="/student/login"
+                      className="inline-flex h-10 flex-1 items-center justify-center rounded-lg bg-primary text-sm font-semibold text-primary-foreground shadow-sm transition-all duration-200 hover:bg-primary/90"
+                    >
+                      Siap Memilih
+                    </Link>
+                    {electionItem.status === 'CLOSED' && (
+                      <Link
+                        href="/results"
+                        className="inline-flex h-10 items-center justify-center rounded-lg border-2 border-success/50 bg-success/10 px-4 text-sm font-semibold text-success transition-all duration-200 hover:bg-success/20"
+                      >
+                        🎉 Hasil
+                      </Link>
+                    )}
+                  </div>
+                </motion.div>
+              );
+            })}
+          </div>
+        </section>
+      )}
 
       {election && (
         <section className="relative mx-auto max-w-6xl px-6 py-20">

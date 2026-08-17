@@ -45,18 +45,25 @@ export class AuthService {
   }
 
   async loginStudent(dto: StudentLoginDto) {
-    const student = await this.prisma.student.findFirst({
-      where: { OR: [{ nis: dto.identifier }, { nisn: dto.identifier }] },
-      include: { token: true, election: true },
+    const tokenRecord = await this.prisma.votingToken.findUnique({
+      where: { token: dto.token },
+      include: { student: { include: { election: true } } },
     });
-    if (!student)
-      throw new UnauthorizedException({ errorCode: 'STUDENT_NOT_FOUND' });
-    if (
-      !student.token ||
-      student.token.token !== dto.token ||
-      student.token.is_used
-    ) {
+    if (!tokenRecord || !tokenRecord.student) {
       throw new UnauthorizedException({ errorCode: 'INVALID_TOKEN' });
+    }
+    const student = tokenRecord.student;
+    if (student.nis !== dto.identifier && student.nisn !== dto.identifier) {
+      throw new UnauthorizedException({ errorCode: 'INVALID_TOKEN' });
+    }
+    if (tokenRecord.is_used) {
+      throw new UnauthorizedException({ errorCode: 'INVALID_TOKEN' });
+    }
+    if (
+      tokenRecord.expires_at &&
+      new Date(tokenRecord.expires_at) < new Date()
+    ) {
+      throw new UnauthorizedException({ errorCode: 'TOKEN_EXPIRED' });
     }
     if (student.election.status !== 'ACTIVE') {
       throw new UnauthorizedException({ errorCode: 'ELECTION_NOT_ACTIVE' });

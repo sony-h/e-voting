@@ -62,3 +62,10 @@
 | Results | Sembunyi dari admin | Done | Admin tidak lihat hasil sebelum publish |
 | Results | Reveal delay admin | Done | 6s delay, admin lebih lambat dari publik |
 | Reset | db:reset + seed | Done | 0 suara, DRAFT, tersembunyi |
+| Multi-Election | Dual election aktif bersamaan | Done | OSIS + MPK; hapus index single-active (migration `drop_single_active_election`) |
+| Multi-Election | Per-election unik | Done | NIS/NISN unik per Election (`@@unique([election_id, nis])`) |
+| Multi-Election | Seed dual election | Done | 2 election × 30 siswa × 3 kandidat + 9 galeri masing-masing |
+| Multi-Election | Landing dual cards | Done | Kartu tiap election + CTA, stamp + hasil |
+| Token | Expiry 24 jam | Done | `expires_at` di token, error `TOKEN_EXPIRED` |
+| Token | Login token-first | Done | Login pakai token (unik global) + identifier; verifikasi NIS/NISN, expiry, is_used, status election |
+| Foto | Program gambar tidak ter-crop | Done | Carousel `object-contain` + bg muted |

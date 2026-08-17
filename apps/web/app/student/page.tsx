@@ -49,13 +49,13 @@ function GalleryCarousel({ images }: { images: CandidateImage[] }) {
   return (
     <div>
       <h3 className="font-heading font-semibold">Program &amp; Kegiatan</h3>
-      <div className="relative mt-2 overflow-hidden rounded-lg">
+      <div className="relative mt-2 overflow-hidden rounded-lg bg-muted/40">
         <Image
           src={`${UPLOADS_BASE}${current.url}`}
           alt={current.caption ?? 'Gambar program'}
           width={1280}
           height={720}
-          className="aspect-video w-full object-cover"
+          className="aspect-video w-full object-contain"
         />
         {current.caption && (
           <p className="absolute bottom-0 left-0 right-0 bg-black/50 px-3 py-1.5 text-xs font-medium text-white">
