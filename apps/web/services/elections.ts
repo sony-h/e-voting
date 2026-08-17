@@ -15,6 +15,7 @@ export function createElection(data: {
   academic_year: string;
   start_at?: string;
   end_at?: string;
+  order?: number;
 }) {
   return apiFetch<Election>('/elections', { method: 'POST', body: JSON.stringify(data) });
 }
@@ -27,6 +28,7 @@ export function updateElection(
     academic_year?: string;
     start_at?: string;
     end_at?: string;
+    order?: number;
   },
 ) {
   return apiFetch<Election>(`/elections/${id}`, { method: 'PATCH', body: JSON.stringify(data) });

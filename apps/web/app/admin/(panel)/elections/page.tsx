@@ -76,6 +76,7 @@ interface ElectionForm {
   academic_year: string;
   start_at: string;
   end_at: string;
+  order: number;
 }
 
 const EMPTY_FORM: ElectionForm = {
@@ -84,6 +85,7 @@ const EMPTY_FORM: ElectionForm = {
   academic_year: '',
   start_at: '',
   end_at: '',
+  order: 1,
 };
 
 function toForm(election: Election): ElectionForm {
@@ -93,6 +95,7 @@ function toForm(election: Election): ElectionForm {
     academic_year: election.academic_year,
     start_at: election.start_at ? new Date(election.start_at).toISOString().slice(0, 16) : '',
     end_at: election.end_at ? new Date(election.end_at).toISOString().slice(0, 16) : '',
+    order: election.order ?? 1,
   };
 }
 
@@ -121,6 +124,7 @@ export default function AdminElectionsPage() {
         academic_year: form.academic_year,
         start_at: form.start_at ? new Date(form.start_at).toISOString() : undefined,
         end_at: form.end_at ? new Date(form.end_at).toISOString() : undefined,
+        order: form.order,
       };
       return editing ? updateElection(editing.id, payload) : createElection(payload);
     },
@@ -196,6 +200,7 @@ export default function AdminElectionsPage() {
                 <TableHead>Tahun Ajaran</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Periode</TableHead>
+                <TableHead className="w-20">Urutan</TableHead>
                 <TableHead className="text-right">Aksi</TableHead>
               </TableRow>
             </TableHeader>
@@ -215,6 +220,7 @@ export default function AdminElectionsPage() {
                   <TableCell className="text-sm text-muted-foreground">
                     {formatPeriod(election)}
                   </TableCell>
+                  <TableCell className="text-sm">{election.order}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
                       {election.status === 'ACTIVE' && (
@@ -280,6 +286,17 @@ export default function AdminElectionsPage() {
                 placeholder="2026/2027"
                 required
               />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="order">Urutan</Label>
+              <Input
+                id="order"
+                type="number"
+                min={1}
+                value={form.order}
+                onChange={(e) => setForm({ ...form, order: Number(e.target.value) || 1 })}
+              />
+              <p className="text-xs text-muted-foreground">Urutan tampilan di halaman landing.</p>
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
