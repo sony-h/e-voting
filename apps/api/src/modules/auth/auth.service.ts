@@ -65,13 +65,13 @@ export class AuthService {
       throw new UnauthorizedException({ errorCode: 'ALREADY_VOTED' });
 
     const sessionId = randomUUID();
-    const ttl = Number(
-      this.config.get<string>('STUDENT_SESSION_TTL') ?? '1800',
-    );
+    const ttl = Number(this.config.get<string>('STUDENT_SESSION_TTL') ?? '300');
+    const expiresAt = new Date(Date.now() + ttl * 1000);
     const session = {
       studentId: student.id,
       electionId: student.election_id,
       nis: student.nis,
+      expiresAt: expiresAt.toISOString(),
     };
     await this.redis.setex(
       `student:session:${sessionId}`,
@@ -80,6 +80,7 @@ export class AuthService {
     );
     return {
       sessionId,
+      expiresAt: expiresAt.toISOString(),
       student: { full_name: student.full_name, class_name: student.class_name },
     };
   }

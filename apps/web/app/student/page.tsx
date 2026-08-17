@@ -1,16 +1,16 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery } from '@tanstack/react-query';
+import { motion } from 'motion/react';
 import type { Candidate, CandidateImage } from '@e-voting/types';
 import { API_BASE_URL, ApiError } from '@/lib/api';
 import { getVotingCandidates, getVotingStatus, submitVote } from '@/services/voting';
-import { listElections } from '@/services/elections';
-import { studentLogout } from '@/services/auth';
-import { CountdownPill } from '@/components/ui/countdown-pill';
+import { studentLogout, studentSession } from '@/services/auth';
+import { fadeUp } from '@/lib/animations';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -118,6 +118,39 @@ function CheckIcon() {
   );
 }
 
+function SessionTimer({ expiresAt, onExpire }: { expiresAt: string; onExpire: () => void }) {
+  const [remaining, setRemaining] = useState(0);
+
+  useEffect(() => {
+    const tick = () => {
+      const diff = new Date(expiresAt).getTime() - Date.now();
+      setRemaining(Math.max(0, diff));
+      if (diff <= 0) onExpire();
+    };
+    tick();
+    const interval = setInterval(tick, 1000);
+    return () => clearInterval(interval);
+  }, [expiresAt, onExpire]);
+
+  const totalSeconds = Math.ceil(remaining / 1000);
+  const mm = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
+  const ss = String(totalSeconds % 60).padStart(2, '0');
+  const low = remaining < 60_000;
+
+  return (
+    <span
+      className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 font-mono text-xs ${
+        low
+          ? 'animate-pulse border-destructive/40 bg-destructive/10 text-destructive'
+          : 'border-border bg-muted/50 text-muted-foreground'
+      }`}
+    >
+      <span className={`h-1.5 w-1.5 rounded-full ${low ? 'bg-destructive' : 'bg-primary'}`} />
+      Sisa waktu {mm}:{ss}
+    </span>
+  );
+}
+
 export default function StudentPortalPage() {
   const router = useRouter();
   const [voted, setVoted] = useState(false);
@@ -132,8 +165,11 @@ export default function StudentPortalPage() {
 
   const statusError = !statusLoading && !status;
 
-  const { data: elections } = useQuery({ queryKey: ['elections'], queryFn: listElections });
-  const activeElection = elections?.find((e) => e.status === 'ACTIVE');
+  const { data: session } = useQuery({
+    queryKey: ['student-session'],
+    queryFn: studentSession,
+    retry: false,
+  });
 
   const { data: candidates, isLoading: candidatesLoading } = useQuery({
     queryKey: ['voting-candidates'],
@@ -141,6 +177,11 @@ export default function StudentPortalPage() {
     retry: false,
     enabled: !!status,
   });
+
+  async function handleSessionExpire() {
+    await studentLogout().catch(() => undefined);
+    router.push('/student/login?expired=1');
+  }
 
   const submitMutation = useMutation({
     mutationFn: (candidateId: string) => submitVote(candidateId),
@@ -170,7 +211,7 @@ export default function StudentPortalPage() {
         <div className="w-full max-w-md text-center">
           <CheckIcon />
           <h1 className="mt-6 font-heading text-3xl font-bold">Terima kasih!</h1>
-          <p className="mt-2 text-muted-foreground">Hak pilih Anda telah digunakan.</p>
+          <p className="mt-2 text-muted-foreground">Anda telah menggunakan hak pilih Anda.</p>
           <Link
             href="/"
             className="mt-8 inline-flex h-11 w-full items-center justify-center rounded-xl bg-primary px-6 font-semibold text-primary-foreground shadow-sm transition-all duration-200 hover:bg-primary/90 hover:shadow-md"
@@ -217,7 +258,9 @@ export default function StudentPortalPage() {
             </p>
           </div>
           <div className="flex items-center gap-4">
-            <CountdownPill endAt={activeElection?.end_at ?? null} />
+            {session?.expiresAt && (
+              <SessionTimer expiresAt={session.expiresAt} onExpire={handleSessionExpire} />
+            )}
             <button
               onClick={handleLogout}
               className="text-sm text-primary underline underline-offset-4"
@@ -235,10 +278,11 @@ export default function StudentPortalPage() {
           </div>
         ) : (
           <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {candidates.map((candidate) => (
-              <div
+            {candidates.map((candidate, index) => (
+              <motion.div
                 key={candidate.id}
-                className="group flex flex-col overflow-hidden rounded-2xl border bg-card shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
+                {...fadeUp(index * 0.1)}
+                className="group flex flex-col overflow-hidden rounded-2xl border bg-card shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md active:scale-[0.99]"
               >
                 <div className="relative">
                   {candidate.photo_url ? (
@@ -281,7 +325,7 @@ export default function StudentPortalPage() {
                     </div>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
         )}

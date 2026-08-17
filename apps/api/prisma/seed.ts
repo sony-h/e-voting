@@ -220,9 +220,18 @@ async function main() {
         },
       });
       if (existing) {
+        const current = await prisma.votingToken.findUnique({
+          where: { student_id: student.id },
+        });
+        const validFormat = /^[A-Z2-9]{4}-[A-Z2-9]{4}$/;
         await prisma.votingToken.upsert({
           where: { student_id: student.id },
-          update: { election_id: devElection.id },
+          update: {
+            election_id: devElection.id,
+            ...(current && !validFormat.test(current.token)
+              ? { token: generateVotingToken() }
+              : {}),
+          },
           create: {
             student_id: student.id,
             election_id: devElection.id,

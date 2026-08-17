@@ -1,4 +1,12 @@
-import { Controller, Get, Query, Res, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Query,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
 import { Response } from 'express';
 import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
 import { RolesGuard } from '../../guards/roles.guard';
@@ -14,6 +22,11 @@ export class ReportController {
   @Get()
   getResults(@Query('electionId') electionId: string) {
     return this.reportService.getResults(electionId);
+  }
+
+  @Post('publish')
+  publish(@Body() body: { electionId: string; visible: boolean }) {
+    return this.reportService.setResultsPublic(body.electionId, body.visible);
   }
 
   @Get('export/excel')

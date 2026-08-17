@@ -13,6 +13,7 @@ export interface ElectionResults {
     title: string;
     academic_year: string;
     status: string;
+    results_public: boolean;
   };
   total_votes: number;
   candidates: ResultCandidate[];
@@ -20,6 +21,17 @@ export interface ElectionResults {
 
 export function getResults(electionId: string) {
   return apiFetch<ElectionResults>(`/results?electionId=${electionId}`);
+}
+
+export function getPublicResults(electionId: string) {
+  return apiFetch<ElectionResults>(`/public/results?electionId=${electionId}`);
+}
+
+export function publishResults(electionId: string, visible: boolean) {
+  return apiFetch<{ results_public: boolean }>('/results/publish', {
+    method: 'POST',
+    body: JSON.stringify({ electionId, visible }),
+  });
 }
 
 export async function exportResultsExcel(electionId: string) {

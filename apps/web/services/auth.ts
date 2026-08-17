@@ -10,11 +10,15 @@ export interface StudentSession {
   studentId: string;
   electionId: string;
   nis: string;
+  expiresAt: string;
 }
 
 export interface StudentLoginResult {
-  full_name: string;
-  class_name: string;
+  expiresAt: string;
+  student: {
+    full_name: string;
+    class_name: string;
+  };
 }
 
 export function adminLogin(username: string, password: string) {

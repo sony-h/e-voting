@@ -121,6 +121,7 @@ Field:
 * status
 * start_at
 * end_at
+* results_public
 * created_at
 * updated_at
 
@@ -130,6 +131,10 @@ Status:
 * Scheduled
 * Active
 * Closed
+
+Catatan:
+
+* `results_public` (Boolean, default false): menentukan apakah hasil election ditampilkan ke publik (halaman `/results`). Hanya dapat diubah oleh admin setelah election Closed.
 
 ---
 

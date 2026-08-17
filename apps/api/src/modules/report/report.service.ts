@@ -32,6 +32,7 @@ export class ReportService {
         title: election.title,
         academic_year: election.academic_year,
         status: election.status,
+        results_public: election.results_public,
       },
       total_votes: totalVotes,
       candidates: candidates
@@ -47,6 +48,22 @@ export class ReportService {
         }))
         .sort((a, b) => b.votes - a.votes),
     };
+  }
+
+  async getPublicResults(electionId: string) {
+    const election = await this.ensureClosed(electionId);
+    if (!election.results_public) {
+      throw new BadRequestException({ errorCode: 'RESULTS_NOT_PUBLISHED' });
+    }
+    return this.getResults(electionId);
+  }
+
+  async setResultsPublic(electionId: string, visible: boolean) {
+    await this.ensureClosed(electionId);
+    return this.prisma.election.update({
+      where: { id: electionId },
+      data: { results_public: visible },
+    });
   }
 
   async exportExcel(electionId: string) {

@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, type FormEvent } from 'react';
+import { Suspense, useState, type FormEvent } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { studentLogin } from '@/services/auth';
 import { ApiError } from '@/lib/api';
 import { Button } from '@/components/ui/button';
@@ -10,11 +10,32 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
+function maskToken(raw: string): string {
+  const cleaned = raw
+    .toUpperCase()
+    .replace(/[^A-Z2-9]/g, '')
+    .slice(0, 8);
+  if (cleaned.length <= 4) return cleaned;
+  return `${cleaned.slice(0, 4)}-${cleaned.slice(4)}`;
+}
+
 export default function StudentLoginPage() {
+  return (
+    <Suspense>
+      <StudentLoginForm />
+    </Suspense>
+  );
+}
+
+function StudentLoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const expired = searchParams.get('expired') === '1';
   const [identifier, setIdentifier] = useState('');
   const [token, setToken] = useState('');
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(
+    expired ? 'Waktu voting habis. Silakan login kembali.' : null,
+  );
   const [loading, setLoading] = useState(false);
 
   async function onSubmit(e: FormEvent) {
@@ -30,7 +51,7 @@ export default function StudentLoginPage() {
           err.errorCode === 'INVALID_TOKEN'
             ? 'Token voting tidak valid.'
             : err.errorCode === 'ALREADY_VOTED'
-              ? 'Anda sudah menggunakan hak pilih.'
+              ? 'Anda telah menggunakan hak pilih Anda.'
               : err.errorCode === 'ELECTION_NOT_ACTIVE'
                 ? 'Pemilihan belum dimulai.'
                 : 'Login gagal. Periksa kembali data Anda.',
@@ -83,7 +104,7 @@ export default function StudentLoginPage() {
                 <Input
                   id="token"
                   value={token}
-                  onChange={(e) => setToken(e.target.value)}
+                  onChange={(e) => setToken(maskToken(e.target.value))}
                   className="font-mono tracking-widest uppercase"
                   placeholder="XXXX-XXXX"
                   required

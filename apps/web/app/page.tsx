@@ -15,6 +15,7 @@ import {
 import type { CandidateWithImages } from '@/services/candidates';
 import { listElections } from '@/services/elections';
 import { listPublicCandidates } from '@/services/candidates';
+import { getPublicResults } from '@/services/results';
 import { formatPeriod } from '@/lib/format';
 import { uploadUrl } from '@/lib/images';
 import { fadeUp } from '@/lib/animations';
@@ -282,6 +283,15 @@ export default function HomePage() {
     retry: false,
   });
 
+  const { data: resultsVisible, isError: resultsError } = useQuery({
+    queryKey: ['public-results-visible', election?.id],
+    queryFn: () => getPublicResults(election!.id),
+    enabled: !!election?.id && election?.status === 'CLOSED',
+    retry: false,
+    refetchInterval: 5000,
+  });
+  const resultsPublished = !!resultsVisible && !resultsError;
+
   const heroAnim = reduced
     ? {}
     : {
@@ -426,6 +436,16 @@ export default function HomePage() {
           >
             Siap Memilih — Klik di Sini
           </Link>
+          {resultsPublished && (
+            <motion.div {...fadeUp(0.1)} className="mt-6">
+              <Link
+                href="/results"
+                className="inline-flex items-center gap-2 rounded-xl border-2 border-success/50 bg-success/10 px-8 py-3 font-semibold text-success transition-all duration-200 hover:bg-success/20"
+              >
+                🎉 Lihat Hasil Pemilihan
+              </Link>
+            </motion.div>
+          )}
         </motion.div>
       </section>
     </main>

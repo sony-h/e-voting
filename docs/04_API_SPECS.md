@@ -331,6 +331,34 @@ Response
 
 ---
 
+GET
+
+```text
+/public/results?electionId=
+```
+
+Hasil pemilihan untuk publik.
+
+Public: tidak memerlukan autentikasi.
+
+Hanya tersedia apabila Election Closed **dan** `results_public = true`; jika belum dipublikasikan: error code `RESULTS_NOT_PUBLISHED`.
+
+---
+
+POST
+
+```text
+/results/publish
+```
+
+Mengatur visibilitas hasil ke publik.
+
+Hanya admin. Body: `{ "electionId": "uuid", "visible": true }`.
+
+Hanya dapat diubah setelah Election Closed.
+
+---
+
 # 5. Student
 
 GET
@@ -678,6 +706,7 @@ System
 * ELECTION_NOT_CLOSED
 * DATABASE_UNAVAILABLE
 * CACHE_UNAVAILABLE
+* RESULTS_NOT_PUBLISHED
 
 ---
 

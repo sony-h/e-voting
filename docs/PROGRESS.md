@@ -54,3 +54,8 @@
 | UI | Screen-fit dialogs | Done | max-h dvh + internal scroll, candidate sm:max-w-lg |
 | Foto | Rasio standar | Done | Portrait 4:3 (1200x900), program 16:9 (1280x720) |
 | Foto | Validasi upload | Done | Min 800px (IMAGE_TOO_SMALL), maks 10MB |
+| Voting | Pesan sudah memilih | Done | "Anda telah menggunakan hak pilih Anda." |
+| Voting | Token mask input | Done | Auto-dash XXXX-XXXX, uppercase |
+| Voting | Animasi halaman pilih | Done | Staggered cards, hover, press |
+| Voting | Limit waktu 5 menit | Done | Sesi Redis 300s + countdown + redirect |
+| Results | Festive + publish | Done | Confetti, podium, count-up; /results publik + toggle admin |

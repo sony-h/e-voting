@@ -85,14 +85,15 @@ export class StudentAuthController {
     @Body() dto: StudentLoginDto,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const { sessionId, student } = await this.authService.loginStudent(dto);
+    const { sessionId, expiresAt, student } =
+      await this.authService.loginStudent(dto);
     res.cookie(STUDENT_COOKIE, sessionId, {
       httpOnly: true,
       sameSite: 'lax',
       secure: process.env.NODE_ENV === 'production',
       maxAge: 30 * 60 * 1000,
     });
-    return student;
+    return { expiresAt, student };
   }
 
   @Post('logout')
