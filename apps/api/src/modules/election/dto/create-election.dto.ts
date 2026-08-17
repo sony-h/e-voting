@@ -1,6 +1,7 @@
 import {
   IsDateString,
   IsEnum,
+  IsInt,
   IsNotEmpty,
   IsOptional,
   IsString,
@@ -31,4 +32,8 @@ export class CreateElectionDto {
   @IsDateString()
   @IsOptional()
   end_at?: string;
+
+  @IsInt()
+  @IsOptional()
+  order?: number;
 }

@@ -200,6 +200,7 @@ async function main() {
           'Pilih Ketua dan Wakil Ketua OSIS untuk tahun ajaran 2026/2027.',
         academic_year: '2026/2027',
         candidates: CANDIDATES_OSIS,
+        order: 1,
       },
       {
         id: 'dev-election-mpk',
@@ -208,6 +209,7 @@ async function main() {
           'Pilih Ketua dan Wakil Ketua MPK untuk tahun ajaran 2026/2027.',
         academic_year: '2026/2027',
         candidates: CANDIDATES_MPK,
+        order: 2,
       },
     ];
 
@@ -221,6 +223,7 @@ async function main() {
           status: 'DRAFT',
           start_at: new Date(),
           end_at: new Date(Date.now() + 72 * 60 * 60 * 1000),
+          order: electionData.order,
         },
         create: {
           id: electionData.id,
@@ -230,6 +233,7 @@ async function main() {
           status: 'DRAFT',
           start_at: new Date(),
           end_at: new Date(Date.now() + 72 * 60 * 60 * 1000),
+          order: electionData.order,
         },
       });
       console.log('Election ready:', devElection.title);

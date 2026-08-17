@@ -13,7 +13,7 @@ export class ElectionService {
   constructor(private readonly prisma: PrismaService) {}
 
   findAll() {
-    return this.prisma.election.findMany({ orderBy: { created_at: 'desc' } });
+    return this.prisma.election.findMany({ orderBy: { order: 'asc' } });
   }
 
   findOne(id: string) {
