@@ -3,7 +3,7 @@
 import { useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueries } from '@tanstack/react-query';
 import {
   motion,
   useMotionValue,
@@ -278,20 +278,19 @@ export default function HomePage() {
 
   const sortedElections = [...allElections].sort((a, b) => (a.order ?? 1) - (b.order ?? 1));
 
-  const { data: electionCandidates } = useQuery({
-    queryKey: ['public-candidates-all'],
-    queryFn: async () => {
-      const results = await Promise.all(
-        sortedElections.map((e) => listPublicCandidates(e.id).catch(() => [])),
-      );
-      return sortedElections.map((e, i) => ({
-        election: e,
-        candidates: results[i] ?? [],
-      }));
-    },
-    enabled: sortedElections.length > 0,
-    retry: false,
+  const candidateQueries = useQueries({
+    queries: sortedElections.map((e) => ({
+      queryKey: ['public-candidates', e.id],
+      queryFn: () => listPublicCandidates(e.id),
+      enabled: !!e.id,
+      retry: false,
+    })),
   });
+
+  const electionSections = sortedElections.map((e, i) => ({
+    election: e,
+    candidates: candidateQueries[i]?.data ?? [],
+  }));
 
   const heroAnim = reduced
     ? {}
@@ -343,17 +342,18 @@ export default function HomePage() {
           <div className="flex justify-center">
             <BallotStamp status={status} />
           </div>
-          {election && (
+          {allElections.length > 0 && (
             <>
               <h2 className="mt-4 font-heading text-xl font-semibold text-muted-foreground">
-                {election.title}
+                {allElections.map((e) => e.title.replace(/^Pemilihan Ketua\s*/, '')).join(' · ')}
               </h2>
               <p className="mx-auto mt-1 max-w-md text-sm text-muted-foreground">
-                {election.description ??
-                  'Satu siswa, satu suara. Pilihanmu menentukan masa depan organisasi.'}
+                {allElections.find((e) => e.status === 'ACTIVE')
+                  ? 'Sedang berlangsung — pilih pemimpinmu.'
+                  : 'Dijadwalkan — pantau perkembangannya.'}
               </p>
               <p className="mt-3 font-mono text-sm text-muted-foreground">
-                {formatPeriod(election)}
+                {allElections.length} pemilihan · {formatPeriod(election!)}
               </p>
             </>
           )}
@@ -431,7 +431,7 @@ export default function HomePage() {
         </section>
       )}
 
-      {electionCandidates?.map(({ election: e, candidates: eCandidates }) =>
+      {electionSections.map(({ election: e, candidates: eCandidates }) =>
         eCandidates.length > 0 ? (
           <section key={e.id} className="relative mx-auto max-w-6xl px-6 py-20">
             <motion.div {...fadeUp()} className="text-center">
