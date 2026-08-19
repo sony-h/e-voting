@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'motion/react';
 import type { Candidate, CandidateImage } from '@e-voting/types';
 import { API_BASE_URL, ApiError } from '@/lib/api';
@@ -157,6 +157,8 @@ export default function StudentPortalPage() {
   const [detailCandidate, setDetailCandidate] = useState<Candidate | null>(null);
   const [confirmCandidate, setConfirmCandidate] = useState<Candidate | null>(null);
   const [nextElection, setNextElection] = useState<{ electionId: string } | null>(null);
+  const [countdown, setCountdown] = useState(5);
+  const queryClient = useQueryClient();
 
   const { data: status, isLoading: statusLoading } = useQuery({
     queryKey: ['voting-status'],
@@ -186,6 +188,13 @@ export default function StudentPortalPage() {
     router.push('/student/login?expired=1');
   }
 
+  const goToNext = useCallback(async () => {
+    await queryClient.invalidateQueries({ queryKey: ['voting-status'] });
+    setVoted(false);
+    setNextElection(null);
+    setCountdown(5);
+  }, [queryClient]);
+
   const submitMutation = useMutation({
     mutationFn: (candidateId: string) => submitVote(candidateId),
     onSuccess: (result) => {
@@ -204,8 +213,6 @@ export default function StudentPortalPage() {
     },
   });
 
-  const [countdown, setCountdown] = useState(5);
-
   useEffect(() => {
     if (!voted) return;
     let remaining = 5;
@@ -214,11 +221,15 @@ export default function StudentPortalPage() {
       setCountdown(remaining);
       if (remaining <= 0) {
         clearInterval(timer);
-        router.push(nextElection ? '/student' : '/');
+        if (nextElection) {
+          goToNext();
+        } else {
+          router.push('/');
+        }
       }
     }, 1000);
     return () => clearInterval(timer);
-  }, [voted, router, nextElection]);
+  }, [voted, router, nextElection, goToNext]);
 
   async function handleLogout() {
     await studentLogout().catch(() => undefined);
@@ -247,7 +258,7 @@ export default function StudentPortalPage() {
           <div className="mt-6 flex flex-col gap-2">
             {nextElection && (
               <button
-                onClick={() => router.push('/student')}
+                onClick={goToNext}
                 className="inline-flex h-11 w-full items-center justify-center rounded-xl bg-primary px-6 font-semibold text-primary-foreground shadow-sm transition-all duration-200 hover:bg-primary/90"
               >
                 Lanjut ke Pemilihan Berikutnya
