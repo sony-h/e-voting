@@ -177,4 +177,27 @@ describe('VotingService', () => {
       BadRequestException,
     );
   });
+
+  it('getStatus returns elections list with titles', async () => {
+    prismaMock.election.findUnique.mockResolvedValue({
+      id: 'e1',
+      status: 'ACTIVE',
+    });
+    prismaMock.election.findMany.mockResolvedValue([
+      { id: 'e1', title: 'Pemilihan Ketua OSIS 2026/2027' },
+    ]);
+
+    const result = await service.getStatus(session);
+
+    expect(result.elections).toEqual([
+      {
+        electionId: 'e1',
+        studentId: 's1',
+        has_voted: false,
+        title: 'Pemilihan Ketua OSIS 2026/2027',
+      },
+    ]);
+    expect(result.electionId).toBe('e1');
+    expect(result.election_status).toBe('ACTIVE');
+  });
 });
