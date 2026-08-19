@@ -83,6 +83,10 @@ function isEditable(status: Election['status']) {
   return status === 'DRAFT' || status === 'SCHEDULED';
 }
 
+function isResetTokenAllowed(status: Election['status']) {
+  return status !== 'CLOSED';
+}
+
 export default function AdminStudentsPage() {
   const queryClient = useQueryClient();
   const [electionId, setElectionId] = useState('');
@@ -186,6 +190,7 @@ export default function AdminStudentsPage() {
   }
 
   const editable = !!selectedElection && isEditable(selectedElection.status);
+  const resetTokenAllowed = !!selectedElection && isResetTokenAllowed(selectedElection.status);
 
   return (
     <div className="space-y-6">
@@ -272,7 +277,7 @@ export default function AdminStudentsPage() {
                         variant="outline"
                         size="sm"
                         onClick={() => setConfirmAction({ type: 'reset-token', student })}
-                        disabled={!editable}
+                        disabled={!resetTokenAllowed}
                       >
                         Reset Token
                       </Button>

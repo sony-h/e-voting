@@ -79,7 +79,7 @@ export class StudentService {
 
   async resetToken(id: string) {
     const student = await this.ensureExists(id);
-    await this.ensureEditable(student.election_id);
+    await this.ensureTokenResetAllowed(student.election_id, student.id);
     const token = generateVotingToken();
     return this.prisma.votingToken.upsert({
       where: { student_id: id },
@@ -186,6 +186,25 @@ export class StudentService {
       throw new NotFoundException({ errorCode: 'ELECTION_NOT_FOUND' });
     if (election.status === 'ACTIVE' || election.status === 'CLOSED') {
       throw new BadRequestException({ errorCode: 'VOTING_NOT_ALLOWED' });
+    }
+  }
+
+  private async ensureTokenResetAllowed(electionId: string, studentId: string) {
+    const election = await this.prisma.election.findUnique({
+      where: { id: electionId },
+    });
+    if (!election)
+      throw new NotFoundException({ errorCode: 'ELECTION_NOT_FOUND' });
+    if (election.status === 'CLOSED') {
+      throw new BadRequestException({ errorCode: 'ELECTION_CLOSED' });
+    }
+    if (election.status === 'ACTIVE') {
+      const student = await this.prisma.student.findUnique({
+        where: { id: studentId },
+      });
+      if (student?.has_voted) {
+        throw new BadRequestException({ errorCode: 'ALREADY_VOTED' });
+      }
     }
   }
 }

@@ -112,6 +112,8 @@ Catatan:
 * field `identifier` menerima NIS atau NISN.
 * Login berbasis token: sistem mencari token (unik global), lalu memverifikasi `identifier` cocok dengan NIS/NISN siswa pemilik token, token belum dipakai, dan belum kedaluwarsa (`expires_at`).
 * Token kedaluwarsa setelah 24 jam (`TOKEN_EXPIRY_HOURS` di `.env`). Saat kedaluwarsa, kembalikan `TOKEN_EXPIRED` dan hubungi panitia untuk token baru.
+* Saat election menjadi ACTIVE, semua token (termasuk yang sudah expired) di-refresh ulang ke `now + TOKEN_EXPIRY_HOURS` sehingga siswa bisa langsung memilih.
+* Admin dapat mereset token siswa saat election ACTIVE (hanya untuk siswa yang belum memilih).
 * Satu siswa dapat memiliki token di tiap pemilihan (per-eleksi); suara dibatasi per pemilihan (`has_voted` per baris Student).
 
 Response

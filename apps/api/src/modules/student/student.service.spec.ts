@@ -68,4 +68,40 @@ describe('StudentService', () => {
     const { token } = prismaMock.votingToken.upsert.mock.calls[0][0].update;
     expect(token).toMatch(/^[A-Z2-9]{4}-[A-Z2-9]{4}$/);
   });
+
+  it('allows reset token during ACTIVE for unvoted student', async () => {
+    prismaMock.student.findUnique
+      .mockResolvedValueOnce({ id: 's1', election_id: 'e1' })
+      .mockResolvedValueOnce({ id: 's1', has_voted: false });
+    prismaMock.election.findUnique.mockResolvedValue({
+      id: 'e1',
+      status: 'ACTIVE',
+    });
+    prismaMock.votingToken.upsert.mockResolvedValue({ id: 't1' });
+    await service.resetToken('s1');
+    expect(prismaMock.votingToken.upsert).toHaveBeenCalled();
+  });
+
+  it('rejects reset token during ACTIVE for voted student', async () => {
+    prismaMock.student.findUnique
+      .mockResolvedValueOnce({ id: 's1', election_id: 'e1' })
+      .mockResolvedValueOnce({ id: 's1', has_voted: true });
+    prismaMock.election.findUnique.mockResolvedValue({
+      id: 'e1',
+      status: 'ACTIVE',
+    });
+    await expect(service.resetToken('s1')).rejects.toThrow(BadRequestException);
+  });
+
+  it('rejects reset token during CLOSED election', async () => {
+    prismaMock.student.findUnique.mockResolvedValue({
+      id: 's1',
+      election_id: 'e1',
+    });
+    prismaMock.election.findUnique.mockResolvedValue({
+      id: 'e1',
+      status: 'CLOSED',
+    });
+    await expect(service.resetToken('s1')).rejects.toThrow(BadRequestException);
+  });
 });

@@ -68,6 +68,8 @@
 | Multi-Election | Landing dual cards | Done | Kartu tiap election + CTA, stamp + hasil |
 | Token | Expiry 24 jam | Done | `expires_at` di token, error `TOKEN_EXPIRED` |
 | Token | Login token-first | Done | Login pakai token (unik global) + identifier; verifikasi NIS/NISN, expiry, is_used, status election |
+| Token | Auto-refresh on start | Done | Token expiry refreshed to now+24h when election goes ACTIVE |
+| Token | Reset during ACTIVE | Done | Admin can reset token during ACTIVE for unvoted students |
 | Foto | Program gambar tidak ter-crop | Done | Carousel `object-contain` + bg muted |
 | Order | Election order column | Done | order field, admin form, landing + results ordering |
 | Results | Per-election results | Done | /results index + /results/[id] detail, fallback redirect |

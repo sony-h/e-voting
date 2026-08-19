@@ -1,6 +1,5 @@
 import {
   BadRequestException,
-  ConflictException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -42,17 +41,19 @@ export class ElectionService {
     if (election.status === 'ACTIVE') {
       throw new BadRequestException({ errorCode: 'ELECTION_NOT_FOUND' });
     }
-    try {
-      return await this.prisma.election.update({
-        where: { id },
-        data: { status: 'ACTIVE', start_at: election.start_at ?? new Date() },
-      });
-    } catch (error) {
-      if ((error as { code?: string }).code === 'P2002') {
-        throw new ConflictException({ errorCode: 'MULTIPLE_ACTIVE_ELECTION' });
-      }
-      throw error;
-    }
+    const started = await this.prisma.election.update({
+      where: { id },
+      data: { status: 'ACTIVE', start_at: election.start_at ?? new Date() },
+    });
+
+    const expiryHours = Number(process.env.TOKEN_EXPIRY_HOURS ?? '24');
+    const expiresAt = new Date(Date.now() + expiryHours * 60 * 60 * 1000);
+    await this.prisma.votingToken.updateMany({
+      where: { election_id: id },
+      data: { expires_at: expiresAt },
+    });
+
+    return started;
   }
 
   async close(id: string) {
