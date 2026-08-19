@@ -3,6 +3,7 @@
 import { use } from 'react';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
+import { ApiError } from '@/lib/api';
 import { getElection } from '@/services/elections';
 import { getPublicResults } from '@/services/results';
 import { FestiveResults, FireConfetti } from '@/components/results/festive-results';
@@ -16,7 +17,11 @@ export default function ElectionResultsPage({ params }: { params: Promise<{ id: 
     retry: false,
   });
 
-  const { data: results, isError } = useQuery({
+  const {
+    data: results,
+    isError,
+    error,
+  } = useQuery({
     queryKey: ['public-results', id],
     queryFn: () => getPublicResults(id),
     enabled: !!id,
@@ -24,7 +29,8 @@ export default function ElectionResultsPage({ params }: { params: Promise<{ id: 
     refetchInterval: 5000,
   });
 
-  const notPublished = isError && election?.status !== undefined && election.status !== 'ACTIVE';
+  const errorCode = error instanceof ApiError ? error.errorCode : null;
+  const notPublished = isError && errorCode === 'RESULTS_NOT_PUBLISHED';
 
   if (electionLoading) {
     return (
@@ -84,7 +90,7 @@ export default function ElectionResultsPage({ params }: { params: Promise<{ id: 
           <h1 className="mt-2 font-heading text-3xl font-bold sm:text-4xl">{election.title}</h1>
         </div>
 
-        {!results && isError && notPublished ? (
+        {notPublished ? (
           <div className="mt-12 rounded-xl border border-dashed p-12 text-center">
             <p className="text-4xl">⏳</p>
             <h2 className="mt-3 font-heading text-xl font-bold">Hasil belum ditampilkan</h2>

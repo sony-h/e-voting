@@ -97,8 +97,8 @@ export function FestiveResults({ results }: { results: ElectionResults }) {
                     }}
                     className={`flex w-28 flex-col items-center rounded-t-xl border border-b-0 bg-card pt-3 shadow-sm ${heights[position]}`}
                   >
-                    <span className="text-2xl">{medal[position]}</span>
-                    <p className="mt-1 line-clamp-1 px-1 text-sm font-semibold">
+                    <span className="text-2xl">{medal[i]}</span>
+                    <p className="mt-1 w-full min-w-0 truncate px-1 text-center text-sm font-semibold">
                       {c.chairman_name}
                     </p>
                     <p className="font-mono text-xs text-muted-foreground">
