@@ -8,8 +8,12 @@ export interface AdminProfile {
 
 export interface StudentSession {
   studentId: string;
-  electionId: string;
   nis: string;
+  elections: {
+    electionId: string;
+    studentId: string;
+    has_voted: boolean;
+  }[];
   expiresAt: string;
 }
 
