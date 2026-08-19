@@ -3,23 +3,25 @@ import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { VotingService, type VotingSession } from './voting.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { RedisService } from '../../redis/redis.service';
+import { ConfigService } from '@nestjs/config';
 
 describe('VotingService', () => {
   let service: VotingService;
   const prismaMock = {
     candidate: { findUnique: jest.fn(), findMany: jest.fn() },
-    election: { findUnique: jest.fn() },
+    election: { findUnique: jest.fn(), findMany: jest.fn() },
     student: { findUnique: jest.fn(), update: jest.fn() },
     votingToken: { updateMany: jest.fn() },
     vote: { create: jest.fn() },
     $transaction: jest.fn(),
   };
   const redisMock = { del: jest.fn(), get: jest.fn(), setex: jest.fn() };
+  const configMock = { get: jest.fn().mockReturnValue('600') };
 
   const session: VotingSession = {
     studentId: 's1',
-    electionId: 'e1',
     nis: '231001',
+    elections: [{ electionId: 'e1', studentId: 's1', has_voted: false }],
   };
 
   beforeEach(async () => {
@@ -31,6 +33,7 @@ describe('VotingService', () => {
         VotingService,
         { provide: PrismaService, useValue: prismaMock },
         { provide: RedisService, useValue: redisMock },
+        { provide: ConfigService, useValue: configMock },
       ],
     }).compile();
     service = moduleRef.get(VotingService);
@@ -123,5 +126,52 @@ describe('VotingService', () => {
   it('throws not found when election missing', async () => {
     prismaMock.election.findUnique.mockResolvedValue(null);
     await expect(service.getStatus(session)).rejects.toThrow(NotFoundException);
+  });
+
+  it('resolves current election and returns next after submit', async () => {
+    const multiSession: VotingSession = {
+      studentId: 's1',
+      nis: '231001',
+      elections: [
+        { electionId: 'e1', studentId: 's1', has_voted: false },
+        { electionId: 'e2', studentId: 's1', has_voted: false },
+      ],
+    };
+    prismaMock.election.findUnique.mockResolvedValue({
+      id: 'e1',
+      status: 'ACTIVE',
+    });
+    prismaMock.candidate.findUnique.mockResolvedValue({
+      id: 'c1',
+      election_id: 'e1',
+    });
+    prismaMock.student.findUnique.mockResolvedValue({
+      id: 's1',
+      has_voted: false,
+    });
+
+    const result = await service.submit(multiSession, 'c1', 'sess1');
+
+    expect(result.message).toBe('Your vote has been recorded.');
+    expect(result.next).toEqual({ electionId: 'e2' });
+    expect(redisMock.setex).toHaveBeenCalledWith(
+      'student:session:sess1',
+      600,
+      expect.stringContaining('"has_voted":true'),
+    );
+  });
+
+  it('throws ALREADY_VOTED when all elections voted', async () => {
+    const allVotedSession: VotingSession = {
+      studentId: 's1',
+      nis: '231001',
+      elections: [
+        { electionId: 'e1', studentId: 's1', has_voted: true },
+        { electionId: 'e2', studentId: 's1', has_voted: true },
+      ],
+    };
+    await expect(service.getCandidates(allVotedSession)).rejects.toThrow(
+      BadRequestException,
+    );
   });
 });
