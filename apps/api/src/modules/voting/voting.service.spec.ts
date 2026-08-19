@@ -68,7 +68,10 @@ describe('VotingService', () => {
       where: { student_id: 's1' },
       data: { is_used: true },
     });
-    expect(result).toEqual({ message: 'Your vote has been recorded.' });
+    expect(result).toEqual({
+      message: 'Your vote has been recorded.',
+      next: null,
+    });
   });
 
   it('rejects submit when election is not active', async () => {
