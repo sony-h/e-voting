@@ -28,8 +28,8 @@ interface AdminPayload {
 
 interface StudentSessionPayload {
   studentId: string;
-  electionId: string;
   nis: string;
+  elections: { electionId: string; studentId: string; has_voted: boolean }[];
 }
 
 type AdminRequest = Request & { user: AdminPayload };

@@ -40,9 +40,12 @@ export class VotingController {
     const result = await this.votingService.submit(
       req.session,
       dto.candidateId,
+      req.cookies?.[STUDENT_COOKIE],
     );
-    await this.votingService.destroySession(req.cookies?.[STUDENT_COOKIE]);
-    res.clearCookie(STUDENT_COOKIE);
+    if (!result.next) {
+      await this.votingService.destroySession(req.cookies?.[STUDENT_COOKIE]);
+      res.clearCookie(STUDENT_COOKIE);
+    }
     return result;
   }
 }
