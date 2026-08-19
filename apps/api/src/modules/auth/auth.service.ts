@@ -68,17 +68,39 @@ export class AuthService {
     if (student.election.status !== 'ACTIVE') {
       throw new UnauthorizedException({ errorCode: 'ELECTION_NOT_ACTIVE' });
     }
-    if (student.has_voted)
+    const otherPending = await this.prisma.student.findMany({
+      where: { nis: student.nis, has_voted: false },
+      include: { election: true },
+    });
+    if (student.has_voted && otherPending.length === 0) {
       throw new UnauthorizedException({ errorCode: 'ALREADY_VOTED' });
+    }
+
+    // Find all Student rows for this student across elections
+    const allStudents = await this.prisma.student.findMany({
+      where: { nis: student.nis },
+      include: { election: true },
+    });
+
+    const elections = allStudents
+      .filter((s) => s.election.status === 'ACTIVE')
+      .map((s) => ({
+        electionId: s.election_id,
+        studentId: s.id,
+        has_voted: s.has_voted,
+      }));
+
+    if (elections.length === 0) {
+      throw new UnauthorizedException({ errorCode: 'ELECTION_NOT_ACTIVE' });
+    }
 
     const sessionId = randomUUID();
-    const ttl = Number(this.config.get<string>('STUDENT_SESSION_TTL') ?? '300');
+    const ttl = Number(this.config.get<string>('STUDENT_SESSION_TTL') ?? '600');
     const expiresAt = new Date(Date.now() + ttl * 1000);
     const session = {
       studentId: student.id,
-      electionId: student.election_id,
       nis: student.nis,
-      expiresAt: expiresAt.toISOString(),
+      elections,
     };
     await this.redis.setex(
       `student:session:${sessionId}`,
