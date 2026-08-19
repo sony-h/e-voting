@@ -156,12 +156,15 @@ export default function StudentPortalPage() {
   const [voted, setVoted] = useState(false);
   const [detailCandidate, setDetailCandidate] = useState<Candidate | null>(null);
   const [confirmCandidate, setConfirmCandidate] = useState<Candidate | null>(null);
+  const [nextElection, setNextElection] = useState<{ electionId: string } | null>(null);
 
   const { data: status, isLoading: statusLoading } = useQuery({
     queryKey: ['voting-status'],
     queryFn: getVotingStatus,
     retry: false,
   });
+
+  const currentElection = status?.elections?.find((e) => !e.has_voted);
 
   const statusError = !statusLoading && !status;
 
@@ -172,10 +175,10 @@ export default function StudentPortalPage() {
   });
 
   const { data: candidates, isLoading: candidatesLoading } = useQuery({
-    queryKey: ['voting-candidates'],
+    queryKey: ['voting-candidates', currentElection?.electionId],
     queryFn: getVotingCandidates,
     retry: false,
-    enabled: !!status,
+    enabled: !!status && !!currentElection,
   });
 
   async function handleSessionExpire() {
@@ -185,7 +188,8 @@ export default function StudentPortalPage() {
 
   const submitMutation = useMutation({
     mutationFn: (candidateId: string) => submitVote(candidateId),
-    onSuccess: () => {
+    onSuccess: (result) => {
+      setNextElection(result.next);
       setVoted(true);
       setConfirmCandidate(null);
       setDetailCandidate(null);
@@ -210,11 +214,11 @@ export default function StudentPortalPage() {
       setCountdown(remaining);
       if (remaining <= 0) {
         clearInterval(timer);
-        router.push('/');
+        router.push(nextElection ? '/student' : '/');
       }
     }, 1000);
     return () => clearInterval(timer);
-  }, [voted, router]);
+  }, [voted, router, nextElection]);
 
   async function handleLogout() {
     await studentLogout().catch(() => undefined);
@@ -226,19 +230,36 @@ export default function StudentPortalPage() {
       <main className="flex min-h-screen items-center justify-center px-6">
         <div className="w-full max-w-md text-center">
           <CheckIcon />
-          <h1 className="mt-6 font-heading text-3xl font-bold">Terima kasih!</h1>
-          <p className="mt-2 text-muted-foreground">Anda telah menggunakan hak pilih Anda.</p>
+          <h1 className="mt-6 font-heading text-3xl font-bold">
+            {nextElection ? 'Suara tersimpan!' : 'Terima kasih!'}
+          </h1>
+          <p className="mt-2 text-muted-foreground">
+            {nextElection
+              ? 'Lanjutkan ke pemilihan berikutnya.'
+              : 'Anda telah menggunakan hak pilih Anda.'}
+          </p>
           {voted && (
             <p className="mt-3 text-sm text-muted-foreground">
-              Redirect ke beranda dalam {countdown} detik...
+              Redirect ke {nextElection ? 'pemilihan berikutnya' : 'beranda'} dalam {countdown}{' '}
+              detik...
             </p>
           )}
-          <Link
-            href="/"
-            className="mt-6 inline-flex h-11 w-full items-center justify-center rounded-xl border bg-primary/5 px-6 text-sm font-semibold text-primary transition-all duration-200 hover:bg-primary/10"
-          >
-            Kembali ke Beranda
-          </Link>
+          <div className="mt-6 flex flex-col gap-2">
+            {nextElection && (
+              <button
+                onClick={() => router.push('/student')}
+                className="inline-flex h-11 w-full items-center justify-center rounded-xl bg-primary px-6 font-semibold text-primary-foreground shadow-sm transition-all duration-200 hover:bg-primary/90"
+              >
+                Lanjut ke Pemilihan Berikutnya
+              </button>
+            )}
+            <Link
+              href="/"
+              className="inline-flex h-11 w-full items-center justify-center rounded-xl border bg-primary/5 px-6 text-sm font-semibold text-primary transition-all duration-200 hover:bg-primary/10"
+            >
+              Kembali ke Beranda
+            </Link>
+          </div>
         </div>
       </main>
     );
@@ -273,7 +294,9 @@ export default function StudentPortalPage() {
       <div className="mx-auto max-w-5xl">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h1 className="font-heading text-2xl font-bold">Pilih Pemimpinmu</h1>
+            <h1 className="font-heading text-2xl font-bold">
+              {currentElection?.title ?? 'Pilih Pemimpinmu'}
+            </h1>
             <p className="text-sm text-muted-foreground">
               Pilih satu kandidat. Suara Anda rahasia.
             </p>
