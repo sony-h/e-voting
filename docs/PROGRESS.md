@@ -74,3 +74,6 @@
 | Landing | Per-election candidates | Done | Candidates grouped by election, ordered vertically |
 | Copy | Generic landing copy | Done | No hardcoded "OSIS", uses election.title |
 | Vote | Auto-redirect 5s | Done | Countdown + router.push after voting |
+| Multi-Election | Sequential voting session | Done | Voting flow processes elections in `order`; submit returns `next` for next election |
+| Multi-Election | Per-election vote tracking | Done | Session tracks `has_voted` per election, update after each submit |
+| Multi-Election | Smart session lifecycle | Done | Session persists until all elections complete; deleted on final submit |

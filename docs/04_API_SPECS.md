@@ -508,23 +508,48 @@ Flow
 Backend akan:
 
 * Validasi Session
-* Validasi Election
+* Validasi Election (current)
 * Validasi hak pilih
 * Menyimpan Vote
 * Menandai StudentElection.has_voted
 * Menandai VotingToken.is_used
-* Menghapus Session Redis
+* Update session: tandai election current sebagai `has_voted: true`
+* Jika masih ada election lain yang belum dipilih, session tetap ada; jika tidak, session dihapus
 
-Catatan: Session Redis dihapus setelah commit transaksi database (Redis tidak dapat bergabung dalam transaksi Postgres).
+Catatan: Session Redis dihapus hanya jika tidak ada election tersisa. Jika siswa memiliki beberapa election aktif, session tetap hidup sampai semua selesai.
+
+Session Shape
+
+```json
+{
+  "studentId": "uuid",
+  "nis": "231045",
+  "elections": [
+    {
+      "electionId": "uuid",
+      "studentId": "uuid",
+      "has_voted": false
+    }
+  ]
+}
+```
 
 Response
 
 ```json
 {
   "success": true,
-  "message": "Your vote has been recorded."
+  "message": "Your vote has been recorded.",
+  "next": {
+    "electionId": "uuid"
+  }
 }
 ```
+
+Field `next`:
+
+* Jika ada election lain yang belum dipilih: `{ "electionId": "uuid" }` — client harus mengarahkan siswa ke portal voting election berikutnya.
+* Jika semua election sudah dipilih: `null` — voting selesai, client dapat redirect ke halaman sukses.
 
 ---
 
