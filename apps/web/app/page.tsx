@@ -635,7 +635,7 @@ export default function HomePage() {
         <div className="mx-auto flex max-w-6xl flex-col items-center gap-4 px-6 py-8 sm:flex-row sm:justify-between">
           <div className="flex items-center gap-3">
             <Image
-              src="/logo-orivastra-white-circle-v2.png"
+              src="/logo-orivastra-white-circle.png"
               alt="Orivastra"
               width={32}
               height={32}
