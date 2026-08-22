@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useQuery, useQueries } from '@tanstack/react-query';
@@ -126,10 +126,98 @@ function TiltCard({ children }: { children: React.ReactNode }) {
   );
 }
 
+function ProgramCarousel({ images }: { images: CandidateWithImages['images'] }) {
+  const reduced = useReducedMotion();
+  const [index, setIndex] = useState(0);
+  const [paused, setPaused] = useState(false);
+
+  useEffect(() => {
+    if (!images || images.length <= 1 || reduced || paused) return;
+    const id = setInterval(() => setIndex((i) => (i + 1) % images.length), 3000);
+    return () => clearInterval(id);
+  }, [images, reduced, paused]);
+
+  if (!images || images.length === 0) return null;
+  const current = images[index % images.length]!;
+  const go = (dir: number) => setIndex((i) => (i + dir + images.length) % images.length);
+
+  return (
+    <div
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      onTouchStart={() => setPaused(true)}
+      onTouchEnd={() => setPaused(false)}
+      className="mt-2"
+    >
+      <div className="relative overflow-hidden rounded-lg">
+        <motion.div
+          key={current.id}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.28 }}
+        >
+          <Image
+            src={uploadUrl(current.url) ?? ''}
+            alt={current.caption ?? 'Gambar program'}
+            width={1280}
+            height={720}
+            className="aspect-video w-full object-cover"
+          />
+        </motion.div>
+        {current.caption && (
+          <p className="absolute bottom-0 left-0 right-0 truncate bg-black/50 px-2 py-1 text-[10px] font-medium text-white">
+            {current.caption}
+          </p>
+        )}
+        {images.length > 1 && (
+          <>
+            <button
+              type="button"
+              aria-label="Sebelumnya"
+              onClick={(e) => {
+                e.preventDefault();
+                go(-1);
+              }}
+              className="absolute left-1.5 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-full bg-black/40 text-sm text-white transition-colors hover:bg-black/60"
+            >
+              ‹
+            </button>
+            <button
+              type="button"
+              aria-label="Berikutnya"
+              onClick={(e) => {
+                e.preventDefault();
+                go(1);
+              }}
+              className="absolute right-1.5 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-full bg-black/40 text-sm text-white transition-colors hover:bg-black/60"
+            >
+              ›
+            </button>
+          </>
+        )}
+      </div>
+      {images.length > 1 && (
+        <div className="mt-2 flex justify-center gap-1.5">
+          {images.map((img, i) => (
+            <button
+              key={img.id}
+              type="button"
+              aria-label={`Gambar ${i + 1}`}
+              onClick={(e) => {
+                e.preventDefault();
+                setIndex(i);
+              }}
+              className={`h-1.5 rounded-full transition-all duration-200 ${i === index ? 'w-4 bg-primary' : 'w-1.5 bg-muted-foreground/30'}`}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function CandidateCard({ candidate }: { candidate: CandidateWithImages }) {
   const images = candidate.images ?? [];
-  const shown = images.slice(0, 3);
-  const hiddenCount = images.length - shown.length;
 
   return (
     <TiltCard>
@@ -168,23 +256,7 @@ function CandidateCard({ candidate }: { candidate: CandidateWithImages }) {
               <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
                 Program
               </p>
-              <div className="mt-2 flex gap-2">
-                {shown.map((image) => (
-                  <Image
-                    key={image.id}
-                    src={uploadUrl(image.url) ?? ''}
-                    alt={image.caption ?? 'Gambar program'}
-                    width={1280}
-                    height={720}
-                    className="aspect-video w-28 rounded-lg object-cover"
-                  />
-                ))}
-                {hiddenCount > 0 && (
-                  <div className="flex aspect-video w-28 items-center justify-center rounded-lg border border-dashed text-xs font-semibold text-muted-foreground">
-                    +{hiddenCount}
-                  </div>
-                )}
-              </div>
+              <ProgramCarousel images={images} />
             </div>
           )}
 
@@ -319,7 +391,19 @@ export default function HomePage() {
         />
       </motion.div>
 
-      <section className="relative flex min-h-screen flex-col items-center justify-center px-6 pb-16 pt-24">
+      <section className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-6 pb-16 pt-24">
+        {/* School photo backdrop — hero only, replace public/school-hero-bg.jpg to update */}
+        <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+          <Image
+            src="/school-hero-bg.jpg"
+            alt=""
+            fill
+            priority
+            className="scale-[1.03] object-cover blur-[18px] opacity-[0.18] dark:opacity-[0.12] dark:brightness-[0.6]"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/20 to-background" />
+          <div className="absolute inset-0 bg-gradient-to-b from-background/10 via-transparent to-transparent dark:from-background/20" />
+        </div>
         <motion.p
           {...heroAnim}
           className="font-mono text-xs uppercase tracking-[0.3em] text-muted-foreground"
