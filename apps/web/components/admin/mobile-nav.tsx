@@ -42,14 +42,20 @@ export function MobileNav() {
           <Menu className="h-5 w-5" />
         </Button>
         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white p-1 shadow-sm ring-1 ring-foreground/10">
-          <Image src="/logo-orivastra-white-circle.png" alt="Orivastra" width={32} height={32} className="h-6 w-6 object-contain" />
+          <Image
+            src="/logo-orivastra-white-circle.png"
+            alt="Orivastra"
+            width={32}
+            height={32}
+            className="h-6 w-6 object-contain"
+          />
         </div>
         <div className="flex flex-col">
           <span className="font-heading text-sm font-bold tracking-[0.14em] leading-none">
             ORIV<span className="text-primary">A</span>STRA
           </span>
           <span className="font-mono text-[9px] uppercase tracking-[0.18em] leading-none text-muted-foreground">
-            From Origin to the Stars.
+            E-Voting Panel
           </span>
         </div>
       </div>
@@ -65,7 +71,13 @@ export function MobileNav() {
             <div className="flex h-auto items-center justify-between border-b px-4 py-3">
               <div className="flex items-center gap-2.5">
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white p-1 shadow-sm ring-1 ring-foreground/10">
-                  <Image src="/logo-orivastra-white-circle.png" alt="Orivastra" width={32} height={32} className="h-6 w-6 object-contain" />
+                  <Image
+                    src="/logo-orivastra-white-circle.png"
+                    alt="Orivastra"
+                    width={32}
+                    height={32}
+                    className="h-6 w-6 object-contain"
+                  />
                 </div>
                 <div className="flex flex-col">
                   <span className="font-heading text-sm font-bold tracking-[0.14em] leading-none">

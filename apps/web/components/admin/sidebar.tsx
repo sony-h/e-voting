@@ -42,7 +42,7 @@ export function Sidebar() {
             ORIV<span className="text-primary">A</span>STRA
           </span>
           <span className="font-mono text-[9px] uppercase tracking-[0.18em] leading-none text-muted-foreground">
-            From Origin to the Stars.
+            E-Voting Panel
           </span>
         </div>
       </div>
