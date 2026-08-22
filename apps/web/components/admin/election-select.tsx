@@ -26,7 +26,7 @@ export function ElectionSelect({ value, onChange }: ElectionSelectProps) {
     <div className="space-y-2">
       <Label>Election</Label>
       <Select value={value} onValueChange={onChange} disabled={isLoading || !elections?.length}>
-        <SelectTrigger className="w-72">
+        <SelectTrigger className="w-56">
           <SelectValue placeholder={isLoading ? 'Memuat...' : 'Pilih election'} />
         </SelectTrigger>
         <SelectContent>

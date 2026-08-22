@@ -395,7 +395,7 @@ export default function HomePage() {
         {/* School photo backdrop — hero only, replace public/school-hero-bg.jpg to update. Fallback CSS mesh stays underneath. */}
         <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
           <Image
-            src="/school-hero-bg.jpg"
+            src="/school-hero-bg2.jpg"
             alt=""
             fill
             priority
