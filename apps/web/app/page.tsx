@@ -606,7 +606,7 @@ export default function HomePage() {
         <div className="mx-auto flex max-w-6xl flex-col items-center gap-4 px-6 py-8 sm:flex-row sm:justify-between">
           <div className="flex items-center gap-3">
             <Image
-              src="/logo-orivastra-v2-transparent.png"
+              src="/logo-orivastra-white-circle-v2.png"
               alt="Orivastra"
               width={32}
               height={32}
@@ -623,7 +623,7 @@ export default function HomePage() {
           </div>
           <div className="text-center sm:text-right">
             <p className="text-sm text-muted-foreground">
-              Crafted with care by <span className="font-semibold text-foreground">Orivastra</span>
+              Built with care by <span className="font-semibold text-foreground">Orivastra</span>
             </p>
             <p className="mt-1 font-mono text-xs text-muted-foreground">
               © {new Date().getFullYear()} Orivastra — Building from strong foundations to reach
