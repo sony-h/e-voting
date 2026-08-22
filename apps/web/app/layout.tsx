@@ -1,9 +1,6 @@
-'use client';
-
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ThemeProvider } from 'next-themes';
-import { AuthProvider } from '@/hooks/use-auth';
+import type { Metadata } from 'next';
 import localFont from 'next/font/local';
+import { Providers } from '@/components/providers';
 import './globals.css';
 
 const geistSans = localFont({
@@ -24,7 +21,18 @@ const sourceSerif4 = localFont({
   display: 'swap',
 });
 
-const queryClient = new QueryClient();
+export const metadata: Metadata = {
+  title: {
+    default: 'E-Voting - Orivastra',
+    template: '%s | E-Voting - Orivastra',
+  },
+  description:
+    'E-Voting OSIS & MPK — SMA N 1 Wonosobo, crafted by Orivastra. From Origin to the Stars. Technology Beyond Horizons.',
+  icons: {
+    icon: '/icon.png',
+    apple: '/apple-icon.png',
+  },
+};
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -34,16 +42,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       className={`${geistSans.variable} ${geistMono.variable} ${sourceSerif4.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="light"
-          enableSystem={false}
-          disableTransitionOnChange
-        >
-          <QueryClientProvider client={queryClient}>
-            <AuthProvider>{children}</AuthProvider>
-          </QueryClientProvider>
-        </ThemeProvider>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

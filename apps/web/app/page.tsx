@@ -403,21 +403,50 @@ export default function HomePage() {
           />
           <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background" />
         </div>
-        <header className="absolute inset-x-0 top-0 z-10 flex items-center justify-between px-6 py-4 lg:px-8">
-          <div className="flex items-center gap-3">
-            <Image
-              src="/logo-smansa.png"
-              alt="SMA N 1 Wonosobo"
-              width={36}
-              height={36}
-              className="h-8 w-8 object-contain"
-              priority
-            />
-            <span className="font-heading font-semibold tracking-tight text-foreground drop-shadow-[0_1px_2px_rgba(0,0,0,0.1)]">
+        <motion.header
+          {...(reduced
+            ? {}
+            : {
+                initial: { opacity: 0, y: -8 },
+                animate: { opacity: 1, y: 0 },
+                transition: { duration: 0.6, delay: 0.15, ease: [0.21, 0.47, 0.32, 0.98] as const },
+              })}
+          className="absolute inset-x-0 top-0 z-10 flex items-center justify-between px-6 py-4 lg:px-8"
+        >
+          <div className="group flex items-center gap-2.5">
+            <motion.div
+              {...(reduced
+                ? {}
+                : {
+                    initial: { scale: 0.9, opacity: 0 },
+                    animate: { scale: 1, opacity: 1 },
+                    transition: { duration: 0.5, delay: 0.25 },
+                  })}
+              className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/80 p-1 shadow-sm backdrop-blur transition-transform duration-200 group-hover:scale-[1.04]"
+            >
+              <Image
+                src="/logo-smansa.png"
+                alt="SMA N 1 Wonosobo"
+                width={36}
+                height={36}
+                className="h-7 w-7 object-contain"
+                priority
+              />
+            </motion.div>
+            <motion.span
+              {...(reduced
+                ? {}
+                : {
+                    initial: { opacity: 0, x: -6 },
+                    animate: { opacity: 1, x: 0 },
+                    transition: { duration: 0.5, delay: 0.3 },
+                  })}
+              className="font-heading font-semibold tracking-tight text-foreground drop-shadow-[0_1px_2px_rgba(0,0,0,0.1)]"
+            >
               SMA N 1 Wonosobo
-            </span>
+            </motion.span>
           </div>
-        </header>
+        </motion.header>
         <motion.p
           {...heroAnim}
           className="font-mono text-xs uppercase tracking-[0.3em] text-foreground drop-shadow-[0_1px_2px_rgba(0,0,0,0.12)]"
@@ -626,8 +655,7 @@ export default function HomePage() {
               Built with care by <span className="font-semibold text-foreground">Orivastra</span>
             </p>
             <p className="mt-1 font-mono text-xs text-muted-foreground">
-              © {new Date().getFullYear()} Orivastra — Building from strong foundations to reach
-              limitless possibilities.
+              © {new Date().getFullYear()} Orivastra
             </p>
           </div>
         </div>
