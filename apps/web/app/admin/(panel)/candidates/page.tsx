@@ -1,9 +1,10 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Image from 'next/image';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+import { MoreHorizontal } from 'lucide-react';
 import type { Candidate, CandidateImage, Election } from '@e-voting/types';
 import { API_BASE_URL } from '@/lib/api';
 import { listElections } from '@/services/elections';
@@ -18,11 +19,19 @@ import {
   type CandidateWithImages,
 } from '@/services/candidates';
 import { ElectionSelect } from '@/components/admin/election-select';
+import { TableToolbar } from '@/components/admin/table-toolbar';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { SkeletonTable } from '@/components/ui/skeleton-table';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import {
   Table,
   TableBody,
@@ -97,15 +106,57 @@ export default function AdminCandidatesPage() {
   const fileRef = useRef<HTMLInputElement>(null);
   const galleryRef = useRef<HTMLInputElement>(null);
 
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [sortBy, setSortBy] = useState('nomor');
+  const [page, setPage] = useState(1);
+
   const { data: elections } = useQuery({ queryKey: ['elections'], queryFn: listElections });
   const effectiveElectionId = electionId || elections?.[0]?.id || '';
   const selectedElection = elections?.find((e) => e.id === effectiveElectionId);
 
-  const { data: candidates, isLoading } = useQuery({
+  const {
+    data: candidates,
+    isLoading,
+    isError,
+    refetch,
+  } = useQuery({
     queryKey: ['candidates', effectiveElectionId],
     queryFn: () => listCandidates(effectiveElectionId),
     enabled: !!effectiveElectionId,
   });
+
+  const filteredSorted = useMemo(() => {
+    if (!candidates) return [];
+    let list = candidates.filter((c) => {
+      const q = search.toLowerCase();
+      const matchSearch =
+        !q ||
+        c.chairman_name.toLowerCase().includes(q) ||
+        (c.vice_chairman_name ?? '').toLowerCase().includes(q);
+      const matchStatus =
+        statusFilter === 'all' ||
+        (statusFilter === 'landing' && c.show_on_landing) ||
+        (statusFilter === 'hidden' && !c.show_on_landing);
+      return matchSearch && matchStatus;
+    });
+    if (sortBy === 'nomor')
+      list = [...list].sort((a, b) => a.candidate_number - b.candidate_number);
+    else if (sortBy === 'nama')
+      list = [...list].sort((a, b) => a.chairman_name.localeCompare(b.chairman_name));
+    return list;
+  }, [candidates, search, statusFilter, sortBy]);
+
+  const paginated = useMemo(
+    () => filteredSorted.slice((page - 1) * 10, page * 10),
+    [filteredSorted, page],
+  );
+  const totalPages = Math.max(1, Math.ceil(filteredSorted.length / 10));
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setPage(1);
+  }, [search, statusFilter, sortBy, effectiveElectionId]);
 
   const invalidate = () =>
     queryClient.invalidateQueries({ queryKey: ['candidates', effectiveElectionId] });
@@ -206,74 +257,176 @@ export default function AdminCandidatesPage() {
       </div>
 
       {isLoading ? (
-        <p className="text-sm text-muted-foreground">Memuat...</p>
+        <SkeletonTable rows={5} cols={6} />
+      ) : isError ? (
+        <div
+          role="alert"
+          className="flex items-center justify-between rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm"
+        >
+          <span>Gagal memuat kandidat. Periksa koneksi dan coba lagi.</span>
+          <Button variant="outline" size="sm" onClick={() => refetch()}>
+            Coba lagi
+          </Button>
+        </div>
       ) : !candidates || candidates.length === 0 ? (
         <div className="rounded-xl border border-dashed p-12 text-center text-sm text-muted-foreground">
-          Belum ada kandidat.
+          <p>Belum ada kandidat.</p>
+          <Button
+            className="mt-4"
+            onClick={openCreate}
+            disabled={!effectiveElectionId || !editable}
+          >
+            Tambah Kandidat
+          </Button>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-xl border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Nomor</TableHead>
-                <TableHead>Foto</TableHead>
-                <TableHead>Ketua</TableHead>
-                <TableHead>Wakil</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Aksi</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {candidates.map((candidate) => (
-                <TableRow key={candidate.id}>
-                  <TableCell className="font-medium">{candidate.candidate_number}</TableCell>
-                  <TableCell>
-                    {candidate.photo_url ? (
-                      <Image
-                        src={`${API_BASE_URL.replace('/api/v1', '')}${candidate.photo_url}`}
-                        alt={candidate.chairman_name}
-                        width={48}
-                        height={48}
-                        className="h-12 w-12 rounded-lg object-cover"
-                      />
-                    ) : (
-                      <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-muted text-xs text-muted-foreground">
-                        No foto
-                      </div>
-                    )}
-                  </TableCell>
-                  <TableCell className="font-medium">{candidate.chairman_name}</TableCell>
-                  <TableCell>{candidate.vice_chairman_name ?? '—'}</TableCell>
-                  <TableCell>
-                    <Badge>{selectedElection?.status ?? '—'}</Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => openEdit(candidate)}
-                        disabled={!editable}
+        <>
+          <TableToolbar
+            search={search}
+            onSearchChange={setSearch}
+            placeholder="Cari ketua / wakil..."
+            statusFilter={statusFilter}
+            onStatusChange={setStatusFilter}
+            statusOptions={[
+              { value: 'all', label: 'Semua' },
+              { value: 'landing', label: 'Tampil' },
+              { value: 'hidden', label: 'Tersembunyi' },
+            ]}
+            sortBy={sortBy}
+            onSortChange={setSortBy}
+            sortOptions={[
+              { value: 'nomor', label: 'Nomor' },
+              { value: 'nama', label: 'Nama A-Z' },
+            ]}
+          />
+          {filteredSorted.length === 0 ? (
+            <div className="rounded-xl border border-dashed p-12 text-center text-sm text-muted-foreground">
+              Tidak ada kandidat yang cocok.
+            </div>
+          ) : (
+            <div className="overflow-hidden rounded-xl border">
+              <Table>
+                <TableHeader className="sticky top-0 z-10 bg-card">
+                  <TableRow>
+                    <TableHead scope="col" className="w-12 text-center tabular-nums">
+                      Nomor
+                    </TableHead>
+                    <TableHead scope="col">Foto</TableHead>
+                    <TableHead scope="col" className="max-w-[16ch]">
+                      Ketua
+                    </TableHead>
+                    <TableHead scope="col" className="max-w-[16ch]">
+                      Wakil
+                    </TableHead>
+                    <TableHead scope="col">Tampil</TableHead>
+                    <TableHead scope="col" className="text-right">
+                      Aksi
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {paginated.map((candidate) => (
+                    <TableRow key={candidate.id}>
+                      <TableCell className="w-12 text-center font-medium tabular-nums">
+                        {candidate.candidate_number}
+                      </TableCell>
+                      <TableCell>
+                        {candidate.photo_url ? (
+                          <Image
+                            src={`${API_BASE_URL.replace('/api/v1', '')}${candidate.photo_url}`}
+                            alt={candidate.chairman_name}
+                            width={48}
+                            height={48}
+                            className="h-12 w-12 rounded-lg object-cover"
+                          />
+                        ) : (
+                          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-muted text-xs text-muted-foreground">
+                            No foto
+                          </div>
+                        )}
+                      </TableCell>
+                      <TableCell
+                        className="max-w-[16ch] truncate font-medium"
+                        title={candidate.chairman_name}
                       >
-                        Edit
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="text-red-600"
-                        onClick={() => setDeleteTarget(candidate)}
-                        disabled={!editable}
+                        {candidate.chairman_name}
+                      </TableCell>
+                      <TableCell
+                        className="max-w-[16ch] truncate"
+                        title={candidate.vice_chairman_name ?? ''}
                       >
-                        Hapus
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
+                        {candidate.vice_chairman_name ?? '—'}
+                      </TableCell>
+                      <TableCell>
+                        {candidate.show_on_landing ? (
+                          <Badge variant="default">Landing</Badge>
+                        ) : (
+                          <Badge variant="outline">Tersembunyi</Badge>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              aria-label={`Aksi ${candidate.chairman_name}`}
+                            >
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              onClick={() => openEdit(candidate)}
+                              disabled={!editable}
+                              title={!editable ? 'Terkunci saat voting berlangsung' : undefined}
+                            >
+                              Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              variant="destructive"
+                              onClick={() => setDeleteTarget(candidate)}
+                              disabled={!editable}
+                              title={!editable ? 'Terkunci saat voting berlangsung' : undefined}
+                            >
+                              Hapus
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+              {filteredSorted.length > 10 && (
+                <div className="flex items-center justify-between border-t px-4 py-3 text-sm">
+                  <span className="text-muted-foreground">
+                    Menampilkan {(page - 1) * 10 + 1}–{Math.min(page * 10, filteredSorted.length)}{' '}
+                    dari {filteredSorted.length}
+                  </span>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setPage((p) => Math.max(1, p - 1))}
+                      disabled={page === 1}
+                    >
+                      Sebelumnya
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                      disabled={page === totalPages}
+                    >
+                      Selanjutnya
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </>
       )}
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
@@ -285,7 +438,9 @@ export default function AdminCandidatesPage() {
           <div className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="candidate_number">Nomor Urut</Label>
+                <Label htmlFor="candidate_number">
+                  Nomor Urut <span className="text-destructive">*</span>
+                </Label>
                 <Input
                   id="candidate_number"
                   type="number"
@@ -293,6 +448,7 @@ export default function AdminCandidatesPage() {
                   value={form.candidate_number}
                   onChange={(e) => setForm({ ...form, candidate_number: e.target.value })}
                   required
+                  aria-required="true"
                 />
               </div>
               <div className="space-y-2">
@@ -327,21 +483,29 @@ export default function AdminCandidatesPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="vision">Visi</Label>
+              <Label htmlFor="vision">
+                Visi <span className="text-destructive">*</span>
+              </Label>
               <Textarea
                 id="vision"
+                rows={3}
                 value={form.vision}
                 onChange={(e) => setForm({ ...form, vision: e.target.value })}
                 required
+                aria-required="true"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="mission">Misi</Label>
+              <Label htmlFor="mission">
+                Misi <span className="text-destructive">*</span>
+              </Label>
               <Textarea
                 id="mission"
+                rows={3}
                 value={form.mission}
                 onChange={(e) => setForm({ ...form, mission: e.target.value })}
                 required
+                aria-required="true"
               />
             </div>
             <div className="space-y-2">
@@ -364,7 +528,11 @@ export default function AdminCandidatesPage() {
                 accept="image/jpeg,image/png,image/webp"
                 multiple
                 ref={galleryRef}
-                onChange={(e) => setGalleryFiles(Array.from(e.target.files ?? []).slice(0, 5))}
+                onChange={(e) => {
+                  const files = Array.from(e.target.files ?? []);
+                  if (files.length > 5) toast.error(`Maks 5 file, ${files.length - 5} diabaikan`);
+                  setGalleryFiles(files.slice(0, 5));
+                }}
               />
               <p className="text-xs text-muted-foreground">
                 Format jpeg/png/webp · maks 10MB per file · lebar minimal 800px · rasio disarankan
@@ -443,6 +611,7 @@ export default function AdminCandidatesPage() {
           <AlertDialogFooter>
             <AlertDialogCancel>Batal</AlertDialogCancel>
             <AlertDialogAction
+              variant="destructive"
               onClick={() => deleteTarget && deleteMutation.mutate(deleteTarget.id)}
             >
               Ya, Hapus

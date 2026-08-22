@@ -79,3 +79,9 @@
 | Multi-Election | Sequential voting session | Done | Voting flow processes elections in `order`; submit returns `next` for next election |
 | Multi-Election | Per-election vote tracking | Done | Session tracks `has_voted` per election, update after each submit |
 | Multi-Election | Smart session lifecycle | Done | Session persists until all elections complete; deleted on final submit |
+| Main | Hero school photo + cleared text | Done | Building exterior blur 3px 0.8, isolate -z-10, text-foreground crisp |
+| Main | Program carousel in card | Done | Auto-play 3s, pause hover, dots+arrows, reduced-motion |
+| Admin | Responsive shell | Done | Mobile drawer, sidebar icons, active fix, skip-to-content, max-w 1600 |
+| Admin | Elections polish | Done | PageHeader, badge ACTIVE solid, search/filter/sort, pagination, skeleton |
+| Admin | Students polish | Done | Toolbar, bulk select, ⋯ menu, token copy, sticky header, pagination |
+| Admin | Candidates polish | Done | Fix Landing badge, toolbar, pagination, dialog rows, gallery toast |
