@@ -391,29 +391,28 @@ export default function HomePage() {
         />
       </motion.div>
 
-      <section className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-6 pb-16 pt-24">
-        {/* School photo backdrop — hero only, replace public/school-hero-bg.jpg to update */}
-        <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+      <section className="relative isolate flex min-h-screen flex-col items-center justify-center overflow-hidden px-6 pb-16 pt-24">
+        {/* School photo backdrop — hero only, replace public/school-hero-bg.jpg to update. Fallback CSS mesh stays underneath. */}
+        <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
           <Image
             src="/school-hero-bg.jpg"
             alt=""
             fill
             priority
-            className="scale-[1.03] object-cover blur-[18px] opacity-[0.18] dark:opacity-[0.12] dark:brightness-[0.6]"
+            className="scale-[1.02] object-cover blur-[3px] opacity-[0.8] dark:opacity-[0.65]"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/20 to-background" />
-          <div className="absolute inset-0 bg-gradient-to-b from-background/10 via-transparent to-transparent dark:from-background/20" />
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background" />
         </div>
         <motion.p
           {...heroAnim}
-          className="font-mono text-xs uppercase tracking-[0.3em] text-muted-foreground"
+          className="font-mono text-xs uppercase tracking-[0.3em] text-foreground drop-shadow-[0_1px_2px_rgba(0,0,0,0.12)]"
         >
           Pemilihan Organisasi{election ? ` · ${election.academic_year}` : ''}
         </motion.p>
 
         <motion.h1
           {...heroAnim}
-          className="mt-4 text-center font-heading text-4xl font-bold leading-tight sm:text-6xl"
+          className="mt-4 text-center font-heading text-4xl font-bold leading-tight text-foreground drop-shadow-[0_1px_8px_rgba(0,0,0,0.12)] sm:text-6xl"
         >
           Pilih Pemimpin Organisasi
         </motion.h1>
@@ -428,15 +427,15 @@ export default function HomePage() {
           </div>
           {allElections.length > 0 && (
             <>
-              <h2 className="mt-4 font-heading text-xl font-semibold text-muted-foreground">
+              <h2 className="mt-4 font-heading text-xl font-semibold text-foreground drop-shadow-[0_1px_2px_rgba(0,0,0,0.1)]">
                 {allElections.map((e) => e.title.replace(/^Pemilihan Ketua\s*/, '')).join(' · ')}
               </h2>
-              <p className="mx-auto mt-1 max-w-md text-sm text-muted-foreground">
+              <p className="mx-auto mt-1 max-w-md text-sm text-foreground">
                 {allElections.find((e) => e.status === 'ACTIVE')
                   ? 'Sedang berlangsung — pilih pemimpinmu.'
                   : 'Dijadwalkan — pantau perkembangannya.'}
               </p>
-              <p className="mt-3 font-mono text-sm text-muted-foreground">
+              <p className="mt-3 font-mono text-sm text-foreground drop-shadow-[0_1px_2px_rgba(0,0,0,0.08)]">
                 {allElections.length} pemilihan · {formatPeriod(election!)}
               </p>
             </>
