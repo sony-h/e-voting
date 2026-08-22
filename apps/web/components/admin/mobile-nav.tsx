@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { Menu, X } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
@@ -40,10 +41,17 @@ export function MobileNav() {
         >
           <Menu className="h-5 w-5" />
         </Button>
-        <span className="flex h-6 w-6 items-center justify-center rounded-md bg-primary text-xs font-bold text-primary-foreground">
-          EV
-        </span>
-        <span className="font-heading font-semibold">E-Voting OSIS</span>
+        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white p-1 shadow-sm ring-1 ring-foreground/10">
+          <Image src="/logo-orivastra-white-circle.png" alt="Orivastra" width={32} height={32} className="h-6 w-6 object-contain" />
+        </div>
+        <div className="flex flex-col">
+          <span className="font-heading text-sm font-bold tracking-[0.14em] leading-none">
+            ORIV<span className="text-primary">A</span>STRA
+          </span>
+          <span className="font-mono text-[9px] uppercase tracking-[0.18em] leading-none text-muted-foreground">
+            From Origin to the Stars.
+          </span>
+        </div>
       </div>
 
       {open && (
@@ -54,12 +62,19 @@ export function MobileNav() {
             aria-hidden
           />
           <aside className="relative flex h-full w-64 flex-col border-r bg-card shadow-xl">
-            <div className="flex h-14 items-center justify-between border-b px-4">
-              <div className="flex items-center gap-2">
-                <span className="flex h-6 w-6 items-center justify-center rounded-md bg-primary text-xs font-bold text-primary-foreground">
-                  EV
-                </span>
-                <span className="font-heading font-semibold">E-Voting OSIS</span>
+            <div className="flex h-auto items-center justify-between border-b px-4 py-3">
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white p-1 shadow-sm ring-1 ring-foreground/10">
+                  <Image src="/logo-orivastra-white-circle.png" alt="Orivastra" width={32} height={32} className="h-6 w-6 object-contain" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="font-heading text-sm font-bold tracking-[0.14em] leading-none">
+                    ORIV<span className="text-primary">A</span>STRA
+                  </span>
+                  <span className="font-mono text-[9px] uppercase tracking-[0.18em] leading-none text-muted-foreground">
+                    From Origin to the Stars.
+                  </span>
+                </div>
               </div>
               <Button
                 variant="ghost"

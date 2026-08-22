@@ -91,8 +91,9 @@ export default function AdminResultsPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Results"
-        description="Hasil pemilihan hanya tersedia setelah election ditutup."
+        eyebrow="Orivastra · Hasil"
+        title="Hasil"
+        description="Hasil pemilihan hanya tersedia setelah pemilihan ditutup."
         action={
           <div className="flex flex-wrap items-end gap-4">
             <ElectionSelect value={effectiveElectionId} onChange={setElectionId} />

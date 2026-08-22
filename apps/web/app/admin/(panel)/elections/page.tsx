@@ -249,6 +249,7 @@ export default function AdminElectionsPage() {
   return (
     <div className="space-y-6">
       <PageHeader
+        eyebrow="Orivastra · Pemilihan"
         title="Pemilihan"
         description={`Kelola periode pemilihan · ${elections?.length ?? 0} pemilihan`}
         action={<Button onClick={openCreate}>Tambah Pemilihan</Button>}

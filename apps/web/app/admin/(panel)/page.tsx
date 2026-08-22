@@ -53,6 +53,7 @@ export default function AdminDashboardPage() {
   return (
     <div className="space-y-6">
       <PageHeader
+        eyebrow="Orivastra · Dashboard"
         title="Dashboard"
         description="Monitoring partisipasi voting."
         action={<ElectionSelect value={effectiveElectionId} onChange={setElectionId} />}

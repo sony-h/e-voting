@@ -350,7 +350,8 @@ export default function AdminStudentsPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Students"
+        eyebrow="Orivastra · Siswa"
+        title="Siswa"
         description={`Kelola data siswa dan token voting (${total})`}
         action={
           <div className="flex flex-wrap items-end gap-3">

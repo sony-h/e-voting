@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { BarChart3, CalendarRange, LayoutDashboard, Users, UsersRound } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
@@ -26,11 +27,24 @@ export function Sidebar() {
 
   return (
     <aside className="flex w-64 flex-col border-r bg-card" aria-label="Navigasi admin">
-      <div className="flex h-14 items-center gap-2 border-b px-6">
-        <span className="flex h-6 w-6 items-center justify-center rounded-md bg-primary text-xs font-bold text-primary-foreground">
-          EV
-        </span>
-        <span className="font-heading font-semibold">E-Voting OSIS</span>
+      <div className="flex h-auto items-center gap-2.5 border-b px-6 py-3">
+        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white p-1 shadow-sm ring-1 ring-foreground/10">
+          <Image
+            src="/logo-orivastra-white-circle.png"
+            alt="Orivastra"
+            width={32}
+            height={32}
+            className="h-6 w-6 object-contain"
+          />
+        </div>
+        <div className="flex flex-col">
+          <span className="font-heading text-sm font-bold tracking-[0.14em] leading-none">
+            ORIV<span className="text-primary">A</span>STRA
+          </span>
+          <span className="font-mono text-[9px] uppercase tracking-[0.18em] leading-none text-muted-foreground">
+            From Origin to the Stars.
+          </span>
+        </div>
       </div>
       <nav className="flex-1 space-y-1 overflow-y-auto p-4" aria-label="Menu utama">
         <p className="px-3 pb-1 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">

@@ -20,6 +20,7 @@ import {
 } from '@/services/candidates';
 import { ElectionSelect } from '@/components/admin/election-select';
 import { TableToolbar } from '@/components/admin/table-toolbar';
+import { PageHeader } from '@/components/ui/page-header';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -241,20 +242,19 @@ export default function AdminCandidatesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="font-heading text-2xl font-bold">Candidates</h1>
-          <p className="text-sm text-muted-foreground">
-            Kelola kandidat untuk election yang dipilih.
-          </p>
-        </div>
-        <div className="flex items-end gap-4">
-          <ElectionSelect value={effectiveElectionId} onChange={setElectionId} />
-          <Button onClick={openCreate} disabled={!effectiveElectionId || !editable}>
-            Tambah Kandidat
-          </Button>
-        </div>
-      </div>
+      <PageHeader
+        eyebrow="Orivastra · Kandidat"
+        title="Kandidat"
+        description="Kelola kandidat untuk pemilihan yang dipilih."
+        action={
+          <div className="flex items-end gap-4">
+            <ElectionSelect value={effectiveElectionId} onChange={setElectionId} />
+            <Button onClick={openCreate} disabled={!effectiveElectionId || !editable}>
+              Tambah Kandidat
+            </Button>
+          </div>
+        }
+      />
 
       {isLoading ? (
         <SkeletonTable rows={5} cols={6} />
