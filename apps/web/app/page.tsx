@@ -395,7 +395,7 @@ export default function HomePage() {
         {/* School photo backdrop — hero only, replace public/school-hero-bg.jpg to update. Fallback CSS mesh stays underneath. */}
         <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
           <Image
-            src="/school-hero-bg2.jpg"
+            src="/school-hero-bg.jpg"
             alt=""
             fill
             priority
@@ -403,6 +403,21 @@ export default function HomePage() {
           />
           <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background" />
         </div>
+        <header className="absolute inset-x-0 top-0 z-10 flex items-center justify-between px-6 py-4 lg:px-8">
+          <div className="flex items-center gap-3">
+            <Image
+              src="/logo-smansa.png"
+              alt="SMA N 1 Wonosobo"
+              width={36}
+              height={36}
+              className="h-8 w-8 object-contain"
+              priority
+            />
+            <span className="font-heading font-semibold tracking-tight text-foreground drop-shadow-[0_1px_2px_rgba(0,0,0,0.1)]">
+              SMA N 1 Wonosobo
+            </span>
+          </div>
+        </header>
         <motion.p
           {...heroAnim}
           className="font-mono text-xs uppercase tracking-[0.3em] text-foreground drop-shadow-[0_1px_2px_rgba(0,0,0,0.12)]"
@@ -586,6 +601,37 @@ export default function HomePage() {
           </Link>
         </motion.div>
       </section>
+
+      <footer className="relative border-t bg-card/50 backdrop-blur">
+        <div className="mx-auto flex max-w-6xl flex-col items-center gap-4 px-6 py-8 sm:flex-row sm:justify-between">
+          <div className="flex items-center gap-3">
+            <Image
+              src="/logo-orivastra-v2-transparent.png"
+              alt="Orivastra"
+              width={32}
+              height={32}
+              className="h-7 w-7 object-contain"
+            />
+            <div className="flex flex-col">
+              <span className="font-heading text-sm font-bold tracking-[0.14em] text-foreground">
+                ORIV<span className="text-primary">A</span>STRA
+              </span>
+              <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+                From Origin to the Stars.
+              </span>
+            </div>
+          </div>
+          <div className="text-center sm:text-right">
+            <p className="text-sm text-muted-foreground">
+              Crafted with care by <span className="font-semibold text-foreground">Orivastra</span>
+            </p>
+            <p className="mt-1 font-mono text-xs text-muted-foreground">
+              © {new Date().getFullYear()} Orivastra — Building from strong foundations to reach
+              limitless possibilities.
+            </p>
+          </div>
+        </div>
+      </footer>
     </main>
   );
 }
