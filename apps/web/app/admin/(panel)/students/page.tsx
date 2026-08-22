@@ -241,12 +241,13 @@ export default function AdminStudentsPage() {
         s.nis.toLowerCase().includes(q) ||
         s.full_name.toLowerCase().includes(q) ||
         s.class_name.toLowerCase().includes(q);
-      const matchesStatus =
-        statusFilter === 'all' ||
-        s.class_name.toLowerCase().startsWith(statusFilter.toLowerCase()) ||
-        (s.grade ? s.grade.toLowerCase() === statusFilter.toLowerCase() : false);
-      // Special handling for "X" filter: should match X but not XI/XII when exact? We accept prefix but avoid over-matching by checking word boundary.
-      // For now, use startsWith; if filter is X and class is XI-1, it will match – acceptable per spec (prefix).
+      const getGrade = () => {
+        const g = s.grade?.trim();
+        if (g) return g.toLowerCase();
+        const prefix = s.class_name.split('-')[0]?.trim().toLowerCase();
+        return prefix ?? '';
+      };
+      const matchesStatus = statusFilter === 'all' || getGrade() === statusFilter.toLowerCase();
       return matchesSearch && matchesStatus;
     });
     filtered.sort((a, b) => {
