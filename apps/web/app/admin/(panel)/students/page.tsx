@@ -241,12 +241,7 @@ export default function AdminStudentsPage() {
         s.nis.toLowerCase().includes(q) ||
         s.full_name.toLowerCase().includes(q) ||
         s.class_name.toLowerCase().includes(q);
-      const getGrade = () => {
-        const g = s.grade?.trim();
-        if (g) return g.toLowerCase();
-        const prefix = s.class_name.split('-')[0]?.trim().toLowerCase();
-        return prefix ?? '';
-      };
+      const getGrade = () => s.class_name.split('-')[0]?.trim().toLowerCase() ?? '';
       const matchesStatus = statusFilter === 'all' || getGrade() === statusFilter.toLowerCase();
       return matchesSearch && matchesStatus;
     });

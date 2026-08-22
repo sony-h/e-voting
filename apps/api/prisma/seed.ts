@@ -248,7 +248,7 @@ async function main() {
         const full_name = `${FIRST_NAMES[i % FIRST_NAMES.length]} ${
           SURNAMES[(i * 7) % SURNAMES.length]
         }`;
-        const grade = classNames[i]!.klass.slice(0, 3);
+        const grade = classNames[i]!.klass.split('-')[0]!;
         const existing = await prisma.student.findUnique({
           where: {
             election_id_nis: { election_id: electionData.id, nis },
