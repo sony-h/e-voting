@@ -162,7 +162,7 @@ export default function ElectionResultsPage({ params }: { params: Promise<{ id: 
         ) : !results ? (
           <p className="mt-12 text-center text-sm text-muted-foreground">Memuat hasil...</p>
         ) : (
-          <div className="mt-10">
+          <div key={id} className="mt-10">
             <FireConfetti />
             <FestiveResults results={results} />
           </div>

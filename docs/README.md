@@ -76,6 +76,8 @@ pnpm dev
 ## Reset ke Keadaan Demo Bersih
 
 ```bash
+pnpm --filter @e-voting/api db:reseed  # satu perintah: reset + seed (disarankan)
+# atau dua langkah terpisah:
 pnpm --filter @e-voting/api db:reset   # hapus semua suara + reset status siswa/token/election
 pnpm --filter @e-voting/api db:seed    # regenerate data demo
 ```
@@ -131,7 +133,7 @@ Pastikan `evoting-postgres` berstatus `healthy`. Jika tidak: `pnpm db:up`.
 Ubah `POSTGRES_PORT` di `docker/.env` dan `DATABASE_URL` di `apps/api/.env` ke port lain, lalu `pnpm db:up` lagi.
 
 ### Lupa token siswa
-Buka admin → Students → tombol **Reset Token** (hanya bisa sebelum election Active).
+Buka admin → Students → tombol **Reset Token** (bisa kapan saja sebelum siswa memilih, termasuk saat election ACTIVE).
 
 ## Perintah
 
@@ -145,4 +147,5 @@ Buka admin → Students → tombol **Reset Token** (hanya bisa sebelum election 
 | `pnpm db:up` / `pnpm db:down` | Start / stop Docker services |
 | `pnpm --filter @e-voting/api db:migrate` | Jalankan migrasi Prisma |
 | `pnpm --filter @e-voting/api db:seed` | Seed data demo (idempotent) |
+| `pnpm --filter @e-voting/api db:reseed` | Reset + seed dalam satu perintah |
 | `pnpm --filter @e-voting/api db:generate` | Regenerasi Prisma Client |
