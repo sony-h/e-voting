@@ -46,6 +46,7 @@ export default function ElectionResultsPage({ params }: { params: Promise<{ id: 
 
   useEffect(() => {
     if (results && wasNotPublishedRef.current && !revealing) {
+      wasNotPublishedRef.current = false;
       setRevealing(true);
       setCountdown(10);
     }
