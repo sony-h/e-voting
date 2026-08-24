@@ -67,6 +67,23 @@ export class ElectionService {
     });
   }
 
+  async remove(id: string) {
+    const election = await this.ensureExists(id);
+    if (election.status === 'ACTIVE') {
+      throw new BadRequestException({ errorCode: 'VOTING_NOT_ALLOWED' });
+    }
+    return this.prisma.$transaction(async (tx) => {
+      await tx.vote.deleteMany({ where: { election_id: id } });
+      await tx.votingToken.deleteMany({ where: { election_id: id } });
+      await tx.candidateImage.deleteMany({
+        where: { candidate: { election_id: id } },
+      });
+      await tx.candidate.deleteMany({ where: { election_id: id } });
+      await tx.student.deleteMany({ where: { election_id: id } });
+      return tx.election.delete({ where: { id } });
+    });
+  }
+
   private async ensureExists(id: string) {
     const election = await this.prisma.election.findUnique({ where: { id } });
     if (!election)

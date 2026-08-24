@@ -9,6 +9,7 @@ import type { Election } from '@e-voting/types';
 import {
   closeElection,
   createElection,
+  deleteElection,
   listElections,
   startElection,
   updateElection,
@@ -128,6 +129,8 @@ export default function AdminElectionsPage() {
     type: 'start' | 'close';
     election: Election;
   } | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Election | null>(null);
+  const [confirmText, setConfirmText] = useState('');
 
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -195,6 +198,25 @@ export default function AdminElectionsPage() {
     onError: (err) => {
       toast.error(err instanceof ApiError ? err.message : 'Gagal menutup election.');
       setConfirmAction(null);
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => deleteElection(id),
+    onSuccess: async () => {
+      await invalidate();
+      toast.success('Election dihapus.');
+      setDeleteTarget(null);
+      setConfirmText('');
+    },
+    onError: (err) => {
+      const msg =
+        err instanceof ApiError && err.errorCode === 'VOTING_NOT_ALLOWED'
+          ? 'Tidak dapat menghapus election yang sedang aktif.'
+          : err instanceof ApiError
+            ? err.message
+            : 'Gagal menghapus election.';
+      toast.error(msg);
     },
   });
 
@@ -368,6 +390,22 @@ export default function AdminElectionsPage() {
                           <Button variant="outline" size="sm" onClick={() => openEdit(election)}>
                             Edit
                           </Button>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => {
+                              setDeleteTarget(election);
+                              setConfirmText('');
+                            }}
+                            disabled={election.status === 'ACTIVE'}
+                            title={
+                              election.status === 'ACTIVE'
+                                ? 'Tidak dapat menghapus election yang sedang aktif'
+                                : undefined
+                            }
+                          >
+                            Hapus
+                          </Button>
                         </div>
                       </TableCell>
                     </TableRow>
@@ -525,6 +563,53 @@ export default function AdminElectionsPage() {
               }}
             >
               Ya
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog
+        open={deleteTarget !== null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setDeleteTarget(null);
+            setConfirmText('');
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Hapus Pemilihan?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Pemilihan &quot;{deleteTarget?.title}&quot; dan semua kandidat, siswa, token, serta
+              suara terkait akan dihapus permanen. Tindakan ini tidak dapat dibatalkan.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="space-y-2">
+            <Label htmlFor="confirm-delete">Ketik HAPUS untuk konfirmasi</Label>
+            <Input
+              id="confirm-delete"
+              value={confirmText}
+              onChange={(e) => setConfirmText(e.target.value)}
+              placeholder="HAPUS"
+              autoComplete="off"
+            />
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              onClick={() => {
+                setDeleteTarget(null);
+                setConfirmText('');
+              }}
+            >
+              Batal
+            </AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              disabled={confirmText !== 'HAPUS' || deleteMutation.isPending}
+              onClick={() => deleteTarget && deleteMutation.mutate(deleteTarget.id)}
+            >
+              {deleteMutation.isPending ? 'Menghapus...' : 'Ya, Hapus'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

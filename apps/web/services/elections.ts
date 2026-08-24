@@ -41,3 +41,7 @@ export function startElection(id: string) {
 export function closeElection(id: string) {
   return apiFetch<Election>(`/elections/${id}/close`, { method: 'POST' });
 }
+
+export function deleteElection(id: string) {
+  return apiFetch<{ message: string }>(`/elections/${id}`, { method: 'DELETE' });
+}

@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Patch,
@@ -54,5 +55,12 @@ export class ElectionController {
   @Roles('ADMIN')
   close(@Param('id') id: string) {
     return this.electionService.close(id);
+  }
+
+  @Delete(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  remove(@Param('id') id: string) {
+    return this.electionService.remove(id);
   }
 }

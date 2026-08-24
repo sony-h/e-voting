@@ -1,11 +1,15 @@
 'use client';
 
-import { use } from 'react';
+/* eslint-disable react-hooks/set-state-in-effect -- revealing countdown state sync is intentional */
+
+import { use, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
+import { motion } from 'motion/react';
 import { useQuery } from '@tanstack/react-query';
 import { ApiError } from '@/lib/api';
 import { getElection } from '@/services/elections';
 import { getPublicResults } from '@/services/results';
+import { Progress } from '@/components/ui/progress';
 import { FestiveResults, FireConfetti } from '@/components/results/festive-results';
 
 export default function ElectionResultsPage({ params }: { params: Promise<{ id: string }> }) {
@@ -31,6 +35,39 @@ export default function ElectionResultsPage({ params }: { params: Promise<{ id: 
 
   const errorCode = error instanceof ApiError ? error.errorCode : null;
   const notPublished = isError && errorCode === 'RESULTS_NOT_PUBLISHED';
+
+  const [revealing, setRevealing] = useState(false);
+  const [countdown, setCountdown] = useState(10);
+  const wasNotPublishedRef = useRef(false);
+
+  useEffect(() => {
+    if (notPublished) wasNotPublishedRef.current = true;
+  }, [notPublished]);
+
+  useEffect(() => {
+    if (results && wasNotPublishedRef.current && !revealing) {
+      setRevealing(true);
+      setCountdown(10);
+    }
+  }, [results, revealing]);
+
+  useEffect(() => {
+    if (!revealing) return;
+    const interval = setInterval(() => setCountdown((n) => Math.max(0, n - 1)), 1000);
+    const timeout = setTimeout(() => setRevealing(false), 10000);
+    return () => {
+      clearInterval(interval);
+      clearTimeout(timeout);
+    };
+  }, [revealing]);
+
+  useEffect(() => {
+    if (notPublished && revealing) {
+      setRevealing(false);
+      setCountdown(10);
+      wasNotPublishedRef.current = false;
+    }
+  }, [notPublished, revealing]);
 
   if (electionLoading) {
     return (
@@ -90,7 +127,29 @@ export default function ElectionResultsPage({ params }: { params: Promise<{ id: 
           <h1 className="mt-2 font-heading text-3xl font-bold sm:text-4xl">{election.title}</h1>
         </div>
 
-        {notPublished ? (
+        {revealing ? (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mt-12 rounded-2xl border bg-card p-8 text-center shadow-sm"
+          >
+            <p className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">
+              Hasil akan ditampilkan
+            </p>
+            <motion.p
+              key={countdown}
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.3 }}
+              className="mt-4 font-heading text-6xl font-bold tabular-nums sm:text-7xl"
+            >
+              {countdown}
+            </motion.p>
+            <p className="mt-2 text-sm text-muted-foreground">detik lagi</p>
+            <Progress value={(10 - countdown) * 10} className="mx-auto mt-6 max-w-sm" />
+            <p className="mt-3 font-mono text-xs text-muted-foreground">{election.title}</p>
+          </motion.div>
+        ) : notPublished ? (
           <div className="mt-12 rounded-xl border border-dashed p-12 text-center">
             <p className="text-4xl">⏳</p>
             <h2 className="mt-3 font-heading text-xl font-bold">Hasil belum ditampilkan</h2>
