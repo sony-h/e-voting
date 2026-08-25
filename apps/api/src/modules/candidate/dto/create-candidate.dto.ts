@@ -24,4 +24,8 @@ export class CreateCandidateDto {
   @IsString()
   @IsNotEmpty()
   mission!: string;
+
+  @IsString()
+  @IsOptional()
+  program_description?: string;
 }

@@ -135,6 +135,7 @@ const CANDIDATES_MPK: CandidateSeed[] = [
 
 const PORTRAIT_DIR = join(process.cwd(), 'uploads', 'candidate-photo');
 const GALLERY_DIR = join(process.cwd(), 'uploads', 'candidate-image');
+const POSTER_DIR = join(process.cwd(), 'uploads', 'candidate-poster');
 
 async function generateImage(opts: {
   dir: string;
@@ -191,6 +192,7 @@ async function main() {
   if (process.env.NODE_ENV !== 'production') {
     mkdirSync(PORTRAIT_DIR, { recursive: true });
     mkdirSync(GALLERY_DIR, { recursive: true });
+    mkdirSync(POSTER_DIR, { recursive: true });
 
     const elections = [
       {
@@ -322,6 +324,19 @@ async function main() {
           height: 900,
         });
 
+        const posterFile = await generateImage({
+          dir: POSTER_DIR,
+          name: `${prefix}-candidate-${number}-poster`,
+          label: `POSTER ${number}`,
+          sublabel: seed.chairman.toUpperCase(),
+          bg: seed.colors.bg,
+          fg: seed.colors.fg,
+          width: 800,
+          height: 1200,
+        });
+
+        const programDescription = `Program unggulan: ${seed.program.join(', ')}. ${seed.vision}`;
+
         const candidate = await prisma.candidate.upsert({
           where: {
             election_id_candidate_number: {
@@ -334,6 +349,8 @@ async function main() {
             vice_chairman_name: seed.vice,
             vision: seed.vision,
             mission: seed.mission,
+            program_description: programDescription,
+            poster_url: `/uploads/candidate-poster/${posterFile}`,
             photo_url: `/uploads/candidate-photo/${portraitFile}`,
             show_on_landing: true,
           },
@@ -344,6 +361,8 @@ async function main() {
             vice_chairman_name: seed.vice,
             vision: seed.vision,
             mission: seed.mission,
+            program_description: programDescription,
+            poster_url: `/uploads/candidate-poster/${posterFile}`,
             photo_url: `/uploads/candidate-photo/${portraitFile}`,
             show_on_landing: true,
           },

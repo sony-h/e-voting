@@ -84,6 +84,36 @@ export class CandidateController {
     );
   }
 
+  @Post(':id/poster')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: join(process.cwd(), 'uploads', 'candidate-poster'),
+        filename: (_req, file, cb) =>
+          cb(
+            null,
+            `${Date.now()}-${randomUUID()}${extname(file.originalname)}`,
+          ),
+      }),
+      limits: { fileSize: 10 * 1024 * 1024 },
+      fileFilter: (_req, file, cb) =>
+        cb(
+          null,
+          ['image/jpeg', 'image/png', 'image/webp'].includes(file.mimetype),
+        ),
+    }),
+  )
+  uploadPoster(
+    @Param('id') id: string,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    return this.candidateService.updatePoster(
+      id,
+      `/uploads/candidate-poster/${file.filename}`,
+      join(process.cwd(), 'uploads', 'candidate-poster', file.filename),
+    );
+  }
+
   @Post(':id/images')
   @UseInterceptors(
     FilesInterceptor('files', 5, {

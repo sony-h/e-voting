@@ -231,6 +231,30 @@ export default function CandidateDetailPage() {
             )}
           </div>
 
+          {candidate.poster_url && (
+            <motion.div {...fadeUp(0.12)} className="mt-10">
+              <h2 className="font-heading text-xl font-semibold">Poster Kampanye</h2>
+              <div className="mt-3 overflow-hidden rounded-2xl bg-muted/40">
+                <Image
+                  src={uploadUrl(candidate.poster_url) ?? ''}
+                  alt="Poster kampanye"
+                  width={800}
+                  height={1200}
+                  className="aspect-[2/3] w-full object-contain"
+                />
+              </div>
+            </motion.div>
+          )}
+
+          {candidate.program_description && (
+            <motion.section {...fadeUp(0.13)} className="mt-10">
+              <h2 className="font-heading text-xl font-semibold">Program</h2>
+              <p className="mt-3 whitespace-pre-line text-muted-foreground">
+                {candidate.program_description}
+              </p>
+            </motion.section>
+          )}
+
           {images.length > 0 && (
             <motion.div {...fadeUp(0.15)} className="mt-10">
               <h2 className="font-heading text-xl font-semibold">Program &amp; Kegiatan</h2>

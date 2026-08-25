@@ -38,6 +38,15 @@ export function uploadCandidatePhoto(id: string, file: File) {
   });
 }
 
+export function uploadCandidatePoster(id: string, file: File) {
+  const form = new FormData();
+  form.append('file', file);
+  return apiFetch<CandidateWithImages>(`/candidates/${id}/poster`, {
+    method: 'POST',
+    body: form,
+  });
+}
+
 export function uploadCandidateImages(id: string, files: File[]) {
   const form = new FormData();
   files.forEach((file) => form.append('files', file));

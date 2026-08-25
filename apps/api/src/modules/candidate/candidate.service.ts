@@ -64,6 +64,16 @@ export class CandidateService {
     });
   }
 
+  async updatePoster(id: string, posterUrl: string, filePath?: string) {
+    const candidate = await this.ensureExists(id);
+    await this.ensureEditable(candidate.election_id);
+    if (filePath) await this.assertImageSize(filePath);
+    return this.prisma.candidate.update({
+      where: { id },
+      data: { poster_url: posterUrl },
+    });
+  }
+
   async addImages(id: string, files: Express.Multer.File[]) {
     const candidate = await this.ensureExists(id);
     await this.ensureEditable(candidate.election_id);

@@ -16,6 +16,7 @@ import {
   updateCandidate,
   uploadCandidateImages,
   uploadCandidatePhoto,
+  uploadCandidatePoster,
   type CandidateWithImages,
 } from '@/services/candidates';
 import { ElectionSelect } from '@/components/admin/election-select';
@@ -67,6 +68,7 @@ interface CandidateForm {
   vice_chairman_name: string;
   vision: string;
   mission: string;
+  program_description: string;
   show_on_landing: boolean;
 }
 
@@ -76,6 +78,7 @@ const EMPTY_FORM: CandidateForm = {
   vice_chairman_name: '',
   vision: '',
   mission: '',
+  program_description: '',
   show_on_landing: true,
 };
 
@@ -86,6 +89,7 @@ function toForm(c: Candidate): CandidateForm {
     vice_chairman_name: c.vice_chairman_name ?? '',
     vision: c.vision,
     mission: c.mission,
+    program_description: c.program_description ?? '',
     show_on_landing: c.show_on_landing,
   };
 }
@@ -101,10 +105,12 @@ export default function AdminCandidatesPage() {
   const [editing, setEditing] = useState<CandidateWithImages | null>(null);
   const [form, setForm] = useState<CandidateForm>(EMPTY_FORM);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [posterFile, setPosterFile] = useState<File | null>(null);
   const [galleryFiles, setGalleryFiles] = useState<File[]>([]);
   const [galleryToDelete, setGalleryToDelete] = useState<CandidateImage[]>([]);
   const [deleteTarget, setDeleteTarget] = useState<Candidate | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const posterRef = useRef<HTMLInputElement>(null);
   const galleryRef = useRef<HTMLInputElement>(null);
 
   const [search, setSearch] = useState('');
@@ -171,15 +177,18 @@ export default function AdminCandidatesPage() {
         vice_chairman_name: form.vice_chairman_name || undefined,
         vision: form.vision,
         mission: form.mission,
+        program_description: form.program_description || undefined,
         show_on_landing: form.show_on_landing,
       };
       let saved: CandidateWithImages;
       if (editing) {
         saved = await updateCandidate(editing.id, payload);
         if (photoFile) saved = await uploadCandidatePhoto(editing.id, photoFile);
+        if (posterFile) saved = await uploadCandidatePoster(editing.id, posterFile);
       } else {
         saved = await createCandidate(payload);
         if (photoFile) saved = await uploadCandidatePhoto(saved.id, photoFile);
+        if (posterFile) saved = await uploadCandidatePoster(saved.id, posterFile);
       }
       if (galleryFiles.length > 0) {
         await uploadCandidateImages(saved.id, galleryFiles);
@@ -196,9 +205,11 @@ export default function AdminCandidatesPage() {
       setEditing(null);
       setForm(EMPTY_FORM);
       setPhotoFile(null);
+      setPosterFile(null);
       setGalleryFiles([]);
       setGalleryToDelete([]);
       if (fileRef.current) fileRef.current.value = '';
+      if (posterRef.current) posterRef.current.value = '';
       if (galleryRef.current) galleryRef.current.value = '';
     },
     onError: () => toast.error('Gagal menyimpan kandidat.'),
@@ -218,9 +229,11 @@ export default function AdminCandidatesPage() {
     setEditing(null);
     setForm(EMPTY_FORM);
     setPhotoFile(null);
+    setPosterFile(null);
     setGalleryFiles([]);
     setGalleryToDelete([]);
     if (fileRef.current) fileRef.current.value = '';
+    if (posterRef.current) posterRef.current.value = '';
     if (galleryRef.current) galleryRef.current.value = '';
     setDialogOpen(true);
   }
@@ -229,9 +242,11 @@ export default function AdminCandidatesPage() {
     setEditing(candidate);
     setForm(toForm(candidate));
     setPhotoFile(null);
+    setPosterFile(null);
     setGalleryFiles([]);
     setGalleryToDelete([]);
     if (fileRef.current) fileRef.current.value = '';
+    if (posterRef.current) posterRef.current.value = '';
     if (galleryRef.current) galleryRef.current.value = '';
     setDialogOpen(true);
   }
@@ -507,6 +522,29 @@ export default function AdminCandidatesPage() {
                 required
                 aria-required="true"
               />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="program_description">Deskripsi Program</Label>
+              <Textarea
+                id="program_description"
+                rows={4}
+                value={form.program_description}
+                onChange={(e) => setForm({ ...form, program_description: e.target.value })}
+                placeholder="Jelaskan program unggulan kandidat..."
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="poster">Poster Kampanye</Label>
+              <Input
+                id="poster"
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                ref={posterRef}
+                onChange={(e) => setPosterFile(e.target.files?.[0] ?? null)}
+              />
+              <p className="text-xs text-muted-foreground">
+                Maks 10MB · lebar minimal 800px · rasio disarankan 2:3 (poster)
+              </p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="show_on_landing">Tampilkan di Landing Page</Label>

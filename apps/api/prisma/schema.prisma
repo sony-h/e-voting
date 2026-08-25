@@ -67,6 +67,8 @@ model Candidate {
   photo_url           String?
   vision              String
   mission             String
+  program_description String?
+  poster_url          String?
   show_on_landing     Boolean  @default(true)
   created_at          DateTime @default(now())
   updated_at          DateTime @updatedAt

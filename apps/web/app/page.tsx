@@ -422,14 +422,14 @@ export default function HomePage() {
                     animate: { scale: 1, opacity: 1 },
                     transition: { duration: 0.5, delay: 0.25 },
                   })}
-              className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/80 p-1 shadow-sm backdrop-blur transition-transform duration-200 group-hover:scale-[1.04]"
+              className="flex h-9 w-9 sm:h-16 sm:w-16 items-center justify-center rounded-lg bg-white/80 p-1 shadow-sm backdrop-blur transition-transform duration-200 group-hover:scale-[1.04]"
             >
               <Image
                 src="/logo-smansa.png"
                 alt="SMA N 1 Wonosobo"
-                width={36}
-                height={36}
-                className="h-7 w-7 object-contain"
+                width={64}
+                height={64}
+                className="h-7 w-7 object-contain sm:h-14 sm:w-14"
                 priority
               />
             </motion.div>
@@ -441,7 +441,7 @@ export default function HomePage() {
                     animate: { opacity: 1, x: 0 },
                     transition: { duration: 0.5, delay: 0.3 },
                   })}
-              className="font-heading font-semibold tracking-tight text-foreground drop-shadow-[0_1px_2px_rgba(0,0,0,0.1)]"
+              className="text-2xl font-heading font-semibold text-gray-100 tracking-tight text-foreground drop-shadow-[0_1px_2px_rgba(0,0,0,0.1)]"
             >
               SMA N 1 Wonosobo
             </motion.span>
@@ -459,9 +459,9 @@ export default function HomePage() {
               <Image
                 src="/logo-osis.png"
                 alt="OSIS"
-                width={32}
-                height={32}
-                className="h-8 w-8 object-contain drop-shadow-[0_1px_2px_rgba(0,0,0,0.1)] sm:h-9 sm:w-9"
+                width={64}
+                height={64}
+                className="h-8 w-8 object-contain drop-shadow-[0_1px_2px_rgba(0,0,0,0.1)] sm:h-16 sm:w-16"
               />
             </motion.div>
             <motion.div
@@ -476,9 +476,9 @@ export default function HomePage() {
               <Image
                 src="/logo-mpk.png"
                 alt="MPK"
-                width={32}
-                height={32}
-                className="h-8 w-8 object-contain drop-shadow-[0_1px_2px_rgba(0,0,0,0.1)] sm:h-9 sm:w-9"
+                width={64}
+                height={64}
+                className="h-8 w-8 object-contain drop-shadow-[0_1px_2px_rgba(0,0,0,0.1)] sm:h-16 sm:w-16"
               />
             </motion.div>
           </div>

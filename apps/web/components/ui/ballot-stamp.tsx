@@ -17,7 +17,7 @@ const STATUS_META: Record<BallotStatus, { label: string; className: string }> = 
   },
   DRAFT: {
     label: 'Draft',
-    className: 'border-border text-muted-foreground',
+    className: 'border-border text-muted-foreground text-gray-800',
   },
 };
 

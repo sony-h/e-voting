@@ -42,6 +42,8 @@ export interface Candidate {
   photo_url: string | null;
   vision: string;
   mission: string;
+  program_description: string | null;
+  poster_url: string | null;
   show_on_landing: boolean;
   created_at: Date;
   updated_at: Date;
