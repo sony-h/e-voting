@@ -392,10 +392,10 @@ export default function HomePage() {
       </motion.div>
 
       <section className="relative isolate flex min-h-screen flex-col items-center justify-center overflow-hidden px-6 pb-16 pt-24">
-        {/* School photo backdrop — hero only, replace public/school-hero-bg.jpg to update. Fallback CSS mesh stays underneath. */}
+        {/* OSIS & MPK photo backdrop — hero only, replace public/osis-mpk-bg.webp to update. Fallback CSS mesh stays underneath. */}
         <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
           <Image
-            src="/school-hero-bg.jpg"
+            src="/osis-mpk-bg.webp"
             alt=""
             fill
             priority
@@ -445,6 +445,42 @@ export default function HomePage() {
             >
               SMA N 1 Wonosobo
             </motion.span>
+          </div>
+          <div className="flex items-center gap-3">
+            <motion.div
+              {...(reduced
+                ? {}
+                : {
+                    initial: { opacity: 0, x: 8 },
+                    animate: { opacity: 1, x: 0 },
+                    transition: { duration: 0.5, delay: 0.35 },
+                  })}
+            >
+              <Image
+                src="/logo-osis.png"
+                alt="OSIS"
+                width={32}
+                height={32}
+                className="h-8 w-8 object-contain drop-shadow-[0_1px_2px_rgba(0,0,0,0.1)] sm:h-9 sm:w-9"
+              />
+            </motion.div>
+            <motion.div
+              {...(reduced
+                ? {}
+                : {
+                    initial: { opacity: 0, x: 8 },
+                    animate: { opacity: 1, x: 0 },
+                    transition: { duration: 0.5, delay: 0.4 },
+                  })}
+            >
+              <Image
+                src="/logo-mpk.png"
+                alt="MPK"
+                width={32}
+                height={32}
+                className="h-8 w-8 object-contain drop-shadow-[0_1px_2px_rgba(0,0,0,0.1)] sm:h-9 sm:w-9"
+              />
+            </motion.div>
           </div>
         </motion.header>
         <motion.p
