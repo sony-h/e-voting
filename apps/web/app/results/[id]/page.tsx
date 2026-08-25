@@ -2,7 +2,7 @@
 
 /* eslint-disable react-hooks/set-state-in-effect -- revealing countdown state sync is intentional */
 
-import { use, useEffect, useRef, useState } from 'react';
+import { use, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { motion } from 'motion/react';
 import { useQuery } from '@tanstack/react-query';
@@ -38,19 +38,19 @@ export default function ElectionResultsPage({ params }: { params: Promise<{ id: 
 
   const [revealing, setRevealing] = useState(false);
   const [countdown, setCountdown] = useState(10);
-  const wasNotPublishedRef = useRef(false);
+  const [hasPendingReveal, setHasPendingReveal] = useState(false);
 
   useEffect(() => {
-    if (notPublished) wasNotPublishedRef.current = true;
+    if (notPublished) setHasPendingReveal(true);
   }, [notPublished]);
 
   useEffect(() => {
-    if (results && wasNotPublishedRef.current && !revealing) {
-      wasNotPublishedRef.current = false;
+    if (results && hasPendingReveal && !revealing) {
+      setHasPendingReveal(false);
       setRevealing(true);
       setCountdown(10);
     }
-  }, [results, revealing]);
+  }, [results, hasPendingReveal, revealing]);
 
   useEffect(() => {
     if (!revealing) return;
@@ -66,7 +66,7 @@ export default function ElectionResultsPage({ params }: { params: Promise<{ id: 
     if (notPublished && revealing) {
       setRevealing(false);
       setCountdown(10);
-      wasNotPublishedRef.current = false;
+      setHasPendingReveal(false);
     }
   }, [notPublished, revealing]);
 
@@ -128,7 +128,7 @@ export default function ElectionResultsPage({ params }: { params: Promise<{ id: 
           <h1 className="mt-2 font-heading text-3xl font-bold sm:text-4xl">{election.title}</h1>
         </div>
 
-        {revealing ? (
+        {revealing || (results && hasPendingReveal) ? (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}

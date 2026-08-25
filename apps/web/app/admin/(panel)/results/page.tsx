@@ -17,7 +17,7 @@ import { Button } from '@/components/ui/button';
 import { FestiveResults, FireConfetti } from '@/components/results/festive-results';
 import { Toaster } from '@/components/ui/sonner';
 
-const REVEAL_DELAY_MS = 12500;
+const REVEAL_DELAY_MS = 15000;
 
 export default function AdminResultsPage() {
   const queryClient = useQueryClient();

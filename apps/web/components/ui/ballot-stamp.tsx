@@ -17,7 +17,7 @@ const STATUS_META: Record<BallotStatus, { label: string; className: string }> = 
   },
   DRAFT: {
     label: 'Draft',
-    className: 'border-border text-muted-foreground text-gray-800',
+    className: 'border-border text-muted-foreground',
   },
 };
 
@@ -26,7 +26,7 @@ export function BallotStamp({ status, className }: { status: BallotStatus; class
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1.5 rounded-full border-2 border-dashed px-3 py-1 text-xs font-semibold tracking-wide',
+        'inline-flex items-center bg-gray-50 gap-1.5 rounded-full border-2 border-dashed px-3 py-1 text-xs font-semibold tracking-wide',
         meta.className,
         className,
       )}
