@@ -10,7 +10,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { CreateCandidateDto } from './dto/create-candidate.dto';
 import { UpdateCandidateDto } from './dto/update-candidate.dto';
 
-const MIN_IMAGE_WIDTH = 800;
+const MIN_IMAGE_SHORT_SIDE = 720;
 
 @Injectable()
 export class CandidateService {
@@ -101,11 +101,12 @@ export class CandidateService {
   private async assertImageSize(filePath: string) {
     try {
       const metadata = await sharp(filePath).metadata();
-      if (!metadata.width || metadata.width < MIN_IMAGE_WIDTH) {
+      const shortSide = Math.min(metadata.width ?? 0, metadata.height ?? 0);
+      if (shortSide < MIN_IMAGE_SHORT_SIDE) {
         await unlink(filePath).catch(() => undefined);
         throw new BadRequestException({
           errorCode: 'IMAGE_TOO_SMALL',
-          message: `Image width must be at least ${MIN_IMAGE_WIDTH}px.`,
+          message: `Image shortest side must be at least ${MIN_IMAGE_SHORT_SIDE}px.`,
         });
       }
     } catch (error) {

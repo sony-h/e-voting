@@ -320,8 +320,8 @@ async function main() {
           sublabel: seed.chairman.toUpperCase(),
           bg: seed.colors.bg,
           fg: seed.colors.fg,
-          width: 1200,
-          height: 900,
+          width: 900,
+          height: 1200,
         });
 
         const posterFile = await generateImage({
@@ -373,6 +373,8 @@ async function main() {
         });
 
         for (let g = 0; g < seed.program.length; g++) {
+          // First image native 3:4; second deliberately 9:16 to demo the blur-pad frame.
+          const isStoryRatio = g === 1;
           const galleryFile = await generateImage({
             dir: GALLERY_DIR,
             name: `${prefix}-candidate-${number}-program-${g + 1}`,
@@ -380,8 +382,8 @@ async function main() {
             sublabel: `${seed.chairman.toUpperCase()} · PROGRAM ${g + 1}`,
             bg: seed.colors.bg,
             fg: seed.colors.fg,
-            width: 1280,
-            height: 720,
+            width: isStoryRatio ? 720 : 900,
+            height: isStoryRatio ? 1280 : 1200,
           });
           await prisma.candidateImage.create({
             data: {

@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
@@ -14,6 +13,7 @@ import { formatPeriod } from '@/lib/format';
 import { fadeUp, EASE } from '@/lib/animations';
 import { BallotStamp, type BallotStatus } from '@/components/ui/ballot-stamp';
 import { Skeleton } from '@/components/ui/skeleton';
+import { PortraitFrame } from '@/components/ui/portrait-frame';
 
 function GalleryCarousel({ images }: { images: CandidateImage[] }) {
   const [index, setIndex] = useState(0);
@@ -24,21 +24,11 @@ function GalleryCarousel({ images }: { images: CandidateImage[] }) {
 
   return (
     <div>
-      <div className="relative overflow-hidden rounded-2xl bg-muted/40">
-        <motion.div
-          key={current.id}
-          initial={{ opacity: 0, x: 24 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.35, ease: EASE }}
-        >
-          <Image
-            src={uploadUrl(current.url) ?? ''}
-            alt={current.caption ?? 'Gambar program'}
-            width={1280}
-            height={720}
-            className="aspect-video w-full object-contain"
-          />
-        </motion.div>
+      <div className="relative">
+        <PortraitFrame
+          src={uploadUrl(current.url) ?? ''}
+          alt={current.caption ?? 'Gambar program'}
+        />
         {current.caption && (
           <motion.p
             initial={{ opacity: 0, y: 8 }}
@@ -197,16 +187,9 @@ export default function CandidateDetailPage() {
 
           <motion.div {...heroAnim} className="relative mt-8">
             {photo ? (
-              <Image
-                src={photo}
-                alt={candidate.chairman_name}
-                width={1200}
-                height={900}
-                priority
-                className="aspect-[4/3] w-full rounded-2xl object-cover shadow-sm"
-              />
+              <PortraitFrame src={photo} alt={candidate.chairman_name} priority />
             ) : (
-              <div className="flex aspect-[4/3] w-full items-center justify-center rounded-2xl bg-muted text-sm text-muted-foreground">
+              <div className="flex aspect-[3/4] w-full items-center justify-center rounded-2xl bg-muted text-sm text-muted-foreground">
                 No foto
               </div>
             )}
@@ -250,13 +233,11 @@ export default function CandidateDetailPage() {
           {candidate.poster_url && (
             <motion.div {...fadeUp(0.12)} className="mt-10">
               <h2 className="font-heading text-xl font-semibold">Poster Kampanye</h2>
-              <div className="mt-3 overflow-hidden rounded-2xl bg-muted/40">
-                <Image
+              <div className="mt-3 overflow-hidden rounded-2xl">
+                <PortraitFrame
                   src={uploadUrl(candidate.poster_url) ?? ''}
                   alt="Poster kampanye"
-                  width={800}
-                  height={1200}
-                  className="aspect-[2/3] w-full object-contain"
+                  ratio="2/3"
                 />
               </div>
             </motion.div>

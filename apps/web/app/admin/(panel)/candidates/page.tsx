@@ -476,7 +476,7 @@ export default function AdminCandidatesPage() {
                   onChange={(e) => setPhotoFile(e.target.files?.[0] ?? null)}
                 />
                 <p className="text-xs text-muted-foreground">
-                  Maks 10MB · lebar minimal 800px · rasio disarankan 4:3
+                  Maks 10MB · sisi terpendek minimal 720px · rasio disarankan 3:4 (potret)
                 </p>
               </div>
             </div>
@@ -543,7 +543,7 @@ export default function AdminCandidatesPage() {
                 onChange={(e) => setPosterFile(e.target.files?.[0] ?? null)}
               />
               <p className="text-xs text-muted-foreground">
-                Maks 10MB · lebar minimal 800px · rasio disarankan 2:3 (poster)
+                Maks 10MB · sisi terpendek minimal 720px · rasio disarankan 2:3 (poster)
               </p>
             </div>
             <div className="space-y-2">
@@ -573,8 +573,8 @@ export default function AdminCandidatesPage() {
                 }}
               />
               <p className="text-xs text-muted-foreground">
-                Format jpeg/png/webp · maks 10MB per file · lebar minimal 800px · rasio disarankan
-                16:9
+                Format jpeg/png/webp · maks 10MB per file · sisi terpendek minimal 720px · rasio
+                disarankan 3:4 (potret), 9:16 diperbolehkan
               </p>
               {(existingImages.length > 0 || galleryFiles.length > 0) && (
                 <div className="grid grid-cols-3 gap-2">

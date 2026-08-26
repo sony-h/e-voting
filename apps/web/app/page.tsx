@@ -19,6 +19,7 @@ import { formatPeriod } from '@/lib/format';
 import { uploadUrl } from '@/lib/images';
 import { fadeUp } from '@/lib/animations';
 import { BallotStamp, type BallotStatus } from '@/components/ui/ballot-stamp';
+import { PortraitFrame } from '@/components/ui/portrait-frame';
 
 function FloatingBallot() {
   const reduced = useReducedMotion();
@@ -156,12 +157,9 @@ function ProgramCarousel({ images }: { images: CandidateWithImages['images'] }) 
           animate={{ opacity: 1 }}
           transition={{ duration: 0.28 }}
         >
-          <Image
+          <PortraitFrame
             src={uploadUrl(current.url) ?? ''}
             alt={current.caption ?? 'Gambar program'}
-            width={1280}
-            height={720}
-            className="aspect-video w-full object-cover"
           />
         </motion.div>
         {current.caption && (
@@ -224,15 +222,13 @@ function CandidateCard({ candidate }: { candidate: CandidateWithImages }) {
       <Link href={`/candidate/${candidate.id}`} className="group flex h-full flex-col">
         <div className="relative">
           {candidate.photo_url ? (
-            <Image
+            <PortraitFrame
               src={uploadUrl(candidate.photo_url) ?? ''}
               alt={candidate.chairman_name}
-              width={1200}
-              height={900}
-              className="aspect-[4/3] w-full object-cover"
+              priority
             />
           ) : (
-            <div className="flex aspect-[4/3] w-full items-center justify-center bg-muted text-sm text-muted-foreground">
+            <div className="flex aspect-[3/4] w-full items-center justify-center bg-muted text-sm text-muted-foreground">
               No foto
             </div>
           )}
@@ -441,7 +437,7 @@ export default function HomePage() {
                     animate: { opacity: 1, x: 0 },
                     transition: { duration: 0.5, delay: 0.3 },
                   })}
-              className="text-2xl font-heading font-semibold text-gray-100 tracking-tight text-foreground drop-shadow-[0_1px_2px_rgba(0,0,0,0.1)]"
+              className="sm:text-2xl font-heading font-semibold text-gray-100 tracking-tight text-foreground drop-shadow-[0_1px_2px_rgba(0,0,0,0.1)]"
             >
               SMA N 1 Wonosobo
             </motion.span>
@@ -487,7 +483,13 @@ export default function HomePage() {
           {...heroAnim}
           className="font-mono text-xs uppercase tracking-[0.3em] text-foreground drop-shadow-[0_1px_2px_rgba(0,0,0,0.12)]"
         >
-          Pemilihan Organisasi{election ? ` · ${election.academic_year}` : ''}
+          <span
+            className={
+              'inline-flex items-center opacity-70 bg-gray-50 gap-1.5 rounded-full border-2 border-dashed px-3 py-1 text-xs font-semibold tracking-wide'
+            }
+          >
+            Pemilihan Organisasi{election ? ` · ${election.academic_year}` : ''}
+          </span>
         </motion.p>
 
         <motion.h1
