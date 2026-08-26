@@ -221,14 +221,19 @@ export default function CandidateDetailPage() {
           </motion.div>
 
           <div className="mt-6 text-center">
-            <motion.h1 {...fadeUp(0.1)} className="font-heading text-3xl font-bold sm:text-4xl">
+            <motion.h1
+              {...fadeUp(0.1)}
+              className="font-heading text-3xl font-bold leading-snug sm:text-4xl"
+            >
               {candidate.chairman_name}
+              {candidate.vice_chairman_name && (
+                <>
+                  {' '}
+                  <span className="text-muted-foreground">&amp;</span>{' '}
+                  {candidate.vice_chairman_name}
+                </>
+              )}
             </motion.h1>
-            {candidate.vice_chairman_name && (
-              <motion.p {...fadeUp(0.18)} className="mt-2 text-lg text-muted-foreground">
-                & {candidate.vice_chairman_name}
-              </motion.p>
-            )}
           </div>
 
           {candidate.poster_url && (
@@ -245,6 +250,17 @@ export default function CandidateDetailPage() {
               </div>
             </motion.div>
           )}
+
+          <div className="mt-10 space-y-8">
+            <motion.section {...fadeUp()}>
+              <h2 className="font-heading text-xl font-semibold">Visi</h2>
+              <p className="mt-3 whitespace-pre-line text-muted-foreground">{candidate.vision}</p>
+            </motion.section>
+            <motion.section {...fadeUp(0.1)}>
+              <h2 className="font-heading text-xl font-semibold">Misi</h2>
+              <p className="mt-3 whitespace-pre-line text-muted-foreground">{candidate.mission}</p>
+            </motion.section>
+          </div>
 
           {candidate.program_description && (
             <motion.section {...fadeUp(0.13)} className="mt-10">
@@ -263,17 +279,6 @@ export default function CandidateDetailPage() {
               </div>
             </motion.div>
           )}
-
-          <div className="mt-10 space-y-8">
-            <motion.section {...fadeUp()}>
-              <h2 className="font-heading text-xl font-semibold">Visi</h2>
-              <p className="mt-3 whitespace-pre-line text-muted-foreground">{candidate.vision}</p>
-            </motion.section>
-            <motion.section {...fadeUp(0.1)}>
-              <h2 className="font-heading text-xl font-semibold">Misi</h2>
-              <p className="mt-3 whitespace-pre-line text-muted-foreground">{candidate.mission}</p>
-            </motion.section>
-          </div>
 
           <motion.div
             {...fadeUp()}
