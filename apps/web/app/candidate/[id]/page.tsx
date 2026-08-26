@@ -236,6 +236,17 @@ export default function CandidateDetailPage() {
             </motion.h1>
           </div>
 
+          <div className="mt-10 space-y-8">
+            <motion.section {...fadeUp()}>
+              <h2 className="font-heading text-xl font-semibold">Visi</h2>
+              <p className="mt-3 whitespace-pre-line text-muted-foreground">{candidate.vision}</p>
+            </motion.section>
+            <motion.section {...fadeUp(0.1)}>
+              <h2 className="font-heading text-xl font-semibold">Misi</h2>
+              <p className="mt-3 whitespace-pre-line text-muted-foreground">{candidate.mission}</p>
+            </motion.section>
+          </div>
+
           {candidate.poster_url && (
             <motion.div {...fadeUp(0.12)} className="mt-10">
               <h2 className="font-heading text-xl font-semibold">Poster Kampanye</h2>
@@ -250,17 +261,6 @@ export default function CandidateDetailPage() {
               </div>
             </motion.div>
           )}
-
-          <div className="mt-10 space-y-8">
-            <motion.section {...fadeUp()}>
-              <h2 className="font-heading text-xl font-semibold">Visi</h2>
-              <p className="mt-3 whitespace-pre-line text-muted-foreground">{candidate.vision}</p>
-            </motion.section>
-            <motion.section {...fadeUp(0.1)}>
-              <h2 className="font-heading text-xl font-semibold">Misi</h2>
-              <p className="mt-3 whitespace-pre-line text-muted-foreground">{candidate.mission}</p>
-            </motion.section>
-          </div>
 
           {candidate.program_description && (
             <motion.section {...fadeUp(0.13)} className="mt-10">
