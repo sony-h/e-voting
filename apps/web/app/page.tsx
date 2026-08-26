@@ -240,7 +240,15 @@ function CandidateCarousel({ candidates }: { candidates: CandidateWithImages[] }
       <div
         ref={trackRef}
         onScroll={onScroll}
-        className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:grid sm:grid-cols-2 sm:snap-none sm:overflow-visible sm:pb-0 lg:grid-cols-3"
+        className={[
+          'flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden',
+          'sm:grid sm:snap-none sm:overflow-visible sm:pb-0',
+          candidates.length === 1
+            ? 'sm:grid-cols-1 lg:grid-cols-1 sm:mx-auto sm:max-w-md lg:max-w-md'
+            : candidates.length === 2
+              ? 'sm:grid-cols-2 lg:grid-cols-2 lg:mx-auto lg:max-w-4xl'
+              : 'sm:grid-cols-2 lg:grid-cols-3',
+        ].join(' ')}
       >
         {candidates.map((candidate) => (
           <motion.div
