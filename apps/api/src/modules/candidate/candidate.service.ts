@@ -6,11 +6,24 @@ import {
 import sharp from 'sharp';
 import { unlink } from 'fs/promises';
 import { join } from 'path';
+import { ImageType } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateCandidateDto } from './dto/create-candidate.dto';
 import { UpdateCandidateDto } from './dto/update-candidate.dto';
 
 const MIN_IMAGE_SHORT_SIDE = 720;
+
+const IMAGE_LIMITS: Record<ImageType, number> = {
+  PROGRAM: 5,
+  PHOTO: 5,
+  POSTER: 3,
+};
+
+function toImageType(value?: string): ImageType {
+  return (Object.values(ImageType) as string[]).includes(value ?? '')
+    ? (value as ImageType)
+    : ImageType.PROGRAM;
+}
 
 @Injectable()
 export class CandidateService {
@@ -54,37 +67,29 @@ export class CandidateService {
     return this.prisma.candidate.delete({ where: { id } });
   }
 
-  async updatePhoto(id: string, photoUrl: string, filePath?: string) {
+  async addImages(
+    id: string,
+    files: Express.Multer.File[],
+    typeValue?: string,
+  ) {
     const candidate = await this.ensureExists(id);
     await this.ensureEditable(candidate.election_id);
-    if (filePath) await this.assertImageSize(filePath);
-    return this.prisma.candidate.update({
-      where: { id },
-      data: { photo_url: photoUrl },
-    });
-  }
-
-  async updatePoster(id: string, posterUrl: string, filePath?: string) {
-    const candidate = await this.ensureExists(id);
-    await this.ensureEditable(candidate.election_id);
-    if (filePath) await this.assertImageSize(filePath);
-    return this.prisma.candidate.update({
-      where: { id },
-      data: { poster_url: posterUrl },
-    });
-  }
-
-  async addImages(id: string, files: Express.Multer.File[]) {
-    const candidate = await this.ensureExists(id);
-    await this.ensureEditable(candidate.election_id);
+    const type = toImageType(typeValue);
     for (const file of files) {
       await this.assertImageSize(
         join(process.cwd(), 'uploads', 'candidate-image', file.filename),
       );
     }
     const existing = await this.prisma.candidateImage.count({
-      where: { candidate_id: id },
+      where: { candidate_id: id, type },
     });
+    const limit = IMAGE_LIMITS[type];
+    if (existing + files.length > limit) {
+      throw new BadRequestException({
+        errorCode: 'MAX_IMAGES_REACHED',
+        message: `Maksimal ${limit} gambar tipe ${type.toLowerCase()}.`,
+      });
+    }
     return this.prisma.$transaction(
       files.map((file, index) =>
         this.prisma.candidateImage.create({
@@ -92,6 +97,7 @@ export class CandidateService {
             candidate_id: id,
             url: `/uploads/candidate-image/${file.filename}`,
             sort_order: existing + index,
+            type,
           },
         }),
       ),

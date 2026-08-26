@@ -33,17 +33,17 @@ export interface Student {
   updated_at: Date;
 }
 
+export type CandidateImageType = 'PROGRAM' | 'PHOTO' | 'POSTER';
+
 export interface Candidate {
   id: string;
   election_id: string;
   candidate_number: number;
   chairman_name: string;
   vice_chairman_name: string | null;
-  photo_url: string | null;
   vision: string;
   mission: string;
   program_description: string | null;
-  poster_url: string | null;
   show_on_landing: boolean;
   created_at: Date;
   updated_at: Date;
@@ -56,6 +56,7 @@ export interface CandidateImage {
   url: string;
   caption: string | null;
   sort_order: number;
+  type: CandidateImageType;
   created_at: Date;
 }
 

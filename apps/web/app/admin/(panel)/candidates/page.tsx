@@ -15,8 +15,6 @@ import {
   listCandidates,
   updateCandidate,
   uploadCandidateImages,
-  uploadCandidatePhoto,
-  uploadCandidatePoster,
   type CandidateWithImages,
 } from '@/services/candidates';
 import { ElectionSelect } from '@/components/admin/election-select';
@@ -104,12 +102,14 @@ export default function AdminCandidatesPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<CandidateWithImages | null>(null);
   const [form, setForm] = useState<CandidateForm>(EMPTY_FORM);
-  const [photoFile, setPhotoFile] = useState<File | null>(null);
-  const [posterFile, setPosterFile] = useState<File | null>(null);
+  const [photoFiles, setPhotoFiles] = useState<File[]>([]);
+  const [posterFiles, setPosterFiles] = useState<File[]>([]);
   const [galleryFiles, setGalleryFiles] = useState<File[]>([]);
+  const [photoToDelete, setPhotoToDelete] = useState<CandidateImage[]>([]);
+  const [posterToDelete, setPosterToDelete] = useState<CandidateImage[]>([]);
   const [galleryToDelete, setGalleryToDelete] = useState<CandidateImage[]>([]);
   const [deleteTarget, setDeleteTarget] = useState<Candidate | null>(null);
-  const fileRef = useRef<HTMLInputElement>(null);
+  const photoRef = useRef<HTMLInputElement>(null);
   const posterRef = useRef<HTMLInputElement>(null);
   const galleryRef = useRef<HTMLInputElement>(null);
 
@@ -183,15 +183,23 @@ export default function AdminCandidatesPage() {
       let saved: CandidateWithImages;
       if (editing) {
         saved = await updateCandidate(editing.id, payload);
-        if (photoFile) saved = await uploadCandidatePhoto(editing.id, photoFile);
-        if (posterFile) saved = await uploadCandidatePoster(editing.id, posterFile);
       } else {
         saved = await createCandidate(payload);
-        if (photoFile) saved = await uploadCandidatePhoto(saved.id, photoFile);
-        if (posterFile) saved = await uploadCandidatePoster(saved.id, posterFile);
+      }
+      if (photoFiles.length > 0) {
+        await uploadCandidateImages(saved.id, photoFiles, 'PHOTO');
+      }
+      if (posterFiles.length > 0) {
+        await uploadCandidateImages(saved.id, posterFiles, 'POSTER');
       }
       if (galleryFiles.length > 0) {
-        await uploadCandidateImages(saved.id, galleryFiles);
+        await uploadCandidateImages(saved.id, galleryFiles, 'PROGRAM');
+      }
+      for (const image of photoToDelete) {
+        await deleteCandidateImage(image.id);
+      }
+      for (const image of posterToDelete) {
+        await deleteCandidateImage(image.id);
       }
       for (const image of galleryToDelete) {
         await deleteCandidateImage(image.id);
@@ -204,11 +212,13 @@ export default function AdminCandidatesPage() {
       setDialogOpen(false);
       setEditing(null);
       setForm(EMPTY_FORM);
-      setPhotoFile(null);
-      setPosterFile(null);
+      setPhotoFiles([]);
+      setPosterFiles([]);
       setGalleryFiles([]);
+      setPhotoToDelete([]);
+      setPosterToDelete([]);
       setGalleryToDelete([]);
-      if (fileRef.current) fileRef.current.value = '';
+      if (photoRef.current) photoRef.current.value = '';
       if (posterRef.current) posterRef.current.value = '';
       if (galleryRef.current) galleryRef.current.value = '';
     },
@@ -228,11 +238,13 @@ export default function AdminCandidatesPage() {
   function openCreate() {
     setEditing(null);
     setForm(EMPTY_FORM);
-    setPhotoFile(null);
-    setPosterFile(null);
+    setPhotoFiles([]);
+    setPosterFiles([]);
     setGalleryFiles([]);
+    setPhotoToDelete([]);
+    setPosterToDelete([]);
     setGalleryToDelete([]);
-    if (fileRef.current) fileRef.current.value = '';
+    if (photoRef.current) photoRef.current.value = '';
     if (posterRef.current) posterRef.current.value = '';
     if (galleryRef.current) galleryRef.current.value = '';
     setDialogOpen(true);
@@ -241,19 +253,31 @@ export default function AdminCandidatesPage() {
   function openEdit(candidate: CandidateWithImages) {
     setEditing(candidate);
     setForm(toForm(candidate));
-    setPhotoFile(null);
-    setPosterFile(null);
+    setPhotoFiles([]);
+    setPosterFiles([]);
     setGalleryFiles([]);
+    setPhotoToDelete([]);
+    setPosterToDelete([]);
     setGalleryToDelete([]);
-    if (fileRef.current) fileRef.current.value = '';
+    if (photoRef.current) photoRef.current.value = '';
     if (posterRef.current) posterRef.current.value = '';
     if (galleryRef.current) galleryRef.current.value = '';
     setDialogOpen(true);
   }
 
   const editable = !!selectedElection && isEditable(selectedElection.status);
+  const existingPhotos =
+    editing?.images.filter(
+      (img) => img.type === 'PHOTO' && !photoToDelete.some((d) => d.id === img.id),
+    ) ?? [];
+  const existingPosters =
+    editing?.images.filter(
+      (img) => img.type === 'POSTER' && !posterToDelete.some((d) => d.id === img.id),
+    ) ?? [];
   const existingImages =
-    editing?.images.filter((img) => !galleryToDelete.some((d) => d.id === img.id)) ?? [];
+    editing?.images.filter(
+      (img) => img.type === 'PROGRAM' && !galleryToDelete.some((d) => d.id === img.id),
+    ) ?? [];
 
   return (
     <div className="space-y-6">
@@ -346,19 +370,27 @@ export default function AdminCandidatesPage() {
                         {candidate.candidate_number}
                       </TableCell>
                       <TableCell>
-                        {candidate.photo_url ? (
-                          <Image
-                            src={`${API_BASE_URL.replace('/api/v1', '')}${candidate.photo_url}`}
-                            alt={candidate.chairman_name}
-                            width={48}
-                            height={48}
-                            className="h-12 w-12 rounded-lg object-cover"
-                          />
-                        ) : (
-                          <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-muted text-xs text-muted-foreground">
-                            No foto
-                          </div>
-                        )}
+                        {(() => {
+                          const firstPhoto = (candidate.images ?? []).find(
+                            (img) => img.type === 'PHOTO',
+                          );
+                          if (firstPhoto) {
+                            return (
+                              <Image
+                                src={`${API_BASE_URL.replace('/api/v1', '')}${firstPhoto.url}`}
+                                alt={candidate.chairman_name}
+                                width={48}
+                                height={48}
+                                className="h-12 w-12 rounded-lg object-cover"
+                              />
+                            );
+                          }
+                          return (
+                            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-muted text-xs text-muted-foreground">
+                              No foto
+                            </div>
+                          );
+                        })()}
                       </TableCell>
                       <TableCell
                         className="max-w-[16ch] truncate font-medium"
@@ -467,17 +499,57 @@ export default function AdminCandidatesPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="photo">Foto</Label>
+                <Label>Foto Kandidat</Label>
                 <Input
-                  id="photo"
                   type="file"
                   accept="image/jpeg,image/png,image/webp"
-                  ref={fileRef}
-                  onChange={(e) => setPhotoFile(e.target.files?.[0] ?? null)}
+                  multiple
+                  ref={photoRef}
+                  onChange={(e) => {
+                    const files = Array.from(e.target.files ?? []);
+                    if (files.length > 5) toast.error(`Maks 5 foto, ${files.length - 5} diabaikan`);
+                    setPhotoFiles(files.slice(0, 5));
+                  }}
                 />
                 <p className="text-xs text-muted-foreground">
-                  Maks 10MB · sisi terpendek minimal 720px · rasio disarankan 3:4 (potret)
+                  Maksimal 5 foto · Maks 10MB per file · sisi terpendek minimal 720px · rasio 3:4
                 </p>
+                {(existingPhotos.length > 0 || photoFiles.length > 0) && (
+                  <div className="grid grid-cols-3 gap-2">
+                    {existingPhotos.map((image) => (
+                      <div key={image.id} className="group relative">
+                        <Image
+                          src={`${API_BASE_URL.replace('/api/v1', '')}${image.url}`}
+                          alt="Foto kandidat"
+                          width={120}
+                          height={120}
+                          className="h-20 w-full rounded-lg object-cover"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setPhotoToDelete([...photoToDelete, image])}
+                          className="absolute right-1 top-1 rounded-full bg-destructive px-1.5 py-0.5 text-[10px] font-semibold text-white"
+                        >
+                          Hapus
+                        </button>
+                      </div>
+                    ))}
+                    {photoFiles.map((file, index) => (
+                      <div key={index} className="relative">
+                        <Image
+                          src={URL.createObjectURL(file)}
+                          alt="Foto baru"
+                          width={120}
+                          height={120}
+                          className="h-20 w-full rounded-lg object-cover"
+                        />
+                        <span className="absolute right-1 top-1 rounded-full bg-primary px-1.5 py-0.5 text-[10px] font-semibold text-white">
+                          Baru
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
             <div className="space-y-2">
@@ -534,17 +606,57 @@ export default function AdminCandidatesPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="poster">Poster Kampanye</Label>
+              <Label>Poster Kampanye</Label>
               <Input
-                id="poster"
                 type="file"
                 accept="image/jpeg,image/png,image/webp"
+                multiple
                 ref={posterRef}
-                onChange={(e) => setPosterFile(e.target.files?.[0] ?? null)}
+                onChange={(e) => {
+                  const files = Array.from(e.target.files ?? []);
+                  if (files.length > 3) toast.error(`Maks 3 poster, ${files.length - 3} diabaikan`);
+                  setPosterFiles(files.slice(0, 3));
+                }}
               />
               <p className="text-xs text-muted-foreground">
-                Maks 10MB · sisi terpendek minimal 720px · rasio disarankan 2:3 (poster)
+                Maksimal 3 poster · Maks 10MB per file · sisi terpendek minimal 720px · rasio 2:3
               </p>
+              {(existingPosters.length > 0 || posterFiles.length > 0) && (
+                <div className="grid grid-cols-3 gap-2">
+                  {existingPosters.map((image) => (
+                    <div key={image.id} className="group relative">
+                      <Image
+                        src={`${API_BASE_URL.replace('/api/v1', '')}${image.url}`}
+                        alt="Poster kampanye"
+                        width={120}
+                        height={120}
+                        className="h-20 w-full rounded-lg object-cover"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setPosterToDelete([...posterToDelete, image])}
+                        className="absolute right-1 top-1 rounded-full bg-destructive px-1.5 py-0.5 text-[10px] font-semibold text-white"
+                      >
+                        Hapus
+                      </button>
+                    </div>
+                  ))}
+                  {posterFiles.map((file, index) => (
+                    <div key={index} className="relative">
+                      <Image
+                        src={URL.createObjectURL(file)}
+                        alt="Poster baru"
+                        width={120}
+                        height={120}
+                        className="h-20 w-full rounded-lg object-cover"
+                      />
+                      <span className="absolute right-1 top-1 rounded-full bg-primary px-1.5 py-0.5 text-[10px] font-semibold text-white">
+                        Baru
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="show_on_landing">Tampilkan di Landing Page</Label>

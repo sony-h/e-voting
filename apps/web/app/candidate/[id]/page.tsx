@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
@@ -10,73 +9,13 @@ import { listElections } from '@/services/elections';
 import { listPublicCandidates } from '@/services/candidates';
 import { uploadUrl } from '@/lib/images';
 import { formatPeriod } from '@/lib/format';
-import { fadeUp, EASE } from '@/lib/animations';
+import { fadeUp } from '@/lib/animations';
 import { BallotStamp, type BallotStatus } from '@/components/ui/ballot-stamp';
 import { Skeleton } from '@/components/ui/skeleton';
-import { PortraitFrame } from '@/components/ui/portrait-frame';
+import { ImageCarousel } from '@/components/ui/image-carousel';
 
-function GalleryCarousel({ images }: { images: CandidateImage[] }) {
-  const [index, setIndex] = useState(0);
-
-  if (images.length === 0) return null;
-  const current = images[index % images.length]!;
-  const go = (dir: number) => setIndex((i) => (i + dir + images.length) % images.length);
-
-  return (
-    <div>
-      <div className="relative">
-        <PortraitFrame
-          src={uploadUrl(current.url) ?? ''}
-          alt={current.caption ?? 'Gambar program'}
-        />
-        {current.caption && (
-          <motion.p
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.15 }}
-            className="absolute bottom-0 left-0 right-0 bg-black/50 px-4 py-2 text-sm font-medium text-white"
-          >
-            {current.caption}
-          </motion.p>
-        )}
-        {images.length > 1 && (
-          <>
-            <button
-              type="button"
-              aria-label="Sebelumnya"
-              onClick={() => go(-1)}
-              className="absolute left-3 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-black/40 text-lg text-white transition-colors hover:bg-black/60"
-            >
-              ‹
-            </button>
-            <button
-              type="button"
-              aria-label="Berikutnya"
-              onClick={() => go(1)}
-              className="absolute right-3 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-black/40 text-lg text-white transition-colors hover:bg-black/60"
-            >
-              ›
-            </button>
-          </>
-        )}
-      </div>
-      {images.length > 1 && (
-        <div className="mt-3 flex justify-center gap-2">
-          {images.map((image, i) => (
-            <button
-              key={image.id}
-              type="button"
-              aria-label={`Gambar ${i + 1}`}
-              onClick={() => setIndex(i)}
-              className={`h-2 rounded-full transition-all duration-200 ${
-                i === index ? 'w-6 bg-primary' : 'w-2 bg-muted-foreground/30'
-              }`}
-            />
-          ))}
-        </div>
-      )}
-    </div>
-  );
+function toCarouselImages(images: CandidateImage[]) {
+  return images.map((img) => ({ id: img.id, url: uploadUrl(img.url) ?? '', caption: img.caption }));
 }
 
 export default function CandidateDetailPage() {
@@ -139,15 +78,16 @@ export default function CandidateDetailPage() {
     );
   }
 
-  const photo = uploadUrl(candidate.photo_url);
-  const images = candidate.images ?? [];
+  const photos = (candidate.images ?? []).filter((img) => img.type === 'PHOTO');
+  const posters = (candidate.images ?? []).filter((img) => img.type === 'POSTER');
+  const program = (candidate.images ?? []).filter((img) => img.type === 'PROGRAM');
 
   const heroAnim = reduced
     ? {}
     : {
         initial: { opacity: 0, y: 24, scale: 0.98 },
         animate: { opacity: 1, y: 0, scale: 1 },
-        transition: { duration: 0.7, ease: EASE },
+        transition: { duration: 0.7, ease: [0.21, 0.47, 0.32, 0.98] as const },
       };
 
   return (
@@ -186,8 +126,14 @@ export default function CandidateDetailPage() {
           </motion.div>
 
           <motion.div {...heroAnim} className="relative mt-8">
-            {photo ? (
-              <PortraitFrame src={photo} alt={candidate.chairman_name} priority />
+            {photos.length > 0 ? (
+              <div className="overflow-hidden rounded-2xl">
+                <ImageCarousel
+                  images={toCarouselImages(photos)}
+                  ratio="3/4"
+                  altFallback={candidate.chairman_name}
+                />
+              </div>
             ) : (
               <div className="flex aspect-[3/4] w-full items-center justify-center rounded-2xl bg-muted text-sm text-muted-foreground">
                 No foto
@@ -230,14 +176,14 @@ export default function CandidateDetailPage() {
             </motion.section>
           </div>
 
-          {candidate.poster_url && (
+          {posters.length > 0 && (
             <motion.div {...fadeUp(0.12)} className="mt-10">
               <h2 className="font-heading text-xl font-semibold">Poster Kampanye</h2>
-              <div className="mt-3 overflow-hidden rounded-2xl">
-                <PortraitFrame
-                  src={uploadUrl(candidate.poster_url) ?? ''}
-                  alt="Poster kampanye"
+              <div className="mt-3">
+                <ImageCarousel
+                  images={toCarouselImages(posters)}
                   ratio="2/3"
+                  altFallback="Poster kampanye"
                 />
               </div>
             </motion.div>
@@ -252,11 +198,15 @@ export default function CandidateDetailPage() {
             </motion.section>
           )}
 
-          {images.length > 0 && (
+          {program.length > 0 && (
             <motion.div {...fadeUp(0.15)} className="mt-10">
               <h2 className="font-heading text-xl font-semibold">Program &amp; Kegiatan</h2>
               <div className="mt-3">
-                <GalleryCarousel images={images} />
+                <ImageCarousel
+                  images={toCarouselImages(program)}
+                  ratio="3/4"
+                  altFallback="Gambar program"
+                />
               </div>
             </motion.div>
           )}

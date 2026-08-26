@@ -133,9 +133,7 @@ const CANDIDATES_MPK: CandidateSeed[] = [
   },
 ];
 
-const PORTRAIT_DIR = join(process.cwd(), 'uploads', 'candidate-photo');
 const GALLERY_DIR = join(process.cwd(), 'uploads', 'candidate-image');
-const POSTER_DIR = join(process.cwd(), 'uploads', 'candidate-poster');
 
 async function generateImage(opts: {
   dir: string;
@@ -190,9 +188,7 @@ async function main() {
   console.log('Admin ready');
 
   if (process.env.NODE_ENV !== 'production') {
-    mkdirSync(PORTRAIT_DIR, { recursive: true });
     mkdirSync(GALLERY_DIR, { recursive: true });
-    mkdirSync(POSTER_DIR, { recursive: true });
 
     const elections = [
       {
@@ -313,28 +309,6 @@ async function main() {
         const number = i + 1;
         const prefix = electionData.id.replace('dev-election-', '');
 
-        const portraitFile = await generateImage({
-          dir: PORTRAIT_DIR,
-          name: `${prefix}-candidate-${number}-portrait`,
-          label: `Nomor ${number}`,
-          sublabel: seed.chairman.toUpperCase(),
-          bg: seed.colors.bg,
-          fg: seed.colors.fg,
-          width: 900,
-          height: 1200,
-        });
-
-        const posterFile = await generateImage({
-          dir: POSTER_DIR,
-          name: `${prefix}-candidate-${number}-poster`,
-          label: `POSTER ${number}`,
-          sublabel: seed.chairman.toUpperCase(),
-          bg: seed.colors.bg,
-          fg: seed.colors.fg,
-          width: 800,
-          height: 1200,
-        });
-
         const programDescription = `Program unggulan: ${seed.program.join(', ')}. ${seed.vision}`;
 
         const candidate = await prisma.candidate.upsert({
@@ -350,8 +324,6 @@ async function main() {
             vision: seed.vision,
             mission: seed.mission,
             program_description: programDescription,
-            poster_url: `/uploads/candidate-poster/${posterFile}`,
-            photo_url: `/uploads/candidate-photo/${portraitFile}`,
             show_on_landing: true,
           },
           create: {
@@ -362,8 +334,6 @@ async function main() {
             vision: seed.vision,
             mission: seed.mission,
             program_description: programDescription,
-            poster_url: `/uploads/candidate-poster/${posterFile}`,
-            photo_url: `/uploads/candidate-photo/${portraitFile}`,
             show_on_landing: true,
           },
         });
@@ -372,9 +342,52 @@ async function main() {
           where: { candidate_id: candidate.id },
         });
 
+        // 3 PHOTO (portrait 3:4)
+        for (let p = 0; p < 3; p++) {
+          const file = await generateImage({
+            dir: GALLERY_DIR,
+            name: `${prefix}-candidate-${number}-photo-${p + 1}`,
+            label: `FOTO ${p + 1}`,
+            sublabel: `${seed.chairman.toUpperCase()} · FOTO ${p + 1}`,
+            bg: seed.colors.bg,
+            fg: seed.colors.fg,
+            width: 900,
+            height: 1200,
+          });
+          await prisma.candidateImage.create({
+            data: {
+              candidate_id: candidate.id,
+              url: `/uploads/candidate-image/${file}`,
+              sort_order: p,
+              type: 'PHOTO',
+            },
+          });
+        }
+
+        // 2 POSTER (2:3; second 9:16 to demo adaptive frame)
+        for (let p = 0; p < 2; p++) {
+          const isStoryRatio = p === 1;
+          const file = await generateImage({
+            dir: GALLERY_DIR,
+            name: `${prefix}-candidate-${number}-poster-${p + 1}`,
+            label: `POSTER ${p + 1}`,
+            sublabel: `${seed.chairman.toUpperCase()} · POSTER ${p + 1}`,
+            bg: seed.colors.bg,
+            fg: seed.colors.fg,
+            width: isStoryRatio ? 720 : 800,
+            height: isStoryRatio ? 1280 : 1200,
+          });
+          await prisma.candidateImage.create({
+            data: {
+              candidate_id: candidate.id,
+              url: `/uploads/candidate-image/${file}`,
+              sort_order: p,
+              type: 'POSTER',
+            },
+          });
+        }
+
         for (let g = 0; g < seed.program.length; g++) {
-          // First image native 3:4; second deliberately 9:16 to demo the blur-pad frame.
-          const isStoryRatio = g === 1;
           const galleryFile = await generateImage({
             dir: GALLERY_DIR,
             name: `${prefix}-candidate-${number}-program-${g + 1}`,
@@ -382,8 +395,8 @@ async function main() {
             sublabel: `${seed.chairman.toUpperCase()} · PROGRAM ${g + 1}`,
             bg: seed.colors.bg,
             fg: seed.colors.fg,
-            width: isStoryRatio ? 720 : 900,
-            height: isStoryRatio ? 1280 : 1200,
+            width: 900,
+            height: 1200,
           });
           await prisma.candidateImage.create({
             data: {
@@ -391,6 +404,7 @@ async function main() {
               url: `/uploads/candidate-image/${galleryFile}`,
               caption: seed.program[g],
               sort_order: g,
+              type: 'PROGRAM',
             },
           });
         }

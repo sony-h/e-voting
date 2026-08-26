@@ -97,6 +97,7 @@ describe('CandidateService', () => {
         candidate_id: 'c1',
         url: '/uploads/candidate-image/a.png',
         sort_order: 2,
+        type: 'PROGRAM',
       },
     });
     expect(prismaMock.candidateImage.create).toHaveBeenCalledWith({
@@ -104,6 +105,7 @@ describe('CandidateService', () => {
         candidate_id: 'c1',
         url: '/uploads/candidate-image/b.png',
         sort_order: 3,
+        type: 'PROGRAM',
       },
     });
   });

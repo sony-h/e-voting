@@ -1,5 +1,5 @@
 import { apiFetch } from '@/lib/api';
-import type { Candidate, CandidateImage } from '@e-voting/types';
+import type { Candidate, CandidateImage, CandidateImageType } from '@e-voting/types';
 
 export type CandidateWithImages = Candidate & { images: CandidateImage[] };
 
@@ -29,28 +29,14 @@ export function deleteCandidate(id: string) {
   return apiFetch<{ message: string }>(`/candidates/${id}`, { method: 'DELETE' });
 }
 
-export function uploadCandidatePhoto(id: string, file: File) {
-  const form = new FormData();
-  form.append('file', file);
-  return apiFetch<CandidateWithImages>(`/candidates/${id}/photo`, {
-    method: 'POST',
-    body: form,
-  });
-}
-
-export function uploadCandidatePoster(id: string, file: File) {
-  const form = new FormData();
-  form.append('file', file);
-  return apiFetch<CandidateWithImages>(`/candidates/${id}/poster`, {
-    method: 'POST',
-    body: form,
-  });
-}
-
-export function uploadCandidateImages(id: string, files: File[]) {
+export function uploadCandidateImages(
+  id: string,
+  files: File[],
+  type: CandidateImageType = 'PROGRAM',
+) {
   const form = new FormData();
   files.forEach((file) => form.append('files', file));
-  return apiFetch<CandidateImage[]>(`/candidates/${id}/images`, {
+  return apiFetch<CandidateImage[]>(`/candidates/${id}/images?type=${type}`, {
     method: 'POST',
     body: form,
   });

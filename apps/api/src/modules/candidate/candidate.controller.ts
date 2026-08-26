@@ -7,12 +7,11 @@ import {
   Patch,
   Post,
   Query,
-  UploadedFile,
   UploadedFiles,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
+import { FilesInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname, join } from 'path';
 import { randomUUID } from 'crypto';
@@ -54,66 +53,6 @@ export class CandidateController {
     return this.candidateService.remove(id);
   }
 
-  @Post(':id/photo')
-  @UseInterceptors(
-    FileInterceptor('file', {
-      storage: diskStorage({
-        destination: join(process.cwd(), 'uploads', 'candidate-photo'),
-        filename: (_req, file, cb) =>
-          cb(
-            null,
-            `${Date.now()}-${randomUUID()}${extname(file.originalname)}`,
-          ),
-      }),
-      limits: { fileSize: 10 * 1024 * 1024 },
-      fileFilter: (_req, file, cb) =>
-        cb(
-          null,
-          ['image/jpeg', 'image/png', 'image/webp'].includes(file.mimetype),
-        ),
-    }),
-  )
-  uploadPhoto(
-    @Param('id') id: string,
-    @UploadedFile() file: Express.Multer.File,
-  ) {
-    return this.candidateService.updatePhoto(
-      id,
-      `/uploads/candidate-photo/${file.filename}`,
-      join(process.cwd(), 'uploads', 'candidate-photo', file.filename),
-    );
-  }
-
-  @Post(':id/poster')
-  @UseInterceptors(
-    FileInterceptor('file', {
-      storage: diskStorage({
-        destination: join(process.cwd(), 'uploads', 'candidate-poster'),
-        filename: (_req, file, cb) =>
-          cb(
-            null,
-            `${Date.now()}-${randomUUID()}${extname(file.originalname)}`,
-          ),
-      }),
-      limits: { fileSize: 10 * 1024 * 1024 },
-      fileFilter: (_req, file, cb) =>
-        cb(
-          null,
-          ['image/jpeg', 'image/png', 'image/webp'].includes(file.mimetype),
-        ),
-    }),
-  )
-  uploadPoster(
-    @Param('id') id: string,
-    @UploadedFile() file: Express.Multer.File,
-  ) {
-    return this.candidateService.updatePoster(
-      id,
-      `/uploads/candidate-poster/${file.filename}`,
-      join(process.cwd(), 'uploads', 'candidate-poster', file.filename),
-    );
-  }
-
   @Post(':id/images')
   @UseInterceptors(
     FilesInterceptor('files', 5, {
@@ -136,7 +75,8 @@ export class CandidateController {
   uploadImages(
     @Param('id') id: string,
     @UploadedFiles() files: Express.Multer.File[],
+    @Query('type') type?: string,
   ) {
-    return this.candidateService.addImages(id, files);
+    return this.candidateService.addImages(id, files, type);
   }
 }

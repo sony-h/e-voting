@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useQuery, useQueries } from '@tanstack/react-query';
@@ -19,7 +19,7 @@ import { formatPeriod } from '@/lib/format';
 import { uploadUrl } from '@/lib/images';
 import { fadeUp } from '@/lib/animations';
 import { BallotStamp, type BallotStatus } from '@/components/ui/ballot-stamp';
-import { PortraitFrame } from '@/components/ui/portrait-frame';
+import { ImageCarousel } from '@/components/ui/image-carousel';
 
 function FloatingBallot() {
   const reduced = useReducedMotion();
@@ -128,110 +128,50 @@ function TiltCard({ children }: { children: React.ReactNode }) {
 }
 
 function ProgramCarousel({ images }: { images: CandidateWithImages['images'] }) {
-  const reduced = useReducedMotion();
-  const [index, setIndex] = useState(0);
-  const [paused, setPaused] = useState(false);
-
-  useEffect(() => {
-    if (!images || images.length <= 1 || reduced || paused) return;
-    const id = setInterval(() => setIndex((i) => (i + 1) % images.length), 3000);
-    return () => clearInterval(id);
-  }, [images, reduced, paused]);
-
   if (!images || images.length === 0) return null;
-  const current = images[index % images.length]!;
-  const go = (dir: number) => setIndex((i) => (i + dir + images.length) % images.length);
-
   return (
-    <div
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
-      onTouchStart={() => setPaused(true)}
-      onTouchEnd={() => setPaused(false)}
-      className="mt-2"
-    >
-      <div className="relative overflow-hidden rounded-lg">
-        <motion.div
-          key={current.id}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.28 }}
-        >
-          <PortraitFrame
-            src={uploadUrl(current.url) ?? ''}
-            alt={current.caption ?? 'Gambar program'}
-          />
-        </motion.div>
-        {current.caption && (
-          <p className="absolute bottom-0 left-0 right-0 truncate bg-black/50 px-2 py-1 text-[10px] font-medium text-white">
-            {current.caption}
-          </p>
-        )}
-        {images.length > 1 && (
-          <>
-            <button
-              type="button"
-              aria-label="Sebelumnya"
-              onClick={(e) => {
-                e.preventDefault();
-                go(-1);
-              }}
-              className="absolute left-1.5 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-full bg-black/40 text-sm text-white transition-colors hover:bg-black/60"
-            >
-              ‹
-            </button>
-            <button
-              type="button"
-              aria-label="Berikutnya"
-              onClick={(e) => {
-                e.preventDefault();
-                go(1);
-              }}
-              className="absolute right-1.5 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-full bg-black/40 text-sm text-white transition-colors hover:bg-black/60"
-            >
-              ›
-            </button>
-          </>
-        )}
-      </div>
-      {images.length > 1 && (
-        <div className="mt-2 flex justify-center gap-1.5">
-          {images.map((img, i) => (
-            <button
-              key={img.id}
-              type="button"
-              aria-label={`Gambar ${i + 1}`}
-              onClick={(e) => {
-                e.preventDefault();
-                setIndex(i);
-              }}
-              className={`h-1.5 rounded-full transition-all duration-200 ${i === index ? 'w-4 bg-primary' : 'w-1.5 bg-muted-foreground/30'}`}
-            />
-          ))}
-        </div>
-      )}
+    <div className="mt-2">
+      <ImageCarousel
+        images={images.map((img) => ({
+          id: img.id,
+          url: uploadUrl(img.url) ?? '',
+          caption: img.caption,
+        }))}
+        ratio="3/4"
+        autoplayMs={5000}
+        rounded="lg"
+        altFallback="Gambar program"
+      />
     </div>
   );
 }
 
-function CandidateCard({ candidate }: { candidate: CandidateWithImages }) {
-  const images = candidate.images ?? [];
+function CandidatePhotoCarousel({ candidate }: { candidate: CandidateWithImages }) {
+  const photos = (candidate.images ?? []).filter((img) => img.type === 'PHOTO');
+  if (photos.length === 0) {
+    return (
+      <div className="flex aspect-[3/4] w-full items-center justify-center bg-muted text-sm text-muted-foreground">
+        No foto
+      </div>
+    );
+  }
+  return (
+    <ImageCarousel
+      images={photos.map((img) => ({ id: img.id, url: uploadUrl(img.url) ?? '' }))}
+      ratio="3/4"
+      autoplayMs={10000}
+      rounded="none"
+      altFallback={candidate.chairman_name}
+    />
+  );
+}
 
+function CandidateCard({ candidate }: { candidate: CandidateWithImages }) {
   return (
     <TiltCard>
       <Link href={`/candidate/${candidate.id}`} className="group flex h-full flex-col">
         <div className="relative">
-          {candidate.photo_url ? (
-            <PortraitFrame
-              src={uploadUrl(candidate.photo_url) ?? ''}
-              alt={candidate.chairman_name}
-              priority
-            />
-          ) : (
-            <div className="flex aspect-[3/4] w-full items-center justify-center bg-muted text-sm text-muted-foreground">
-              No foto
-            </div>
-          )}
+          <CandidatePhotoCarousel candidate={candidate} />
           <span
             className="absolute left-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-primary font-mono text-sm font-bold text-primary-foreground shadow-sm"
             style={{ transform: 'translateZ(30px)' }}
@@ -247,12 +187,14 @@ function CandidateCard({ candidate }: { candidate: CandidateWithImages }) {
           </p>
           <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">{candidate.vision}</p>
 
-          {images.length > 0 && (
+          {(candidate.images ?? []).filter((img) => img.type === 'PROGRAM').length > 0 && (
             <div className="mt-4">
               <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
                 Program
               </p>
-              <ProgramCarousel images={images} />
+              <ProgramCarousel
+                images={(candidate.images ?? []).filter((img) => img.type === 'PROGRAM')}
+              />
             </div>
           )}
 
@@ -485,7 +427,7 @@ export default function HomePage() {
         >
           <span
             className={
-              'inline-flex items-center opacity-70 bg-gray-50 gap-1.5 rounded-full border-2 border-dashed px-3 py-1 text-xs font-semibold tracking-wide'
+              'inline-flex items-center opacity-70 bg-gray-50 gap-1.5 rounded-full px-3 py-1 text-xs font-semibold tracking-wide'
             }
           >
             Pemilihan Organisasi{election ? ` · ${election.academic_year}` : ''}
@@ -496,7 +438,13 @@ export default function HomePage() {
           {...heroAnim}
           className="mt-4 text-center font-heading text-4xl font-bold leading-tight text-foreground drop-shadow-[0_1px_8px_rgba(0,0,0,0.12)] sm:text-6xl"
         >
-          Pilih Pemimpin Organisasi
+          <span
+            className={
+              'inline-flex items-center opacity-70 bg-gray-50 rounded-full px-6 py-1 tracking-wide'
+            }
+          >
+            Pilih Pemimpin Organisasi
+          </span>
         </motion.h1>
 
         <motion.div {...heroAnim} className="mt-10 w-full max-w-sm">
