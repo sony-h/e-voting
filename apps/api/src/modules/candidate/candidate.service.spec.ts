@@ -23,7 +23,9 @@ describe('CandidateService', () => {
       count: jest.fn(),
       create: jest.fn(),
       delete: jest.fn(),
+      deleteMany: jest.fn(),
     },
+    vote: { deleteMany: jest.fn() },
     election: { findUnique: jest.fn() },
     $transaction: jest.fn(),
   };
@@ -66,6 +68,35 @@ describe('CandidateService', () => {
       status: 'ACTIVE',
     });
     await expect(service.remove('c1')).rejects.toThrow(BadRequestException);
+  });
+
+  it('deletes candidate with images and votes in a transaction', async () => {
+    prismaMock.candidate.findUnique.mockResolvedValue({
+      id: 'c1',
+      election_id: 'e1',
+    });
+    prismaMock.election.findUnique.mockResolvedValue({
+      id: 'e1',
+      status: 'DRAFT',
+    });
+    prismaMock.$transaction.mockImplementation(
+      (fn: (tx: unknown) => Promise<unknown>) => fn(prismaMock),
+    );
+    prismaMock.candidateImage.deleteMany.mockResolvedValue({ count: 5 });
+    prismaMock.vote.deleteMany.mockResolvedValue({ count: 2 });
+    prismaMock.candidate.delete.mockResolvedValue({ id: 'c1' });
+
+    await service.remove('c1');
+
+    expect(prismaMock.candidateImage.deleteMany).toHaveBeenCalledWith({
+      where: { candidate_id: 'c1' },
+    });
+    expect(prismaMock.vote.deleteMany).toHaveBeenCalledWith({
+      where: { candidate_id: 'c1' },
+    });
+    expect(prismaMock.candidate.delete).toHaveBeenCalledWith({
+      where: { id: 'c1' },
+    });
   });
 
   it('adds gallery images with sequential sort order', async () => {

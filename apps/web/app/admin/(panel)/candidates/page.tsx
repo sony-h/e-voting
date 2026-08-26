@@ -32,6 +32,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Switch } from '@/components/ui/switch';
 import {
   Table,
   TableBody,
@@ -235,6 +236,32 @@ export default function AdminCandidatesPage() {
     onError: () => toast.error('Gagal menghapus kandidat.'),
   });
 
+  const toggleMutation = useMutation({
+    mutationFn: (c: CandidateWithImages) =>
+      updateCandidate(c.id, { show_on_landing: !c.show_on_landing }),
+    onMutate: async (c) => {
+      await queryClient.cancelQueries({ queryKey: ['candidates', effectiveElectionId] });
+      const prev = queryClient.getQueryData<CandidateWithImages[]>([
+        'candidates',
+        effectiveElectionId,
+      ]);
+      queryClient.setQueryData<CandidateWithImages[]>(['candidates', effectiveElectionId], (old) =>
+        old?.map((x) => (x.id === c.id ? { ...x, show_on_landing: !x.show_on_landing } : x)),
+      );
+      return { prev };
+    },
+    onError: (_e, _c, ctx) => {
+      queryClient.setQueryData(['candidates', effectiveElectionId], ctx?.prev);
+      toast.error('Gagal mengubah visibilitas.');
+    },
+    onSettled: () =>
+      queryClient.invalidateQueries({ queryKey: ['candidates', effectiveElectionId] }),
+    onSuccess: (_d, c) =>
+      toast.success(
+        c.show_on_landing ? 'Kandidat disembunyikan.' : 'Kandidat ditampilkan di landing.',
+      ),
+  });
+
   function openCreate() {
     setEditing(null);
     setForm(EMPTY_FORM);
@@ -405,11 +432,23 @@ export default function AdminCandidatesPage() {
                         {candidate.vice_chairman_name ?? '—'}
                       </TableCell>
                       <TableCell>
-                        {candidate.show_on_landing ? (
-                          <Badge variant="default">Landing</Badge>
-                        ) : (
-                          <Badge variant="outline">Tersembunyi</Badge>
-                        )}
+                        <div className="flex items-center gap-2">
+                          <Switch
+                            checked={candidate.show_on_landing}
+                            onCheckedChange={() => toggleMutation.mutate(candidate)}
+                            disabled={!editable || toggleMutation.isPending}
+                            aria-label={
+                              candidate.show_on_landing
+                                ? 'Sembunyikan dari landing'
+                                : 'Tampilkan di landing'
+                            }
+                          />
+                          {candidate.show_on_landing ? (
+                            <Badge variant="default">Landing</Badge>
+                          ) : (
+                            <Badge variant="outline">Tersembunyi</Badge>
+                          )}
+                        </div>
                       </TableCell>
                       <TableCell className="text-right">
                         <DropdownMenu>
@@ -429,6 +468,15 @@ export default function AdminCandidatesPage() {
                               title={!editable ? 'Terkunci saat voting berlangsung' : undefined}
                             >
                               Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => toggleMutation.mutate(candidate)}
+                              disabled={!editable || toggleMutation.isPending}
+                              title={!editable ? 'Terkunci saat voting berlangsung' : undefined}
+                            >
+                              {candidate.show_on_landing
+                                ? 'Sembunyikan dari Landing'
+                                : 'Tampilkan di Landing'}
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               variant="destructive"

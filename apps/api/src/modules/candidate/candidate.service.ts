@@ -64,7 +64,11 @@ export class CandidateService {
   async remove(id: string) {
     const candidate = await this.ensureExists(id);
     await this.ensureEditable(candidate.election_id);
-    return this.prisma.candidate.delete({ where: { id } });
+    return this.prisma.$transaction(async (tx) => {
+      await tx.candidateImage.deleteMany({ where: { candidate_id: id } });
+      await tx.vote.deleteMany({ where: { candidate_id: id } });
+      return tx.candidate.delete({ where: { id } });
+    });
   }
 
   async addImages(

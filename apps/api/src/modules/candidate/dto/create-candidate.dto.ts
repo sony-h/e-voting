@@ -1,4 +1,11 @@
-import { IsInt, IsNotEmpty, IsOptional, IsString, Min } from 'class-validator';
+import {
+  IsBoolean,
+  IsInt,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  Min,
+} from 'class-validator';
 
 export class CreateCandidateDto {
   @IsString()
@@ -28,4 +35,8 @@ export class CreateCandidateDto {
   @IsString()
   @IsOptional()
   program_description?: string;
+
+  @IsBoolean()
+  @IsOptional()
+  show_on_landing?: boolean;
 }

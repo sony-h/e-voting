@@ -379,7 +379,7 @@ export default function HomePage() {
                     animate: { opacity: 1, x: 0 },
                     transition: { duration: 0.5, delay: 0.3 },
                   })}
-              className="sm:text-2xl font-heading font-semibold text-gray-100 tracking-tight text-foreground drop-shadow-[0_1px_2px_rgba(0,0,0,0.1)]"
+              className="sm:text-xl font-heading font-semibold text-gray-100 tracking-tight text-foreground drop-shadow-[0_1px_2px_rgba(0,0,0,0.1)]"
             >
               SMA N 1 Wonosobo
             </motion.span>
@@ -436,7 +436,7 @@ export default function HomePage() {
 
         <motion.h1
           {...heroAnim}
-          className="mt-4 text-center font-heading text-4xl font-bold leading-tight text-foreground drop-shadow-[0_1px_8px_rgba(0,0,0,0.12)] sm:text-6xl"
+          className="mt-4 text-center font-heading text-xl font-bold leading-tight text-foreground drop-shadow-[0_1px_8px_rgba(0,0,0,0.12)] sm:text-4xl lg:text-6xl"
         >
           <span
             className={
