@@ -132,13 +132,11 @@ export default function CandidateDetailPage() {
           {/* Hero Candidate Photo & Badge */}
           <motion.div {...heroAnim} className="relative mt-8">
             {photos.length > 0 ? (
-              <div className="overflow-hidden rounded-2xl shadow-sm">
-                <ImageCarousel
-                  images={toCarouselImages(photos)}
-                  ratio="3/4"
-                  altFallback={candidate.chairman_name}
-                />
-              </div>
+              <ImageCarousel
+                images={toCarouselImages(photos)}
+                ratio="3/4"
+                altFallback={candidate.chairman_name}
+              />
             ) : (
               <div className="flex aspect-[3/4] w-full items-center justify-center rounded-2xl bg-muted text-sm text-muted-foreground">
                 No foto
@@ -148,7 +146,7 @@ export default function CandidateDetailPage() {
               initial={reduced ? false : { scale: 0.5, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ type: 'spring', stiffness: 260, damping: 18, delay: 0.25 }}
-              className="absolute left-4 top-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary font-mono text-xl font-bold text-primary-foreground shadow-md"
+              className="absolute left-4 top-4 z-10 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary font-mono text-xl font-bold text-primary-foreground shadow-md"
             >
               {candidate.candidate_number}
             </motion.span>
@@ -249,13 +247,11 @@ export default function CandidateDetailPage() {
               </motion.div>
 
               <motion.div {...fadeUp(0.1)} className="mx-auto mt-6 max-w-md">
-                <div className="overflow-hidden rounded-2xl shadow-md border bg-card">
-                  <ImageCarousel
-                    images={toCarouselImages(posters)}
-                    ratio="2/3"
-                    altFallback="Poster kampanye"
-                  />
-                </div>
+                <ImageCarousel
+                  images={toCarouselImages(posters)}
+                  ratio="2/3"
+                  altFallback="Poster kampanye"
+                />
               </motion.div>
             </div>
           )}

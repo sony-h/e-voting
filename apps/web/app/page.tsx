@@ -358,9 +358,9 @@ export default function HomePage() {
             alt=""
             fill
             priority
-            className="scale-[1.02] object-cover blur-[4px] opacity-[0.75] dark:opacity-[0.55]"
+            className="scale-[1.02] object-cover blur-[2px] opacity-[0.85] dark:opacity-[0.75]"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-background/40 via-background/20 to-background" />
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background" />
         </div>
 
         {/* Top Header Logos */}
@@ -448,7 +448,7 @@ export default function HomePage() {
         {/* Unified Frosted Glass Hero Card */}
         <motion.div
           {...heroAnim}
-          className="relative z-10 mx-auto my-auto w-full max-w-3xl rounded-3xl border border-white/20 bg-background/30 p-8 text-center shadow-xl backdrop-blur-md dark:border-white/10 dark:bg-background/40 sm:p-12"
+          className="relative z-10 mx-auto my-auto w-full max-w-3xl rounded-3xl border border-white/20 bg-background/10 p-8 text-center shadow-xl backdrop-blur-sm dark:border-white/10 dark:bg-background/40 sm:p-12"
         >
           {/* Hero Eyebrow Pill */}
           <div>

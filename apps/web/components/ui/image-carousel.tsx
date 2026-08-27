@@ -42,6 +42,13 @@ export function ImageCarousel({
   const go = (dir: number) => setIndex((i) => (i + dir + images.length) % images.length);
   const manual = !autoplayMs;
 
+  const roundedClass =
+    rounded === 'none'
+      ? ''
+      : rounded === 'lg'
+        ? 'rounded-lg overflow-hidden border border-border/50 shadow-2xs'
+        : 'rounded-2xl overflow-hidden border border-border/60 shadow-xs';
+
   return (
     <div
       onMouseEnter={autoplayMs ? () => setPaused(true) : undefined}
@@ -49,22 +56,17 @@ export function ImageCarousel({
       onTouchStart={autoplayMs ? () => setPaused(true) : undefined}
       onTouchEnd={autoplayMs ? () => setPaused(false) : undefined}
     >
-      <div className="relative">
+      <div className={`relative ${roundedClass}`}>
         <motion.div
           key={current.id}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.28 }}
         >
-          <PortraitFrame
-            src={current.url}
-            alt={current.caption ?? altFallback}
-            ratio={ratio}
-            className={rounded === 'none' ? '' : rounded === 'lg' ? 'rounded-lg' : 'rounded-2xl'}
-          />
+          <PortraitFrame src={current.url} alt={current.caption ?? altFallback} ratio={ratio} />
         </motion.div>
         {current.caption && (
-          <p className="absolute bottom-0 left-0 right-0 truncate bg-black/50 px-4 py-2 text-sm font-medium text-white">
+          <p className="absolute bottom-0 left-0 right-0 truncate bg-black/60 backdrop-blur-xs px-4 py-2 text-sm font-medium text-white">
             {current.caption}
           </p>
         )}
@@ -74,7 +76,7 @@ export function ImageCarousel({
               type="button"
               aria-label="Sebelumnya"
               onClick={() => go(-1)}
-              className="absolute left-3 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-black/40 text-lg text-white transition-colors hover:bg-black/60"
+              className="absolute left-3 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-black/40 text-lg text-white backdrop-blur-xs transition-colors hover:bg-black/60"
             >
               ‹
             </button>
@@ -82,7 +84,7 @@ export function ImageCarousel({
               type="button"
               aria-label="Berikutnya"
               onClick={() => go(1)}
-              className="absolute right-3 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-black/40 text-lg text-white transition-colors hover:bg-black/60"
+              className="absolute right-3 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-black/40 text-lg text-white backdrop-blur-xs transition-colors hover:bg-black/60"
             >
               ›
             </button>
@@ -98,7 +100,9 @@ export function ImageCarousel({
               aria-label={`Gambar ${i + 1}`}
               onClick={() => setIndex(i)}
               className={`h-2 rounded-full transition-all duration-200 ${
-                i === index ? 'w-6 bg-primary' : 'w-2 bg-muted-foreground/30'
+                i === index
+                  ? 'w-6 bg-primary'
+                  : 'w-2 bg-muted-foreground/30 hover:bg-muted-foreground/50'
               }`}
             />
           ))}
