@@ -52,6 +52,20 @@ export class CandidateService {
     });
   }
 
+  async findPublicOne(id: string) {
+    const candidate = await this.prisma.candidate.findFirst({
+      where: { id, show_on_landing: true },
+      include: {
+        election: true,
+        images: { orderBy: { sort_order: 'asc' } },
+      },
+    });
+    if (!candidate) {
+      throw new NotFoundException({ errorCode: 'CANDIDATE_NOT_FOUND' });
+    }
+    return candidate;
+  }
+
   create(dto: CreateCandidateDto) {
     return this.prisma.candidate.create({ data: dto });
   }

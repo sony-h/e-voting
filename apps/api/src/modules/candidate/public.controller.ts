@@ -1,4 +1,4 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Param, Query } from '@nestjs/common';
 import { CandidateService } from '../candidate/candidate.service';
 import { ReportService } from '../report/report.service';
 import { StaffService } from '../staff/staff.service';
@@ -14,6 +14,11 @@ export class PublicController {
   @Get('candidates')
   findCandidates(@Query('electionId') electionId: string) {
     return this.candidateService.findPublic(electionId);
+  }
+
+  @Get('candidates/:id')
+  findCandidate(@Param('id') id: string) {
+    return this.candidateService.findPublicOne(id);
   }
 
   @Get('results')

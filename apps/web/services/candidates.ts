@@ -1,7 +1,8 @@
 import { apiFetch } from '@/lib/api';
-import type { Candidate, CandidateImage, CandidateImageType } from '@e-voting/types';
+import type { Candidate, CandidateImage, CandidateImageType, Election } from '@e-voting/types';
 
 export type CandidateWithImages = Candidate & { images: CandidateImage[] };
+export type PublicCandidateDetail = CandidateWithImages & { election: Election };
 
 export function listCandidates(electionId: string) {
   return apiFetch<CandidateWithImages[]>(`/candidates?electionId=${electionId}`);
@@ -9,6 +10,10 @@ export function listCandidates(electionId: string) {
 
 export function listPublicCandidates(electionId: string) {
   return apiFetch<CandidateWithImages[]>(`/public/candidates?electionId=${electionId}`);
+}
+
+export function getPublicCandidate(id: string) {
+  return apiFetch<PublicCandidateDetail>(`/public/candidates/${id}`);
 }
 
 export function createCandidate(data: Partial<Candidate>) {

@@ -5,8 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { motion, useReducedMotion, useScroll, useSpring, useTransform } from 'motion/react';
 import type { CandidateImage } from '@e-voting/types';
-import { listElections } from '@/services/elections';
-import { listPublicCandidates } from '@/services/candidates';
+import { getPublicCandidate, listPublicCandidates } from '@/services/candidates';
 import { uploadUrl } from '@/lib/images';
 import { formatPeriod } from '@/lib/format';
 import { fadeUp } from '@/lib/animations';
@@ -29,27 +28,31 @@ export default function CandidateDetailPage() {
     damping: 30,
   });
 
-  const { data: elections } = useQuery({
-    queryKey: ['elections'],
-    queryFn: listElections,
+  const { data: candidate, isLoading } = useQuery({
+    queryKey: ['public-candidate', candidateId],
+    queryFn: () => getPublicCandidate(candidateId),
+    enabled: !!candidateId,
     retry: false,
   });
-  const election = elections?.find((e) => e.status === 'ACTIVE') ?? elections?.[0];
+
+  const election = candidate?.election;
   const status: BallotStatus = (election?.status as BallotStatus) ?? 'DRAFT';
 
-  const { data: candidates, isLoading } = useQuery({
-    queryKey: ['public-candidates', election?.id],
-    queryFn: () => listPublicCandidates(election!.id),
-    enabled: !!election?.id,
+  const { data: siblingCandidates } = useQuery({
+    queryKey: ['public-candidates', candidate?.election_id],
+    queryFn: () => listPublicCandidates(candidate!.election_id),
+    enabled: !!candidate?.election_id,
     retry: false,
   });
 
-  const candidate = candidates?.find((c) => c.id === candidateId);
-  const index = candidates?.findIndex((c) => c.id === candidateId) ?? -1;
-  const prev = index > 0 ? candidates?.[index - 1] : null;
-  const next = index >= 0 && index < (candidates?.length ?? 0) - 1 ? candidates?.[index + 1] : null;
+  const index = siblingCandidates?.findIndex((c) => c.id === candidateId) ?? -1;
+  const prev = index > 0 ? siblingCandidates?.[index - 1] : null;
+  const next =
+    index >= 0 && index < (siblingCandidates?.length ?? 0) - 1
+      ? siblingCandidates?.[index + 1]
+      : null;
 
-  if (isLoading || !election) {
+  if (isLoading) {
     return (
       <main className="mx-auto max-w-3xl px-6 py-10">
         <Skeleton className="h-6 w-40" />
@@ -61,7 +64,7 @@ export default function CandidateDetailPage() {
     );
   }
 
-  if (!candidate) {
+  if (!candidate || !election) {
     return (
       <main className="flex min-h-screen flex-col items-center justify-center px-6 text-center">
         <h1 className="font-heading text-3xl font-bold">Kandidat tidak ditemukan</h1>
