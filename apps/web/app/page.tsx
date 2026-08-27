@@ -448,23 +448,23 @@ export default function HomePage() {
         {/* Unified Frosted Glass Hero Card */}
         <motion.div
           {...heroAnim}
-          className="relative z-10 mx-auto my-auto w-full max-w-3xl rounded-3xl border border-border/70 bg-card/85 p-8 text-center shadow-2xl backdrop-blur-xl dark:bg-card/90 sm:p-12"
+          className="relative z-10 mx-auto my-auto w-full max-w-3xl rounded-3xl border border-white/20 bg-background/30 p-8 text-center shadow-xl backdrop-blur-md dark:border-white/10 dark:bg-background/40 sm:p-12"
         >
           {/* Hero Eyebrow Pill */}
           <div>
-            <span className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/80 px-4 py-1.5 text-xs font-semibold text-foreground shadow-2xs backdrop-blur">
+            <span className="inline-flex items-center gap-2 rounded-full border border-white/30 bg-background/60 px-4 py-1.5 text-xs font-semibold text-foreground shadow-2xs backdrop-blur-sm dark:bg-background/60">
               <Sparkles className="h-3.5 w-3.5 text-primary" />
               E-Voting Resmi SMA N 1 Wonosobo{election ? ` · ${election.academic_year}` : ''}
             </span>
           </div>
 
           {/* Main Heading */}
-          <h1 className="mt-6 font-heading text-3xl font-bold leading-tight tracking-tight text-foreground sm:text-5xl lg:text-6xl">
+          <h1 className="mt-6 font-heading text-3xl font-bold leading-tight tracking-tight text-foreground drop-shadow-[0_2px_8px_rgba(0,0,0,0.12)] sm:text-5xl lg:text-6xl">
             Satu Suara, Menentukan Arah Pemimpin Masa Depan
           </h1>
 
           {/* Inclusive Subtitle */}
-          <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-muted-foreground sm:text-base">
+          <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-foreground/90 drop-shadow-[0_1px_3px_rgba(0,0,0,0.1)] sm:text-base">
             Portal pemilihan terpadu Ketua OSIS &amp; Ketua MPK untuk seluruh Siswa, Guru, dan
             Tenaga Kependidikan secara langsung, umum, bebas, dan rahasia.
           </p>
