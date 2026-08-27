@@ -156,6 +156,7 @@ interface CandidateSeed {
   vice: string;
   vision: string;
   mission: string;
+  quote: string;
   colors: { bg: string; fg: string };
   program: string[];
 }
@@ -168,6 +169,8 @@ const CANDIDATES_OSIS: CandidateSeed[] = [
       'Mewujudkan OSIS yang inklusif, kreatif, dan peduli terhadap setiap siswa.',
     mission:
       '1. Menyelenggarakan program pengembangan bakat siswa.\n2. Meningkatkan kesejahteraan siswa melalui aspirasi yang terfasilitasi.\n3. Membangun budaya kolaborasi antar kelas dan ekstrakurikuler.',
+    quote:
+      'Kepemimpinan sejati bukan tentang memerintah, melainkan melayani dan membuka ruang seluas-luasnya bagi setiap potensi siswa untuk bersinar.',
     colors: { bg: '#1d4ed8', fg: '#ffffff' },
     program: [
       'Festival Bakat Siswa',
@@ -182,6 +185,8 @@ const CANDIDATES_OSIS: CandidateSeed[] = [
       'OSIS digital: transparan, efisien, dan siap menghadapi tantangan masa depan.',
     mission:
       '1. Mendigitalisasi administrasi kegiatan OSIS.\n2. Menyelenggarakan pelatihan literasi digital bagi siswa.\n3. Meningkatkan partisipasi siswa melalui platform online.',
+    quote:
+      'Teknologi adalah sarana, kepedulian adalah jiwa. Kami hadir membawa keterbukaan dan kolaborasi nyata untuk masa depan sekolah yang lebih maju.',
     colors: { bg: '#047857', fg: '#ffffff' },
     program: ['OSIS Digital', 'Pelatihan Literasi', 'Kompetisi Online'],
   },
@@ -192,6 +197,8 @@ const CANDIDATES_OSIS: CandidateSeed[] = [
       'Menjadikan OSIS sebagai rumah kedua bagi seluruh siswa melalui kegiatan yang membangun.',
     mission:
       '1. Menyelenggarakan kegiatan keagamaan dan kebersamaan rutin.\n2. Membentuk tim mentoring antar angkatan.\n3. Menjalin kerjasama dengan pihak sekolah dan alumni.',
+    quote:
+      'Membangun sekolah yang harmonis dimulai dari kebersamaan yang tulus dan semangat saling mendukung antar sesama tanpa membeda-bedakan.',
     colors: { bg: '#b45309', fg: '#ffffff' },
     program: ['Kajian Rutin', 'Mentoring Angkatan', 'Kerjasama Alumni'],
   },
@@ -205,6 +212,8 @@ const CANDIDATES_MPK: CandidateSeed[] = [
       'Menjadikan MPK sebagai wadah aspirasi siswa yang kuat, terbuka, dan berpihak pada keadilan.',
     mission:
       '1. Mengawal aspirasi siswa secara transparan.\n2. Menyelenggarakan forum musyawarah rutin.\n3. Mendorong akuntabilitas kinerja OSIS.',
+    quote:
+      'Keadilan dan transparansi adalah fondasi kepercayaan. Bersama kami, setiap aspirasi siswa akan didengar, dihargai, dan diperjuangkan.',
     colors: { bg: '#7c3aed', fg: '#ffffff' },
     program: ['Forum Aspirasi', 'Musyawarah Rutin', 'Pengawasan OSIS'],
   },
@@ -215,6 +224,8 @@ const CANDIDATES_MPK: CandidateSeed[] = [
       'MPK yang progresif, kolaboratif, dan menjadi jembatan antara siswa dan sekolah.',
     mission:
       '1. Membangun komunikasi dua arah siswa-sekolah.\n2. Menginisiasi program kesejahteraan siswa.\n3. Meningkatkan partisipasi siswa dalam pengambilan keputusan.',
+    quote:
+      'Menjadi jembatan komunikasi yang kokoh dan terpercaya antara siswa dan pihak sekolah demi kemajuan bersama yang bermakna.',
     colors: { bg: '#db2777', fg: '#ffffff' },
     program: ['Jembatan Aspirasi', 'Kesejahteraan Siswa', 'Partisipasi Aktif'],
   },
@@ -225,6 +236,8 @@ const CANDIDATES_MPK: CandidateSeed[] = [
       'MPK yang bersih, objektif, dan menjadi penjaga nilai-nilai demokrasi sekolah.',
     mission:
       '1. Menegakkan transparansi kegiatan organisasi.\n2. Menyelenggarakan pendidikan demokrasi.\n3. Mengawal program-program sekolah secara objektif.',
+    quote:
+      'Menjaga integritas dan nilai-nilai demokrasi demi terwujudnya organisasi yang berwibawa, adil, dan berpihak seutuhnya pada kepentingan siswa.',
     colors: { bg: '#0d9488', fg: '#ffffff' },
     program: ['Transparansi', 'Edukasi Demokrasi', 'Kontrol Objektif'],
   },
@@ -471,7 +484,7 @@ async function main() {
         const number = i + 1;
         const prefix = electionData.id.replace('dev-election-', '');
 
-        const programDescription = `Program unggulan: ${seed.program.join(', ')}. ${seed.vision}`;
+        const programDescription = seed.quote;
 
         const candidate = await prisma.candidate.upsert({
           where: {

@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { motion, useReducedMotion, useScroll, useSpring, useTransform } from 'motion/react';
+import { Quote, Sparkles, Target, Compass, Image as ImageIcon } from 'lucide-react';
 import type { CandidateImage } from '@e-voting/types';
 import { getPublicCandidate, listPublicCandidates } from '@/services/candidates';
 import { uploadUrl } from '@/lib/images';
@@ -94,7 +95,7 @@ export default function CandidateDetailPage() {
       };
 
   return (
-    <main className="min-h-screen">
+    <main className="min-h-screen pb-20">
       <div className="relative">
         <motion.div
           aria-hidden
@@ -113,13 +114,13 @@ export default function CandidateDetailPage() {
           <motion.div {...fadeUp()}>
             <Link
               href="/"
-              className="inline-flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-primary"
+              className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-primary"
             >
-              ← Kembali
+              ← Kembali ke Beranda
             </Link>
           </motion.div>
 
-          <motion.div {...fadeUp(0.05)} className="mt-6 text-center">
+          <motion.div {...fadeUp(0.05)} className="mt-8 text-center">
             <p className="font-mono text-xs uppercase tracking-[0.3em] text-muted-foreground">
               {election.title} · {election.academic_year}
             </p>
@@ -128,9 +129,10 @@ export default function CandidateDetailPage() {
             </div>
           </motion.div>
 
+          {/* Hero Candidate Photo & Badge */}
           <motion.div {...heroAnim} className="relative mt-8">
             {photos.length > 0 ? (
-              <div className="overflow-hidden rounded-2xl">
+              <div className="overflow-hidden rounded-2xl shadow-sm">
                 <ImageCarousel
                   images={toCarouselImages(photos)}
                   ratio="3/4"
@@ -146,91 +148,162 @@ export default function CandidateDetailPage() {
               initial={reduced ? false : { scale: 0.5, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ type: 'spring', stiffness: 260, damping: 18, delay: 0.25 }}
-              className="absolute left-4 top-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary font-mono text-lg font-bold text-primary-foreground shadow-sm"
+              className="absolute left-4 top-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary font-mono text-xl font-bold text-primary-foreground shadow-md"
             >
               {candidate.candidate_number}
             </motion.span>
           </motion.div>
 
-          <div className="mt-6 text-center">
+          {/* Names */}
+          <div className="mt-8 text-center">
             <motion.h1
               {...fadeUp(0.1)}
-              className="font-heading text-3xl font-bold leading-snug sm:text-4xl"
+              className="font-heading text-3xl font-bold leading-snug tracking-tight sm:text-4xl"
             >
               {candidate.chairman_name}
               {candidate.vice_chairman_name && (
                 <>
                   {' '}
-                  <span className="text-muted-foreground">&amp;</span>{' '}
+                  <span className="text-muted-foreground font-normal">&amp;</span>{' '}
                   {candidate.vice_chairman_name}
                 </>
               )}
             </motion.h1>
+            <p className="mt-2 text-sm text-muted-foreground">
+              Kandidat Nomor Urut {candidate.candidate_number}
+            </p>
           </div>
 
-          <div className="mt-10 space-y-8">
-            <motion.section {...fadeUp()}>
-              <h2 className="font-heading text-xl font-semibold">Visi</h2>
-              <p className="mt-3 whitespace-pre-line text-muted-foreground">{candidate.vision}</p>
-            </motion.section>
-            <motion.section {...fadeUp(0.1)}>
-              <h2 className="font-heading text-xl font-semibold">Misi</h2>
-              <p className="mt-3 whitespace-pre-line text-muted-foreground">{candidate.mission}</p>
-            </motion.section>
-          </div>
-
-          {posters.length > 0 && (
-            <motion.div {...fadeUp(0.12)} className="mt-10">
-              <h2 className="font-heading text-xl font-semibold">Poster Kampanye</h2>
-              <div className="mt-3">
-                <ImageCarousel
-                  images={toCarouselImages(posters)}
-                  ratio="2/3"
-                  altFallback="Poster kampanye"
-                />
-              </div>
-            </motion.div>
-          )}
-
-          {candidate.program_description && (
-            <motion.section {...fadeUp(0.13)} className="mt-10">
-              <h2 className="font-heading text-xl font-semibold">Program</h2>
-              <p className="mt-3 whitespace-pre-line text-muted-foreground">
-                {candidate.program_description}
+          {/* Section: Visi & Misi */}
+          <div className="mt-16 sm:mt-20 space-y-8">
+            <motion.div {...fadeUp()} className="text-center">
+              <p className="font-mono text-xs uppercase tracking-[0.3em] text-muted-foreground flex items-center justify-center gap-1.5">
+                <Compass className="h-3.5 w-3.5 text-primary" /> Arah &amp; Komitmen
               </p>
-            </motion.section>
+              <h2 className="mt-2 font-heading text-2xl sm:text-3xl font-bold">Visi &amp; Misi</h2>
+            </motion.div>
+
+            <div className="grid gap-6 sm:grid-cols-2">
+              <motion.div
+                {...fadeUp(0.08)}
+                className="flex flex-col rounded-2xl border bg-card/60 p-6 sm:p-8 shadow-xs backdrop-blur"
+              >
+                <div className="flex items-center gap-2 text-primary font-semibold text-sm">
+                  <Target className="h-4 w-4" /> Visi Utama
+                </div>
+                <p className="mt-4 whitespace-pre-line text-sm sm:text-base leading-relaxed text-foreground/90">
+                  {candidate.vision}
+                </p>
+              </motion.div>
+
+              <motion.div
+                {...fadeUp(0.12)}
+                className="flex flex-col rounded-2xl border bg-card/60 p-6 sm:p-8 shadow-xs backdrop-blur"
+              >
+                <div className="flex items-center gap-2 text-primary font-semibold text-sm">
+                  <Sparkles className="h-4 w-4" /> Misi &amp; Program Kerja
+                </div>
+                <p className="mt-4 whitespace-pre-line text-sm sm:text-base leading-relaxed text-foreground/90">
+                  {candidate.mission}
+                </p>
+              </motion.div>
+            </div>
+          </div>
+
+          {/* Section: Pesan & Kata Mereka (Quote Section) */}
+          {candidate.program_description && (
+            <div className="mt-16 sm:mt-20">
+              <motion.div {...fadeUp()} className="text-center">
+                <p className="font-mono text-xs uppercase tracking-[0.3em] text-muted-foreground flex items-center justify-center gap-1.5">
+                  <Quote className="h-3.5 w-3.5 text-primary" /> Gagasan &amp; Nilai
+                </p>
+                <h2 className="mt-2 font-heading text-2xl sm:text-3xl font-bold">Kata Mereka</h2>
+              </motion.div>
+
+              <motion.div
+                {...fadeUp(0.1)}
+                className="relative mt-6 overflow-hidden rounded-2xl border border-primary/20 bg-primary/5 p-8 sm:p-10 text-center shadow-xs"
+              >
+                <Quote className="mx-auto h-8 w-8 text-primary/30" />
+                <p className="mt-4 font-heading text-lg sm:text-xl italic leading-relaxed text-foreground">
+                  &ldquo;{candidate.program_description}&rdquo;
+                </p>
+                <div className="mt-5 font-mono text-xs text-muted-foreground uppercase tracking-wider">
+                  — {candidate.chairman_name}
+                  {candidate.vice_chairman_name ? ` & ${candidate.vice_chairman_name}` : ''}
+                </div>
+              </motion.div>
+            </div>
           )}
 
+          {/* Section: Poster Kampanye */}
+          {posters.length > 0 && (
+            <div className="mt-16 sm:mt-20">
+              <motion.div {...fadeUp()} className="text-center">
+                <p className="font-mono text-xs uppercase tracking-[0.3em] text-muted-foreground flex items-center justify-center gap-1.5">
+                  <ImageIcon className="h-3.5 w-3.5 text-primary" /> Publikasi &amp; Visual
+                </p>
+                <h2 className="mt-2 font-heading text-2xl sm:text-3xl font-bold">
+                  Poster Kampanye
+                </h2>
+              </motion.div>
+
+              <motion.div {...fadeUp(0.1)} className="mx-auto mt-6 max-w-md">
+                <div className="overflow-hidden rounded-2xl shadow-md border bg-card">
+                  <ImageCarousel
+                    images={toCarouselImages(posters)}
+                    ratio="2/3"
+                    altFallback="Poster kampanye"
+                  />
+                </div>
+              </motion.div>
+            </div>
+          )}
+
+          {/* Section: Program & Kegiatan */}
           {program.length > 0 && (
-            <motion.div {...fadeUp(0.15)} className="mt-10">
-              <h2 className="font-heading text-xl font-semibold">Program &amp; Kegiatan</h2>
-              <div className="mt-3">
+            <div className="mt-16 sm:mt-20">
+              <motion.div {...fadeUp()} className="text-center">
+                <p className="font-mono text-xs uppercase tracking-[0.3em] text-muted-foreground flex items-center justify-center gap-1.5">
+                  <Sparkles className="h-3.5 w-3.5 text-primary" /> Rencana &amp; Dokumentasi
+                </p>
+                <h2 className="mt-2 font-heading text-2xl sm:text-3xl font-bold">
+                  Program &amp; Kegiatan
+                </h2>
+              </motion.div>
+
+              <motion.div {...fadeUp(0.1)} className="mt-6">
                 <ImageCarousel
                   images={toCarouselImages(program)}
                   ratio="3/4"
                   altFallback="Gambar program"
                 />
-              </div>
-            </motion.div>
+              </motion.div>
+            </div>
           )}
 
+          {/* Call to Action Box */}
           <motion.div
             {...fadeUp()}
-            className="mt-12 rounded-2xl border bg-card p-8 text-center shadow-sm"
+            className="mt-20 rounded-2xl border bg-card p-8 sm:p-10 text-center shadow-sm"
           >
-            <h2 className="font-heading text-2xl font-bold">Sudah menentukan pilihanmu?</h2>
-            <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
-              Gunakan NIS/NISN dan Token Voting dari panitia untuk memilih pemimpinmu.
+            <h2 className="font-heading text-2xl sm:text-3xl font-bold">
+              Sudah menentukan pilihanmu?
+            </h2>
+            <p className="mx-auto mt-2.5 max-w-md text-sm text-muted-foreground">
+              Gunakan NIS/NISN atau NIP Anda dan Token Voting dari panitia untuk menyuarakan
+              pilihan.
             </p>
             <Link
               href="/student/login"
-              className="mt-6 inline-flex h-12 w-full max-w-sm items-center justify-center rounded-xl bg-primary px-6 font-semibold text-primary-foreground shadow-sm transition-all duration-200 hover:bg-primary/90 hover:shadow-md"
+              className="mt-6 inline-flex h-12 w-full max-w-sm items-center justify-center rounded-xl bg-primary px-8 font-semibold text-primary-foreground shadow-sm transition-all duration-200 hover:bg-primary/90 hover:shadow-md"
             >
               Siap Memilih — Klik di Sini
             </Link>
           </motion.div>
 
-          <motion.div {...fadeUp()} className="mt-8 flex items-center justify-between gap-4">
+          {/* Prev / Next Switcher */}
+          <motion.div {...fadeUp()} className="mt-10 flex items-center justify-between gap-4">
             {prev ? (
               <button
                 type="button"
@@ -263,7 +336,7 @@ export default function CandidateDetailPage() {
 
           <motion.p
             {...fadeUp(0.05)}
-            className="mt-6 text-center font-mono text-xs text-muted-foreground"
+            className="mt-8 text-center font-mono text-xs text-muted-foreground"
           >
             {formatPeriod(election)}
           </motion.p>

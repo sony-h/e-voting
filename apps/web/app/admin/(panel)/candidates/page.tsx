@@ -644,14 +644,18 @@ export default function AdminCandidatesPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="program_description">Deskripsi Program</Label>
+              <Label htmlFor="program_description">Pesan &amp; Motto Kandidat / Kata Mereka</Label>
               <Textarea
                 id="program_description"
                 rows={4}
                 value={form.program_description}
                 onChange={(e) => setForm({ ...form, program_description: e.target.value })}
-                placeholder="Jelaskan program unggulan kandidat..."
+                placeholder="Tuliskan kutipan, motto, sepatah kata, atau gagasan khusus dari kandidat..."
               />
+              <p className="text-xs text-muted-foreground">
+                Kutipan atau pesan utama yang akan ditampilkan secara estetik di halaman profil
+                kandidat.
+              </p>
             </div>
             <div className="space-y-2">
               <Label>Poster Kampanye</Label>
