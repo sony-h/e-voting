@@ -3,7 +3,14 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { BarChart3, CalendarRange, LayoutDashboard, Users, UsersRound } from 'lucide-react';
+import {
+  BarChart3,
+  CalendarRange,
+  GraduationCap,
+  LayoutDashboard,
+  Users,
+  UsersRound,
+} from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 
@@ -12,6 +19,7 @@ const NAV = [
   { href: '/admin/elections', label: 'Pemilihan', icon: CalendarRange },
   { href: '/admin/candidates', label: 'Kandidat', icon: UsersRound },
   { href: '/admin/students', label: 'Siswa', icon: Users },
+  { href: '/admin/staff', label: 'Guru & Staf', icon: GraduationCap },
   { href: '/admin/results', label: 'Hasil', icon: BarChart3 },
 ];
 

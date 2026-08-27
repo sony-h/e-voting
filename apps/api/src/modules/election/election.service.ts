@@ -79,6 +79,7 @@ export class ElectionService {
         where: { candidate: { election_id: id } },
       });
       await tx.candidate.deleteMany({ where: { election_id: id } });
+      await tx.staffVoter.deleteMany({ where: { election_id: id } });
       await tx.student.deleteMany({ where: { election_id: id } });
       return tx.election.delete({ where: { id } });
     });

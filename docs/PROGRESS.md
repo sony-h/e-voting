@@ -85,3 +85,6 @@
 | Admin | Elections polish | Done | PageHeader, badge ACTIVE solid, search/filter/sort, pagination, skeleton |
 | Admin | Students polish | Done | Toolbar, bulk select, ⋯ menu, token copy, sticky header, pagination |
 | Admin | Candidates polish | Done | Fix Landing badge, toolbar, pagination, dialog rows, gallery toast |
+| Voter | Guru & Staf voter support | Done | StaffVoter table, dual-role login (Siswa vs Guru/Staf with searchable dropdown), anonymous vote submit |
+| Admin | Guru & Staf management | Done | /admin/staff with CRUD, import/export Excel, token reset, bulk actions |
+| Dashboard | Student vs Staff metrics | Done | Dashboard summary and breakdowns for Siswa vs Guru & Staf |

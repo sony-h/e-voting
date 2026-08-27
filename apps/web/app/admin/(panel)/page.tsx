@@ -3,7 +3,12 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { listElections } from '@/services/elections';
-import { getDashboardClasses, getDashboardMajors, getDashboardSummary } from '@/services/dashboard';
+import {
+  getDashboardClasses,
+  getDashboardMajors,
+  getDashboardRoles,
+  getDashboardSummary,
+} from '@/services/dashboard';
 import { ElectionSelect } from '@/components/admin/election-select';
 import { PageHeader } from '@/components/ui/page-header';
 import { StatCard } from '@/components/ui/stat-card';
@@ -48,6 +53,12 @@ export default function AdminDashboardPage() {
     enabled: !!effectiveElectionId,
   });
 
+  const { data: roles } = useQuery({
+    queryKey: ['dashboard-roles', effectiveElectionId],
+    queryFn: () => getDashboardRoles(effectiveElectionId),
+    enabled: !!effectiveElectionId,
+  });
+
   const isActive = selectedElection?.status === 'ACTIVE';
 
   return (
@@ -55,7 +66,7 @@ export default function AdminDashboardPage() {
       <PageHeader
         eyebrow="Orivastra · Dashboard"
         title="Dashboard"
-        description="Monitoring partisipasi voting."
+        description="Monitoring partisipasi voting siswa, guru, dan staf."
         action={<ElectionSelect value={effectiveElectionId} onChange={setElectionId} />}
       />
 
@@ -67,8 +78,10 @@ export default function AdminDashboardPage() {
         <>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <StatCard
-              label="Total Siswa"
-              value={summaryLoading ? '...' : (summary?.total_students ?? 0)}
+              label="Total Pemilih"
+              value={
+                summaryLoading ? '...' : (summary?.total_voters ?? summary?.total_students ?? 0)
+              }
             />
             <StatCard
               label="Sudah Voting"
@@ -76,20 +89,33 @@ export default function AdminDashboardPage() {
               accent="green"
             />
             <StatCard
-              label="Belum Voting"
-              value={summaryLoading ? '...' : (summary?.not_voted ?? 0)}
-              accent="orange"
+              label="Partisipasi Siswa"
+              value={
+                summaryLoading
+                  ? '...'
+                  : `${summary?.students_voted ?? 0}/${summary?.students_total ?? summary?.total_students ?? 0} (${summary?.students_participation_rate ?? summary?.participation_rate ?? 0}%)`
+              }
+              accent="blue"
             />
             <StatCard
-              label="Partisipasi"
-              value={summaryLoading ? '...' : `${summary?.participation_rate ?? 0}%`}
-              accent="blue"
+              label="Partisipasi Guru & Staf"
+              value={
+                summaryLoading
+                  ? '...'
+                  : `${summary?.staff_voted ?? 0}/${summary?.staff_total ?? 0} (${summary?.staff_participation_rate ?? 0}%)`
+              }
+              accent="orange"
             />
           </div>
 
           <div className="rounded-xl border bg-card p-6 shadow-sm">
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <h2 className="font-heading font-semibold">Partisipasi Voting</h2>
+              <div>
+                <h2 className="font-heading font-semibold text-lg">Partisipasi Keseluruhan</h2>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Gabungan suara siswa, guru, dan tenaga kependidikan
+                </p>
+              </div>
               <div className="flex items-center gap-3">
                 {isActive && <CountdownPill endAt={selectedElection?.end_at ?? null} />}
                 <Badge
@@ -101,14 +127,45 @@ export default function AdminDashboardPage() {
               </div>
             </div>
             <Progress className="mt-4" value={summary?.participation_rate ?? 0} />
-            <p className="mt-2 text-sm text-muted-foreground">
-              {summary?.already_voted ?? 0} dari {summary?.total_students ?? 0} siswa telah memilih
-            </p>
+            <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-sm text-muted-foreground">
+              <span>
+                Total <strong className="text-foreground">{summary?.already_voted ?? 0}</strong>{' '}
+                dari{' '}
+                <strong className="text-foreground">
+                  {summary?.total_voters ?? summary?.total_students ?? 0}
+                </strong>{' '}
+                pemilih telah menggunakan hak suaranya
+              </span>
+              <span className="font-mono font-semibold text-primary">
+                {summary?.participation_rate ?? 0}% Partisipasi
+              </span>
+            </div>
           </div>
 
-          <div className="grid gap-6 lg:grid-cols-2">
+          <div className="grid gap-6 lg:grid-cols-3">
             <div className="rounded-xl border bg-card p-6 shadow-sm">
-              <h2 className="font-heading font-semibold">Progress per Kelas</h2>
+              <h2 className="font-heading font-semibold">Guru &amp; Tenaga Kependidikan</h2>
+              <div className="mt-4 space-y-4">
+                {!roles || roles.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">Belum ada data guru/staf.</p>
+                ) : (
+                  roles.map((r) => (
+                    <div key={r.name}>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="font-medium">{r.name}</span>
+                        <span className="font-mono text-xs text-muted-foreground">
+                          {r.voted}/{r.total} · {r.participation_rate}%
+                        </span>
+                      </div>
+                      <Progress className="mt-1.5" value={r.participation_rate} />
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+
+            <div className="rounded-xl border bg-card p-6 shadow-sm">
+              <h2 className="font-heading font-semibold">Siswa per Kelas</h2>
               <div className="mt-4 space-y-4">
                 {!classes || classes.length === 0 ? (
                   <p className="text-sm text-muted-foreground">Belum ada data kelas.</p>
@@ -129,7 +186,7 @@ export default function AdminDashboardPage() {
             </div>
 
             <div className="rounded-xl border bg-card p-6 shadow-sm">
-              <h2 className="font-heading font-semibold">Progress per Jurusan</h2>
+              <h2 className="font-heading font-semibold">Siswa per Jurusan</h2>
               <div className="mt-4 space-y-4">
                 {!majors || majors.length === 0 ? (
                   <p className="text-sm text-muted-foreground">Belum ada data jurusan.</p>

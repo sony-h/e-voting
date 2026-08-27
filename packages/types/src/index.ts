@@ -60,10 +60,30 @@ export interface CandidateImage {
   created_at: Date;
 }
 
+export enum StaffRole {
+  TEACHER = 'TEACHER',
+  STAFF = 'STAFF',
+}
+
+export interface StaffVoter {
+  id: string;
+  election_id: string;
+  nip: string | null;
+  username: string | null;
+  full_name: string;
+  role: StaffRole;
+  has_voted: boolean;
+  voted_at: Date | null;
+  created_at: Date;
+  updated_at: Date;
+  token?: VotingToken | null;
+}
+
 export interface VotingToken {
   id: string;
   election_id: string;
-  student_id: string;
+  student_id: string | null;
+  staff_id: string | null;
   token: string;
   is_used: boolean;
   expires_at: Date | null;

@@ -27,9 +27,15 @@ interface AdminPayload {
 }
 
 interface StudentSessionPayload {
-  studentId: string;
-  nis: string;
-  elections: { electionId: string; studentId: string; has_voted: boolean }[];
+  voterId: string;
+  voterType: 'STUDENT' | 'STAFF';
+  identifier: string;
+  elections: {
+    electionId: string;
+    voterId: string;
+    voterType: 'STUDENT' | 'STAFF';
+    has_voted: boolean;
+  }[];
 }
 
 type AdminRequest = Request & { user: AdminPayload };

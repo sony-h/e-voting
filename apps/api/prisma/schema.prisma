@@ -20,6 +20,11 @@ enum ImageType {
   POSTER
 }
 
+enum StaffRole {
+  TEACHER
+  STAFF
+}
+
 model Election {
   id             String         @id @default(uuid())
   title          String
@@ -33,27 +38,28 @@ model Election {
   created_at     DateTime       @default(now())
   updated_at     DateTime       @updatedAt
 
-  candidates Candidate[]
-  students   Student[]
-  tokens     VotingToken[]
-  votes      Vote[]
+  candidates   Candidate[]
+  students     Student[]
+  staffVoters  StaffVoter[]
+  tokens       VotingToken[]
+  votes        Vote[]
 
   @@index([status])
 }
 
 model Student {
-  id         String    @id @default(uuid())
+  id          String       @id @default(uuid())
   election_id String
-  nis        String
-  nisn       String?
-  full_name  String
-  class_name String
-  major      String?
-  grade      String?
-  has_voted  Boolean   @default(false)
-  voted_at   DateTime?
-  created_at DateTime  @default(now())
-  updated_at DateTime  @updatedAt
+  nis         String
+  nisn        String?
+  full_name   String
+  class_name  String
+  major       String?
+  grade       String?
+  has_voted   Boolean      @default(false)
+  voted_at    DateTime?
+  created_at  DateTime     @default(now())
+  updated_at  DateTime     @updatedAt
 
   election Election     @relation(fields: [election_id], references: [id])
   token    VotingToken?
@@ -62,6 +68,26 @@ model Student {
   @@unique([election_id, nisn])
   @@index([class_name])
   @@index([major])
+}
+
+model StaffVoter {
+  id          String       @id @default(uuid())
+  election_id String
+  nip         String?
+  username    String?
+  full_name   String
+  role        StaffRole    @default(TEACHER)
+  has_voted   Boolean      @default(false)
+  voted_at    DateTime?
+  created_at  DateTime     @default(now())
+  updated_at  DateTime     @updatedAt
+
+  election Election     @relation(fields: [election_id], references: [id])
+  token    VotingToken?
+
+  @@unique([election_id, nip])
+  @@unique([election_id, username])
+  @@index([role])
 }
 
 model Candidate {
@@ -99,16 +125,18 @@ model CandidateImage {
 }
 
 model VotingToken {
-  id          String    @id @default(uuid())
+  id          String      @id @default(uuid())
   election_id String
-  student_id  String    @unique
-  token       String    @unique
-  is_used     Boolean   @default(false)
+  student_id  String?     @unique
+  staff_id    String?     @unique
+  token       String      @unique
+  is_used     Boolean     @default(false)
   expires_at  DateTime?
-  created_at  DateTime  @default(now())
+  created_at  DateTime    @default(now())
 
-  election Election @relation(fields: [election_id], references: [id])
-  student  Student  @relation(fields: [student_id], references: [id])
+  election Election    @relation(fields: [election_id], references: [id])
+  student  Student?    @relation(fields: [student_id], references: [id])
+  staff    StaffVoter? @relation(fields: [staff_id], references: [id])
 }
 
 model Vote {

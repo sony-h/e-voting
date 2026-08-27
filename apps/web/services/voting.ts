@@ -3,7 +3,9 @@ import type { Candidate } from '@e-voting/types';
 
 export interface VotingElection {
   electionId: string;
-  studentId: string;
+  voterId?: string;
+  voterType?: 'STUDENT' | 'STAFF';
+  studentId?: string;
   has_voted: boolean;
   title?: string;
 }

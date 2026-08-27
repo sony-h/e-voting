@@ -54,6 +54,103 @@ const SURNAMES = [
   'Lestari',
 ];
 
+const STAFF_SEEDS = [
+  // 8 PNS Teachers with NIP
+  {
+    nip: '196805121994031005',
+    username: null,
+    full_name: 'Drs. H. Bambang Sudiro, M.Pd.',
+    role: 'TEACHER' as const,
+  },
+  {
+    nip: '197403151999032002',
+    username: null,
+    full_name: 'Sri Wahyuningsih, S.Pd.',
+    role: 'TEACHER' as const,
+  },
+  {
+    nip: '198008202005011008',
+    username: null,
+    full_name: 'Agus Setiawan, S.Pd., M.Si.',
+    role: 'TEACHER' as const,
+  },
+  {
+    nip: '196911241997022001',
+    username: null,
+    full_name: 'Dra. Hj. Nurul Hidayati',
+    role: 'TEACHER' as const,
+  },
+  {
+    nip: '198506142009021003',
+    username: null,
+    full_name: 'Hendra Gunawan, S.Kom.',
+    role: 'TEACHER' as const,
+  },
+  {
+    nip: '198809182014022001',
+    username: null,
+    full_name: 'Siti Rahmawati, S.Pd.',
+    role: 'TEACHER' as const,
+  },
+  {
+    nip: '199104052019031007',
+    username: null,
+    full_name: 'Eko Purnomo, S.Pd.',
+    role: 'TEACHER' as const,
+  },
+  {
+    nip: '198207102008012015',
+    username: null,
+    full_name: 'Rina Marlina, M.Pd.',
+    role: 'TEACHER' as const,
+  },
+  // 2 Honorer Teachers with Username
+  {
+    nip: null,
+    username: 'guru-01',
+    full_name: 'Tri Wibowo, S.Pd.',
+    role: 'TEACHER' as const,
+  },
+  {
+    nip: null,
+    username: 'guru-02',
+    full_name: 'Anisa Permata, S.Pd.',
+    role: 'TEACHER' as const,
+  },
+  // 3 PNS Staff with NIP
+  {
+    nip: '197602142007011012',
+    username: null,
+    full_name: 'Joko Susilo',
+    role: 'STAFF' as const,
+  },
+  {
+    nip: '198109082010011009',
+    username: null,
+    full_name: 'Maryanto',
+    role: 'STAFF' as const,
+  },
+  {
+    nip: '198312012014082002',
+    username: null,
+    full_name: 'Endang Sulastri',
+    role: 'STAFF' as const,
+  },
+  // 2 Staff with Username
+  {
+    nip: null,
+    username: 'staf-01',
+    full_name: 'Dedi Suryadi',
+    role: 'STAFF' as const,
+  },
+  {
+    nip: null,
+    username: 'staf-02',
+    full_name: 'Slamet Riyadi',
+    role: 'STAFF' as const,
+  },
+];
+
 interface CandidateSeed {
   chairman: string;
   vice: string;
@@ -303,6 +400,71 @@ async function main() {
         }
       }
       console.log('30 students ready for', electionData.id);
+
+      for (const s of STAFF_SEEDS) {
+        let staff = null;
+        if (s.nip) {
+          staff = await prisma.staffVoter.findUnique({
+            where: {
+              election_id_nip: { election_id: electionData.id, nip: s.nip },
+            },
+          });
+        }
+        if (!staff && s.username) {
+          staff = await prisma.staffVoter.findUnique({
+            where: {
+              election_id_username: {
+                election_id: electionData.id,
+                username: s.username,
+              },
+            },
+          });
+        }
+
+        if (staff) {
+          staff = await prisma.staffVoter.update({
+            where: { id: staff.id },
+            data: {
+              full_name: s.full_name,
+              role: s.role,
+            },
+          });
+          await prisma.votingToken.upsert({
+            where: { staff_id: staff.id },
+            update: {
+              election_id: electionData.id,
+              expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000),
+            },
+            create: {
+              staff_id: staff.id,
+              election_id: electionData.id,
+              token: generateVotingToken(),
+              expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000),
+            },
+          });
+        } else {
+          staff = await prisma.staffVoter.create({
+            data: {
+              nip: s.nip,
+              username: s.username,
+              full_name: s.full_name,
+              role: s.role,
+              election_id: electionData.id,
+              token: {
+                create: {
+                  election_id: electionData.id,
+                  token: generateVotingToken(),
+                  expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000),
+                },
+              },
+            },
+          });
+        }
+      }
+      console.log(
+        `${STAFF_SEEDS.length} teachers & staff ready for`,
+        electionData.id,
+      );
 
       for (let i = 0; i < electionData.candidates.length; i++) {
         const seed = electionData.candidates[i]!;

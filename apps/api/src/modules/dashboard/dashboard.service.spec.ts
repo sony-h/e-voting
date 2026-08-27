@@ -8,6 +8,7 @@ describe('DashboardService', () => {
   const prismaMock = {
     election: { findUnique: jest.fn() },
     student: { count: jest.fn(), findMany: jest.fn() },
+    staffVoter: { count: jest.fn(), findMany: jest.fn() },
     vote: { count: jest.fn() },
   };
 
@@ -28,26 +29,32 @@ describe('DashboardService', () => {
       status: 'ACTIVE',
     });
     prismaMock.student.count.mockResolvedValueOnce(4).mockResolvedValueOnce(1);
-    prismaMock.vote.count.mockResolvedValue(1);
+    prismaMock.staffVoter.count
+      .mockResolvedValueOnce(2)
+      .mockResolvedValueOnce(1);
+    prismaMock.vote.count.mockResolvedValue(2);
 
     const result = await service.summary('e1');
 
-    expect(result).toEqual({
-      total_students: 4,
-      already_voted: 1,
-      not_voted: 3,
-      total_votes: 1,
-      participation_rate: 25,
-      status: 'ACTIVE',
-    });
+    expect(result.total_voters).toBe(6);
+    expect(result.already_voted).toBe(2);
+    expect(result.not_voted).toBe(4);
+    expect(result.total_votes).toBe(2);
+    expect(result.participation_rate).toBe(33);
+    expect(result.students_total).toBe(4);
+    expect(result.students_voted).toBe(1);
+    expect(result.staff_total).toBe(2);
+    expect(result.staff_voted).toBe(1);
+    expect(result.status).toBe('ACTIVE');
   });
 
-  it('returns zero rate when no students', async () => {
+  it('returns zero rate when no students and no staff', async () => {
     prismaMock.election.findUnique.mockResolvedValue({
       id: 'e1',
       status: 'DRAFT',
     });
     prismaMock.student.count.mockResolvedValue(0);
+    prismaMock.staffVoter.count.mockResolvedValue(0);
     prismaMock.vote.count.mockResolvedValue(0);
 
     const result = await service.summary('e1');

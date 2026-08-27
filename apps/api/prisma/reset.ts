@@ -25,6 +25,12 @@ async function main() {
     });
     console.log(`${electionId}: students reset`, students.count);
 
+    const staff = await prisma.staffVoter.updateMany({
+      where: { election_id: electionId },
+      data: { has_voted: false, voted_at: null },
+    });
+    console.log(`${electionId}: staff reset`, staff.count);
+
     const tokens = await prisma.votingToken.updateMany({
       where: { election_id: electionId },
       data: { is_used: false },

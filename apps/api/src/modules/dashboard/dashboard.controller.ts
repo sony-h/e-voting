@@ -24,4 +24,9 @@ export class DashboardController {
   byMajor(@Query('electionId') electionId: string) {
     return this.dashboardService.byMajor(electionId);
   }
+
+  @Get('roles')
+  byRole(@Query('electionId') electionId: string) {
+    return this.dashboardService.byRole(electionId);
+  }
 }

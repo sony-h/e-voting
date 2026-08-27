@@ -9,12 +9,17 @@ import { RedisService } from '../../redis/redis.service';
 
 export interface VotingSessionElection {
   electionId: string;
-  studentId: string;
+  voterId: string;
+  voterType?: 'STUDENT' | 'STAFF';
+  studentId?: string; // backwards compatibility if needed
   has_voted: boolean;
 }
 export interface VotingSession {
-  studentId: string;
-  nis: string;
+  voterId?: string;
+  studentId?: string;
+  voterType?: 'STUDENT' | 'STAFF';
+  nis?: string;
+  identifier?: string;
   elections: VotingSessionElection[];
 }
 
@@ -74,28 +79,55 @@ export class VotingService {
       throw new BadRequestException({ errorCode: 'INVALID_CANDIDATE' });
     }
 
-    const student = await this.prisma.student.findUnique({
-      where: { id: current.studentId },
-    });
-    if (!student)
-      throw new NotFoundException({ errorCode: 'STUDENT_NOT_FOUND' });
-    if (student.has_voted) {
-      throw new BadRequestException({ errorCode: 'ALREADY_VOTED' });
-    }
+    const voterId = current.voterId ?? current.studentId!;
+    const isStaff = current.voterType === 'STAFF';
 
-    await this.prisma.$transaction(async (tx) => {
-      await tx.vote.create({
-        data: { election_id: current.electionId, candidate_id: candidateId },
+    if (isStaff) {
+      const staff = await this.prisma.staffVoter.findUnique({
+        where: { id: voterId },
       });
-      await tx.student.update({
-        where: { id: current.studentId },
-        data: { has_voted: true, voted_at: new Date() },
+      if (!staff) throw new NotFoundException({ errorCode: 'STAFF_NOT_FOUND' });
+      if (staff.has_voted) {
+        throw new BadRequestException({ errorCode: 'ALREADY_VOTED' });
+      }
+
+      await this.prisma.$transaction(async (tx) => {
+        await tx.vote.create({
+          data: { election_id: current.electionId, candidate_id: candidateId },
+        });
+        await tx.staffVoter.update({
+          where: { id: voterId },
+          data: { has_voted: true, voted_at: new Date() },
+        });
+        await tx.votingToken.updateMany({
+          where: { staff_id: voterId },
+          data: { is_used: true },
+        });
       });
-      await tx.votingToken.updateMany({
-        where: { student_id: current.studentId },
-        data: { is_used: true },
+    } else {
+      const student = await this.prisma.student.findUnique({
+        where: { id: voterId },
       });
-    });
+      if (!student)
+        throw new NotFoundException({ errorCode: 'STUDENT_NOT_FOUND' });
+      if (student.has_voted) {
+        throw new BadRequestException({ errorCode: 'ALREADY_VOTED' });
+      }
+
+      await this.prisma.$transaction(async (tx) => {
+        await tx.vote.create({
+          data: { election_id: current.electionId, candidate_id: candidateId },
+        });
+        await tx.student.update({
+          where: { id: voterId },
+          data: { has_voted: true, voted_at: new Date() },
+        });
+        await tx.votingToken.updateMany({
+          where: { student_id: voterId },
+          data: { is_used: true },
+        });
+      });
+    }
 
     const updatedElections = session.elections.map((e) =>
       e.electionId === current.electionId ? { ...e, has_voted: true } : e,

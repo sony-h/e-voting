@@ -11,6 +11,7 @@ describe('VotingService', () => {
     candidate: { findUnique: jest.fn(), findMany: jest.fn() },
     election: { findUnique: jest.fn(), findMany: jest.fn() },
     student: { findUnique: jest.fn(), update: jest.fn() },
+    staffVoter: { findUnique: jest.fn(), update: jest.fn() },
     votingToken: { updateMany: jest.fn() },
     vote: { create: jest.fn() },
     $transaction: jest.fn(),
@@ -19,9 +20,17 @@ describe('VotingService', () => {
   const configMock = { get: jest.fn().mockReturnValue('600') };
 
   const session: VotingSession = {
-    studentId: 's1',
-    nis: '231001',
-    elections: [{ electionId: 'e1', studentId: 's1', has_voted: false }],
+    voterId: 's1',
+    voterType: 'STUDENT',
+    identifier: '231001',
+    elections: [
+      {
+        electionId: 'e1',
+        voterId: 's1',
+        voterType: 'STUDENT',
+        has_voted: false,
+      },
+    ],
   };
 
   beforeEach(async () => {
@@ -133,11 +142,22 @@ describe('VotingService', () => {
 
   it('resolves current election and returns next after submit', async () => {
     const multiSession: VotingSession = {
-      studentId: 's1',
-      nis: '231001',
+      voterId: 's1',
+      voterType: 'STUDENT',
+      identifier: '231001',
       elections: [
-        { electionId: 'e1', studentId: 's1', has_voted: false },
-        { electionId: 'e2', studentId: 's1', has_voted: false },
+        {
+          electionId: 'e1',
+          voterId: 's1',
+          voterType: 'STUDENT',
+          has_voted: false,
+        },
+        {
+          electionId: 'e2',
+          voterId: 's1',
+          voterType: 'STUDENT',
+          has_voted: false,
+        },
       ],
     };
     prismaMock.election.findUnique.mockResolvedValue({
@@ -166,11 +186,22 @@ describe('VotingService', () => {
 
   it('throws ALREADY_VOTED when all elections voted', async () => {
     const allVotedSession: VotingSession = {
-      studentId: 's1',
-      nis: '231001',
+      voterId: 's1',
+      voterType: 'STUDENT',
+      identifier: '231001',
       elections: [
-        { electionId: 'e1', studentId: 's1', has_voted: true },
-        { electionId: 'e2', studentId: 's1', has_voted: true },
+        {
+          electionId: 'e1',
+          voterId: 's1',
+          voterType: 'STUDENT',
+          has_voted: true,
+        },
+        {
+          electionId: 'e2',
+          voterId: 's1',
+          voterType: 'STUDENT',
+          has_voted: true,
+        },
       ],
     };
     await expect(service.getCandidates(allVotedSession)).rejects.toThrow(
@@ -192,7 +223,8 @@ describe('VotingService', () => {
     expect(result.elections).toEqual([
       {
         electionId: 'e1',
-        studentId: 's1',
+        voterId: 's1',
+        voterType: 'STUDENT',
         has_voted: false,
         title: 'Pemilihan Ketua OSIS 2026/2027',
       },
