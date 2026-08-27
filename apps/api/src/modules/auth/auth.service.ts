@@ -56,16 +56,6 @@ export class AuthService {
       throw new UnauthorizedException({ errorCode: 'INVALID_TOKEN' });
     }
 
-    if (tokenRecord.is_used) {
-      throw new UnauthorizedException({ errorCode: 'INVALID_TOKEN' });
-    }
-    if (
-      tokenRecord.expires_at &&
-      new Date(tokenRecord.expires_at) < new Date()
-    ) {
-      throw new UnauthorizedException({ errorCode: 'TOKEN_EXPIRED' });
-    }
-
     const isStaff = !!tokenRecord.staff;
 
     if (isStaff) {
@@ -80,8 +70,11 @@ export class AuthService {
         throw new UnauthorizedException({ errorCode: 'INVALID_TOKEN' });
       }
 
-      if (staff.election.status !== 'ACTIVE') {
-        throw new UnauthorizedException({ errorCode: 'ELECTION_NOT_ACTIVE' });
+      if (
+        tokenRecord.expires_at &&
+        new Date(tokenRecord.expires_at) < new Date()
+      ) {
+        throw new UnauthorizedException({ errorCode: 'TOKEN_EXPIRED' });
       }
 
       const staffConditions: Array<{ nip?: string; username?: string }> = [];
@@ -96,8 +89,11 @@ export class AuthService {
         include: { election: true },
       });
 
-      const otherPending = allStaffRows.filter((s) => !s.has_voted);
-      if (staff.has_voted && otherPending.length === 0) {
+      const pendingActive = allStaffRows.filter(
+        (s) => s.election.status === 'ACTIVE' && !s.has_voted,
+      );
+
+      if (tokenRecord.is_used && pendingActive.length === 0) {
         throw new UnauthorizedException({ errorCode: 'ALREADY_VOTED' });
       }
 
@@ -112,6 +108,10 @@ export class AuthService {
 
       if (activeElections.length === 0) {
         throw new UnauthorizedException({ errorCode: 'ELECTION_NOT_ACTIVE' });
+      }
+
+      if (activeElections.every((e) => e.has_voted)) {
+        throw new UnauthorizedException({ errorCode: 'ALREADY_VOTED' });
       }
 
       const sessionId = randomUUID();
@@ -145,22 +145,27 @@ export class AuthService {
     if (student.nis !== dto.identifier && student.nisn !== dto.identifier) {
       throw new UnauthorizedException({ errorCode: 'INVALID_TOKEN' });
     }
-    if (student.election.status !== 'ACTIVE') {
-      throw new UnauthorizedException({ errorCode: 'ELECTION_NOT_ACTIVE' });
-    }
-    const otherPending = await this.prisma.student.findMany({
-      where: { nis: student.nis, has_voted: false },
-      include: { election: true },
-    });
-    if (student.has_voted && otherPending.length === 0) {
-      throw new UnauthorizedException({ errorCode: 'ALREADY_VOTED' });
+
+    if (
+      tokenRecord.expires_at &&
+      new Date(tokenRecord.expires_at) < new Date()
+    ) {
+      throw new UnauthorizedException({ errorCode: 'TOKEN_EXPIRED' });
     }
 
-    // Find all Student rows for this student across elections
+    // Find all Student rows for this student across all elections
     const allStudents = await this.prisma.student.findMany({
       where: { nis: student.nis },
       include: { election: true },
     });
+
+    const pendingActiveStudents = allStudents.filter(
+      (s) => s.election.status === 'ACTIVE' && !s.has_voted,
+    );
+
+    if (tokenRecord.is_used && pendingActiveStudents.length === 0) {
+      throw new UnauthorizedException({ errorCode: 'ALREADY_VOTED' });
+    }
 
     const elections = allStudents
       .filter((s) => s.election.status === 'ACTIVE')
@@ -173,6 +178,10 @@ export class AuthService {
 
     if (elections.length === 0) {
       throw new UnauthorizedException({ errorCode: 'ELECTION_NOT_ACTIVE' });
+    }
+
+    if (elections.every((e) => e.has_voted)) {
+      throw new UnauthorizedException({ errorCode: 'ALREADY_VOTED' });
     }
 
     const sessionId = randomUUID();

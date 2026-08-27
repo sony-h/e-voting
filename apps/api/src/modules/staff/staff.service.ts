@@ -22,9 +22,25 @@ export class StaffService {
     });
   }
 
-  findPublic(electionId?: string) {
-    return this.prisma.staffVoter.findMany({
-      where: { election_id: electionId },
+  async findPublic(electionId?: string) {
+    if (electionId) {
+      return this.prisma.staffVoter.findMany({
+        where: { election_id: electionId },
+        select: {
+          id: true,
+          nip: true,
+          username: true,
+          full_name: true,
+          role: true,
+          election_id: true,
+        },
+        orderBy: [{ role: 'asc' }, { full_name: 'asc' }],
+      });
+    }
+
+    // When listing public staff for login dropdown (across all elections),
+    // deduplicate by NIP, username, or full name so each person appears once.
+    const all = await this.prisma.staffVoter.findMany({
       select: {
         id: true,
         nip: true,
@@ -35,6 +51,21 @@ export class StaffService {
       },
       orderBy: [{ role: 'asc' }, { full_name: 'asc' }],
     });
+
+    const seen = new Set<string>();
+    const unique: typeof all = [];
+    for (const item of all) {
+      const key = item.nip
+        ? `nip:${item.nip}`
+        : item.username
+          ? `user:${item.username.toLowerCase()}`
+          : `name:${item.full_name.toLowerCase()}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        unique.push(item);
+      }
+    }
+    return unique;
   }
 
   findOne(id: string) {
