@@ -181,7 +181,7 @@ export default function CandidateDetailPage() {
               <h2 className="mt-2 font-heading text-2xl sm:text-3xl font-bold">Visi &amp; Misi</h2>
             </motion.div>
 
-            <div className="grid gap-6 sm:grid-cols-2">
+            <div className="flex flex-col gap-6">
               <motion.div
                 {...fadeUp(0.08)}
                 className="flex flex-col rounded-2xl border bg-card/60 p-6 sm:p-8 shadow-xs backdrop-blur"
