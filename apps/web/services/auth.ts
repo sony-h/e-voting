@@ -7,11 +7,15 @@ export interface AdminProfile {
 }
 
 export interface StudentSession {
-  studentId: string;
-  nis: string;
+  voterId: string;
+  voterType: 'STUDENT' | 'STAFF';
+  identifier: string;
+  full_name?: string;
+  role_title?: string;
   elections: {
     electionId: string;
-    studentId: string;
+    voterId: string;
+    voterType: 'STUDENT' | 'STAFF';
     has_voted: boolean;
   }[];
   expiresAt: string;

@@ -123,7 +123,10 @@ export class AuthService {
         voterId: staff.id,
         voterType: 'STAFF' as const,
         identifier: staff.nip ?? staff.username ?? staff.id,
+        full_name: staff.full_name,
+        role_title: staff.role === 'TEACHER' ? 'Guru' : 'Tenaga Kependidikan',
         elections: activeElections,
+        expiresAt: expiresAt.toISOString(),
       };
       await this.redis.setex(
         `student:session:${sessionId}`,
@@ -191,7 +194,10 @@ export class AuthService {
       voterId: student.id,
       voterType: 'STUDENT' as const,
       identifier: student.nis,
+      full_name: student.full_name,
+      role_title: student.class_name ? `Kelas ${student.class_name}` : 'Siswa',
       elections,
+      expiresAt: expiresAt.toISOString(),
     };
     await this.redis.setex(
       `student:session:${sessionId}`,
