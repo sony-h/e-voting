@@ -12,6 +12,17 @@ import {
   useSpring,
   useTransform,
 } from 'motion/react';
+import {
+  KeyRound,
+  LogIn,
+  Vote,
+  ShieldCheck,
+  ArrowRight,
+  ChevronDown,
+  Sparkles,
+  Users,
+  Quote,
+} from 'lucide-react';
 import type { CandidateWithImages } from '@/services/candidates';
 import { listElections } from '@/services/elections';
 import { listPublicCandidates } from '@/services/candidates';
@@ -59,7 +70,7 @@ function FloatingBallot() {
         <div className="absolute inset-0 rounded-[2rem] border-2 border-dashed border-primary/30" />
         <div className="absolute inset-0 flex items-center justify-center">
           <div
-            className="flex h-24 w-24 items-center justify-center rounded-3xl bg-primary shadow-lg"
+            className="flex h-24 w-24 items-center justify-center rounded-3xl bg-primary shadow-xl shadow-primary/20"
             style={{ transform: 'translateZ(40px)' }}
           >
             <svg
@@ -74,17 +85,17 @@ function FloatingBallot() {
           </div>
         </div>
         <div
-          className="absolute -right-2 top-6 h-8 w-8 rounded-full bg-success/20"
+          className="absolute -right-2 top-6 h-8 w-8 rounded-full bg-success/25"
           style={{ transform: 'translateZ(70px)' }}
         />
         <div
-          className="absolute -left-3 bottom-8 h-12 w-12 rounded-full bg-primary/10"
+          className="absolute -left-3 bottom-8 h-12 w-12 rounded-full bg-primary/15"
           style={{ transform: 'translateZ(55px)' }}
         />
       </motion.div>
       <div
         aria-hidden
-        className="absolute inset-x-8 -bottom-6 h-6 rounded-full bg-primary/15 blur-xl"
+        className="absolute inset-x-8 -bottom-6 h-6 rounded-full bg-primary/20 blur-xl"
         style={{ transform: 'rotateX(75deg)' }}
       />
     </motion.div>
@@ -119,7 +130,7 @@ function TiltCard({ children }: { children: React.ReactNode }) {
     >
       <motion.div
         style={reduced ? undefined : { rotateX, rotateY, transformStyle: 'preserve-3d' }}
-        className="flex h-full flex-col overflow-hidden rounded-2xl border bg-card shadow-sm transition-shadow duration-200 hover:shadow-xl"
+        className="flex h-full flex-col overflow-hidden rounded-2xl border border-border/70 bg-card/90 shadow-sm backdrop-blur transition-all duration-300 hover:border-primary/40 hover:shadow-xl"
       >
         {children}
       </motion.div>
@@ -170,27 +181,37 @@ function CandidateCard({ candidate }: { candidate: CandidateWithImages }) {
   return (
     <TiltCard>
       <Link href={`/candidate/${candidate.id}`} className="group flex h-full flex-col">
-        <div className="relative">
+        <div className="relative overflow-hidden">
           <CandidatePhotoCarousel candidate={candidate} />
           <span
-            className="absolute left-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-primary font-mono text-sm font-bold text-primary-foreground shadow-sm"
+            className="absolute left-3.5 top-3.5 flex h-11 w-11 items-center justify-center rounded-2xl bg-primary font-mono text-base font-bold text-primary-foreground shadow-md backdrop-blur"
             style={{ transform: 'translateZ(30px)' }}
           >
             {candidate.candidate_number}
           </span>
         </div>
 
-        <div className="flex flex-1 flex-col p-4" style={{ transform: 'translateZ(20px)' }}>
-          <h3 className="font-heading text-lg font-semibold">{candidate.chairman_name}</h3>
-          <p className="text-sm text-muted-foreground">
+        <div className="flex flex-1 flex-col p-5" style={{ transform: 'translateZ(20px)' }}>
+          <h3 className="font-heading text-xl font-bold tracking-tight text-foreground">
+            {candidate.chairman_name}
+          </h3>
+          <p className="text-sm font-medium text-muted-foreground">
             {candidate.vice_chairman_name ? `& ${candidate.vice_chairman_name}` : '—'}
           </p>
-          <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">{candidate.vision}</p>
+
+          {candidate.program_description ? (
+            <div className="mt-3 rounded-xl border border-primary/10 bg-primary/5 p-3 text-xs italic text-foreground/90">
+              <Quote className="inline h-3 w-3 text-primary mr-1 -mt-0.5" />
+              <span className="line-clamp-2">&ldquo;{candidate.program_description}&rdquo;</span>
+            </div>
+          ) : (
+            <p className="mt-3 line-clamp-2 text-sm text-muted-foreground">{candidate.vision}</p>
+          )}
 
           {(candidate.images ?? []).filter((img) => img.type === 'PROGRAM').length > 0 && (
             <div className="mt-4">
               <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
-                Program
+                Galeri Program
               </p>
               <ProgramCarousel
                 images={(candidate.images ?? []).filter((img) => img.type === 'PROGRAM')}
@@ -198,18 +219,10 @@ function CandidateCard({ candidate }: { candidate: CandidateWithImages }) {
             </div>
           )}
 
-          <div className="mt-4 border-t border-dashed pt-4">
-            <span className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-lg border text-sm font-semibold transition-all duration-200 group-hover:border-primary group-hover:bg-primary group-hover:text-primary-foreground">
-              Lihat Detail
-              <svg
-                className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5-5 5M6 12h12" />
-              </svg>
+          <div className="mt-auto pt-5">
+            <span className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-border bg-background text-sm font-semibold text-foreground transition-all duration-200 group-hover:border-primary group-hover:bg-primary group-hover:text-primary-foreground shadow-xs">
+              Lihat Profil &amp; Visi Misi
+              <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-1" />
             </span>
           </div>
         </div>
@@ -236,12 +249,12 @@ function CandidateCarousel({ candidates }: { candidates: CandidateWithImages[] }
   }
 
   return (
-    <div className="mt-12">
+    <div className="mt-10">
       <div
         ref={trackRef}
         onScroll={onScroll}
         className={[
-          'flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden',
+          'flex snap-x snap-mandatory gap-6 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden',
           'sm:grid sm:snap-none sm:overflow-visible sm:pb-0',
           candidates.length === 1
             ? 'sm:grid-cols-1 lg:grid-cols-1 sm:mx-auto sm:max-w-md lg:max-w-md'
@@ -337,8 +350,8 @@ export default function HomePage() {
         />
       </motion.div>
 
+      {/* Hero Section */}
       <section className="relative isolate flex min-h-screen flex-col items-center justify-center overflow-hidden px-6 pb-16 pt-24">
-        {/* OSIS & MPK photo backdrop — hero only, replace public/osis-mpk-bg.webp to update. Fallback CSS mesh stays underneath. */}
         <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
           <Image
             src="/osis-mpk-bg.webp"
@@ -349,6 +362,8 @@ export default function HomePage() {
           />
           <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background" />
         </div>
+
+        {/* Top Header Logos */}
         <motion.header
           {...(reduced
             ? {}
@@ -368,7 +383,7 @@ export default function HomePage() {
                     animate: { scale: 1, opacity: 1 },
                     transition: { duration: 0.5, delay: 0.25 },
                   })}
-              className="flex h-9 w-9 sm:h-16 sm:w-16 items-center justify-center rounded-lg bg-white/80 p-1 shadow-sm backdrop-blur transition-transform duration-200 group-hover:scale-[1.04]"
+              className="flex h-9 w-9 sm:h-16 sm:w-16 items-center justify-center rounded-xl bg-white/80 p-1 shadow-sm backdrop-blur transition-transform duration-200 group-hover:scale-[1.04]"
             >
               <Image
                 src="/logo-smansa.png"
@@ -429,75 +444,85 @@ export default function HomePage() {
             </motion.div>
           </div>
         </motion.header>
-        <motion.p
-          {...heroAnim}
-          className="font-mono text-xs uppercase tracking-[0.3em] text-foreground drop-shadow-[0_1px_2px_rgba(0,0,0,0.12)]"
-        >
-          <span
-            className={
-              'inline-flex items-center opacity-70 bg-gray-50 gap-1.5 rounded-full px-3 py-1 text-xs font-semibold tracking-wide'
-            }
-          >
-            Pemilihan Organisasi{election ? ` · ${election.academic_year}` : ''}
-          </span>
-        </motion.p>
 
+        {/* Hero Eyebrow Pill */}
+        <motion.div {...heroAnim} className="text-center">
+          <span className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/80 px-4 py-1.5 text-xs font-semibold text-foreground shadow-xs backdrop-blur">
+            <Sparkles className="h-3.5 w-3.5 text-primary" />
+            E-Voting Resmi SMA N 1 Wonosobo{election ? ` · ${election.academic_year}` : ''}
+          </span>
+        </motion.div>
+
+        {/* Main Heading */}
         <motion.h1
           {...heroAnim}
-          className="mt-4 text-center font-heading text-xl font-bold leading-tight text-foreground drop-shadow-[0_1px_8px_rgba(0,0,0,0.12)] sm:text-4xl lg:text-6xl"
+          className="mt-6 max-w-4xl text-center font-heading text-3xl font-bold leading-tight tracking-tight text-foreground sm:text-5xl lg:text-6xl"
         >
-          <span
-            className={
-              'inline-flex items-center opacity-70 bg-gray-50 rounded-full px-6 py-1 tracking-wide'
-            }
-          >
-            Pilih Pemimpin Organisasi
-          </span>
+          Satu Suara, Menentukan Arah Pemimpin Masa Depan
         </motion.h1>
 
-        <motion.div {...heroAnim} className="mt-10 w-full max-w-sm">
+        <motion.p
+          {...heroAnim}
+          className="mx-auto mt-4 max-w-2xl text-center text-sm leading-relaxed text-foreground/90 sm:text-base"
+        >
+          Portal pemilihan terpadu Ketua OSIS &amp; Ketua MPK untuk seluruh Siswa, Guru, dan Tenaga
+          Kependidikan secara langsung, umum, bebas, dan rahasia.
+        </motion.p>
+
+        {/* 3D Floating Ballot */}
+        <motion.div {...heroAnim} className="mt-8 w-full max-w-sm">
           <FloatingBallot />
         </motion.div>
 
-        <motion.div {...heroAnim} className="mt-12 text-center">
+        {/* Hero Status & Primary Actions */}
+        <motion.div {...heroAnim} className="mt-8 text-center">
           <div className="flex justify-center">
             <BallotStamp status={status} />
           </div>
+
           {allElections.length > 0 && (
             <>
-              <h2 className="mt-4 font-heading text-xl font-semibold text-foreground drop-shadow-[0_1px_2px_rgba(0,0,0,0.1)]">
+              <h2 className="mt-4 font-heading text-lg font-semibold text-foreground drop-shadow-[0_1px_2px_rgba(0,0,0,0.1)]">
                 {allElections.map((e) => e.title.replace(/^Pemilihan Ketua\s*/, '')).join(' · ')}
               </h2>
-              <p className="mx-auto mt-1 max-w-md text-sm text-foreground">
-                {allElections.find((e) => e.status === 'ACTIVE')
-                  ? 'Sedang berlangsung — pilih pemimpinmu.'
-                  : 'Dijadwalkan — pantau perkembangannya.'}
-              </p>
-              <p className="mt-3 font-mono text-sm text-foreground drop-shadow-[0_1px_2px_rgba(0,0,0,0.08)]">
-                {allElections.length} pemilihan · {formatPeriod(election!)}
+              <p className="mt-1 font-mono text-xs text-foreground/80">
+                {allElections.length} Pemilihan Aktif · {formatPeriod(election!)}
               </p>
             </>
           )}
-          <Link
-            href="/student/login"
-            className="mt-8 inline-flex h-12 w-full max-w-sm items-center justify-center rounded-xl bg-primary px-6 font-semibold text-primary-foreground shadow-sm transition-all duration-200 hover:bg-primary/90 hover:shadow-md"
-          >
-            Siap Memilih — Klik di Sini
-          </Link>
+
+          <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
+            <Link
+              href="/student/login"
+              className="inline-flex h-12 w-full sm:w-auto items-center justify-center gap-2 rounded-xl bg-primary px-8 font-semibold text-primary-foreground shadow-md transition-all duration-200 hover:bg-primary/90 hover:shadow-lg"
+            >
+              Masuk Portal Pemilihan
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+            <a
+              href="#elections"
+              className="inline-flex h-12 w-full sm:w-auto items-center justify-center gap-2 rounded-xl border border-border/80 bg-background/80 px-6 text-sm font-semibold text-foreground shadow-xs backdrop-blur transition-all duration-200 hover:bg-accent"
+            >
+              Lihat Pemilihan
+              <ChevronDown className="h-4 w-4" />
+            </a>
+          </div>
         </motion.div>
       </section>
 
+      {/* Section 1: Available Elections Cards */}
       {allElections.length > 0 && (
-        <section className="relative mx-auto max-w-5xl px-6 py-16">
+        <section id="elections" className="relative mx-auto max-w-5xl px-6 py-20">
           <motion.div {...fadeUp()} className="text-center">
-            <p className="font-mono text-xs uppercase tracking-[0.3em] text-muted-foreground">
-              Pilih Pemilihan
+            <p className="font-mono text-xs uppercase tracking-[0.3em] text-muted-foreground flex items-center justify-center gap-1.5">
+              <Vote className="h-3.5 w-3.5 text-primary" /> PILIHAN PEMILIHAN
             </p>
             <h2 className="mt-2 font-heading text-3xl font-bold sm:text-4xl">
               Ikuti Pemilihan yang Tersedia
             </h2>
             <p className="mx-auto mt-3 max-w-xl text-sm text-muted-foreground">
-              Pilih salah satu pemilihan untuk melihat kandidat dan informasi lengkapnya.
+              Pilih salah satu pemilihan di bawah untuk meninjau profil kandidat dan informasi
+              lengkapnya.
             </p>
           </motion.div>
 
@@ -508,38 +533,65 @@ export default function HomePage() {
           >
             {allElections.map((electionItem, index) => {
               const itemStatus = electionItem.status as BallotStatus;
+              const matchingCandidates =
+                electionSections.find((s) => s.election.id === electionItem.id)?.candidates ?? [];
+
               return (
                 <motion.div
                   key={electionItem.id}
                   {...fadeUp(index * 0.1)}
-                  className="flex flex-col rounded-2xl border bg-card p-6 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
+                  className="group relative flex flex-col justify-between rounded-2xl border border-border/70 bg-card/80 p-7 shadow-xs backdrop-blur transition-all duration-300 hover:border-primary/40 hover:shadow-lg"
                 >
-                  <div className="flex items-center justify-between">
-                    <BallotStamp status={itemStatus} />
-                    <span className="font-mono text-xs text-muted-foreground">
-                      {electionItem.academic_year}
-                    </span>
-                  </div>
-                  <h3 className="mt-4 font-heading text-xl font-bold">{electionItem.title}</h3>
-                  {electionItem.description && (
-                    <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">
-                      {electionItem.description}
+                  <div>
+                    <div className="flex items-center justify-between gap-2">
+                      <BallotStamp status={itemStatus} />
+                      <span className="font-mono text-xs rounded-full bg-muted px-2.5 py-1 text-muted-foreground">
+                        {electionItem.academic_year}
+                      </span>
+                    </div>
+
+                    <h3 className="mt-5 font-heading text-2xl font-bold tracking-tight text-foreground">
+                      {electionItem.title}
+                    </h3>
+
+                    {electionItem.description && (
+                      <p className="mt-2.5 line-clamp-2 text-sm leading-relaxed text-muted-foreground">
+                        {electionItem.description}
+                      </p>
+                    )}
+
+                    <div className="mt-4 flex items-center gap-2 text-xs font-medium text-muted-foreground">
+                      <Users className="h-4 w-4 text-primary" />
+                      <span>
+                        {matchingCandidates.length > 0
+                          ? `${matchingCandidates.length} Pasangan Calon Terdaftar`
+                          : 'Kandidat siap dipilih'}
+                      </span>
+                    </div>
+
+                    <p className="mt-3 font-mono text-xs text-muted-foreground/80">
+                      {formatPeriod(electionItem)}
                     </p>
-                  )}
-                  <p className="mt-3 font-mono text-xs text-muted-foreground">
-                    {formatPeriod(electionItem)}
-                  </p>
-                  <div className="mt-5 flex gap-2">
+                  </div>
+
+                  <div className="mt-6 flex flex-wrap gap-2.5 border-t border-dashed pt-5">
                     <Link
                       href="/student/login"
-                      className="inline-flex h-10 flex-1 items-center justify-center rounded-lg bg-primary text-sm font-semibold text-primary-foreground shadow-sm transition-all duration-200 hover:bg-primary/90"
+                      className="inline-flex h-11 flex-1 items-center justify-center gap-1.5 rounded-xl bg-primary text-sm font-semibold text-primary-foreground shadow-xs transition-all duration-200 hover:bg-primary/90"
                     >
                       Siap Memilih
+                      <ArrowRight className="h-4 w-4" />
                     </Link>
+                    <a
+                      href={`#candidate-section-${electionItem.id}`}
+                      className="inline-flex h-11 items-center justify-center rounded-xl border border-border bg-background px-4 text-sm font-semibold text-foreground transition-all duration-200 hover:bg-accent"
+                    >
+                      Lihat Kandidat
+                    </a>
                     {electionItem.status === 'CLOSED' && (
                       <Link
                         href={`/results/${electionItem.id}`}
-                        className="inline-flex h-10 items-center justify-center rounded-lg border-2 border-success/50 bg-success/10 px-4 text-sm font-semibold text-success transition-all duration-200 hover:bg-success/20"
+                        className="inline-flex h-11 items-center justify-center rounded-xl border border-success/40 bg-success/10 px-4 text-sm font-semibold text-success transition-all duration-200 hover:bg-success/20"
                       >
                         🎉 Hasil
                       </Link>
@@ -552,16 +604,22 @@ export default function HomePage() {
         </section>
       )}
 
+      {/* Section 2: Candidate Showcases */}
       {electionSections.map(({ election: e, candidates: eCandidates }) =>
         eCandidates.length > 0 ? (
-          <section key={e.id} className="relative mx-auto max-w-6xl px-6 py-20">
+          <section
+            key={e.id}
+            id={`candidate-section-${e.id}`}
+            className="relative mx-auto max-w-6xl px-6 py-20 scroll-mt-12"
+          >
             <motion.div {...fadeUp()} className="text-center">
-              <p className="font-mono text-xs uppercase tracking-[0.3em] text-muted-foreground">
-                Kenali Kandidatmu
+              <p className="font-mono text-xs uppercase tracking-[0.3em] text-muted-foreground flex items-center justify-center gap-1.5">
+                <Sparkles className="h-3.5 w-3.5 text-primary" /> KENALI KANDIDATMU
               </p>
               <h2 className="mt-2 font-heading text-3xl font-bold sm:text-4xl">{e.title}</h2>
               <p className="mx-auto mt-3 max-w-xl text-sm text-muted-foreground">
-                Pelajari visi, misi, dan program setiap kandidat sebelum menentukan pilihanmu.
+                Pelajari visi, misi, dan gagasan setiap kandidat sebelum menentukan pilihan
+                terbaikmu.
               </p>
             </motion.div>
             <CandidateCarousel candidates={eCandidates} />
@@ -569,62 +627,112 @@ export default function HomePage() {
         ) : null,
       )}
 
-      <section className="relative mx-auto max-w-5xl px-6 py-20">
+      {/* Section 3: 4-Step Timeline Guide */}
+      <section className="relative mx-auto max-w-6xl px-6 py-24">
         <motion.div {...fadeUp()} className="text-center">
-          <p className="font-mono text-xs uppercase tracking-[0.3em] text-muted-foreground">
-            Cara Memilih
+          <p className="font-mono text-xs uppercase tracking-[0.3em] text-muted-foreground flex items-center justify-center gap-1.5">
+            <Vote className="h-3.5 w-3.5 text-primary" /> ALUR &amp; PANDUAN MEMILIH
           </p>
-          <h2 className="mt-2 font-heading text-3xl font-bold sm:text-4xl">Hanya Tiga Langkah</h2>
+          <h2 className="mt-2 font-heading text-3xl font-bold sm:text-4xl">
+            Empat Langkah Mudah Menyalurkan Hak Suara
+          </h2>
+          <p className="mx-auto mt-3 max-w-2xl text-sm text-muted-foreground">
+            Proses pemilihan digital yang cepat, transparan, dan terjamin kerahasiaannya untuk
+            Siswa, Guru, dan Tenaga Kependidikan.
+          </p>
         </motion.div>
 
-        <div className="mt-12 grid gap-6 sm:grid-cols-3">
+        <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {[
             {
               step: '01',
-              title: 'Masuk',
-              desc: 'Login dengan NIS/NISN dan Token Voting dari panitia.',
+              icon: KeyRound,
+              title: 'Dapatkan Token',
+              desc: 'Panitia menerbitkan token voting 8-karakter (XXXX-XXXX) yang berlaku 24 jam untuk setiap pemilih terdaftar.',
             },
             {
               step: '02',
-              title: 'Pilih',
-              desc: 'Pelajari kandidat, lalu pilih satu yang paling kamu percaya.',
+              icon: LogIn,
+              title: 'Masuk ke Portal',
+              desc: 'Siswa masuk dengan NIS/NISN, sedangkan Guru & Staf masuk menggunakan NIP atau Username beserta token voting.',
             },
             {
               step: '03',
-              title: 'Selesai',
-              desc: 'Suaramu tersimpan rahasia. Satu siswa, satu suara.',
+              icon: Vote,
+              title: 'Tentukan Pilihan',
+              desc: 'Pilih pasangan calon Ketua OSIS & Ketua MPK secara berurutan dalam satu sesi pemilihan yang nyaman.',
             },
-          ].map((item, index) => (
-            <motion.div
-              key={item.step}
-              {...fadeUp(index * 0.12)}
-              className="rounded-2xl border bg-card p-6 text-center shadow-sm transition-all duration-200 hover:-translate-y-1 hover:shadow-md"
-            >
-              <p className="font-mono text-sm text-primary">/{item.step}</p>
-              <h3 className="mt-3 font-heading text-xl font-semibold">{item.title}</h3>
-              <p className="mt-2 text-sm text-muted-foreground">{item.desc}</p>
-            </motion.div>
-          ))}
+            {
+              step: '04',
+              icon: ShieldCheck,
+              title: 'Suara Terverifikasi',
+              desc: 'Suara tersimpan secara anonim dan terenkripsi ke sistem rekapitulasi real-time. Satu pemilih, satu suara sah.',
+            },
+          ].map((item, index) => {
+            const Icon = item.icon;
+            return (
+              <motion.div
+                key={item.step}
+                {...fadeUp(index * 0.1)}
+                className="group relative flex flex-col justify-between rounded-2xl border border-border/70 bg-card/70 p-6 shadow-xs backdrop-blur transition-all duration-300 hover:-translate-y-1 hover:border-primary/40 hover:shadow-lg"
+              >
+                <div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 text-primary transition-colors duration-200 group-hover:bg-primary group-hover:text-primary-foreground">
+                      <Icon className="h-6 w-6" />
+                    </div>
+                    <span className="font-mono text-sm font-bold text-muted-foreground/60 group-hover:text-primary transition-colors">
+                      /{item.step}
+                    </span>
+                  </div>
+                  <h3 className="mt-5 font-heading text-lg font-bold text-foreground">
+                    {item.title}
+                  </h3>
+                  <p className="mt-2.5 text-sm leading-relaxed text-muted-foreground">
+                    {item.desc}
+                  </p>
+                </div>
+              </motion.div>
+            );
+          })}
         </div>
       </section>
 
+      {/* Section 4: Final Call to Action */}
       <section className="relative px-6 py-24 text-center">
-        <motion.div {...fadeUp()}>
-          <h2 className="font-heading text-3xl font-bold sm:text-4xl">
-            Suaramu Menentukan Masa Depan
-          </h2>
-          <p className="mx-auto mt-3 max-w-md text-sm text-muted-foreground">
-            Gunakan hak pilihmu dengan bijak.
-          </p>
-          <Link
-            href="/student/login"
-            className="mt-8 inline-flex h-12 items-center justify-center rounded-xl bg-primary px-10 font-semibold text-primary-foreground shadow-sm transition-all duration-200 hover:bg-primary/90 hover:shadow-md"
-          >
-            Siap Memilih — Klik di Sini
-          </Link>
+        <motion.div
+          {...fadeUp()}
+          className="relative mx-auto max-w-3xl overflow-hidden rounded-3xl border border-border/80 bg-gradient-to-b from-card to-background p-10 sm:p-14 shadow-lg"
+        >
+          <div
+            className="absolute inset-0 pointer-events-none opacity-40"
+            style={{
+              background: 'radial-gradient(circle at 50% 0%, var(--primary), transparent 70%)',
+            }}
+          />
+          <div className="relative z-10">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-4 py-1 text-xs font-semibold text-primary">
+              <Sparkles className="h-3.5 w-3.5" /> Bersama Sukseskan Pemilu Sekolah
+            </span>
+            <h2 className="mt-4 font-heading text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+              Waktunya Bersuara untuk Sekolah Kita
+            </h2>
+            <p className="mx-auto mt-3 max-w-lg text-sm leading-relaxed text-muted-foreground sm:text-base">
+              Pastikan token voting Anda telah siap dan gunakan hak pilih Anda sebelum batas waktu
+              pemilihan berakhir.
+            </p>
+            <Link
+              href="/student/login"
+              className="mt-8 inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-primary px-10 font-semibold text-primary-foreground shadow-md transition-all duration-200 hover:bg-primary/90 hover:shadow-xl"
+            >
+              Mulai Memilih Sekarang
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
         </motion.div>
       </section>
 
+      {/* Footer */}
       <footer className="relative border-t bg-card/50 backdrop-blur">
         <div className="mx-auto flex max-w-6xl flex-col items-center gap-4 px-6 py-8 sm:flex-row sm:justify-between">
           <div className="flex items-center gap-3">
